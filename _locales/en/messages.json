@@ -1,0 +1,11 @@
+{
+    "appName": {
+        "message": "VK Music Play",
+        "description": "App name"
+    },
+
+    "appDesc": {
+        "message": "You music with you everywhere",
+        "description": "App description"
+    }
+}

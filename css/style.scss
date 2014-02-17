@@ -1,0 +1,239 @@
+@import "skit";
+
+* {
+  padding: 0;
+  margin: 0;
+  outline: none;
+  @include box-sizing(border-box);
+  @include appearance(none);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+::-webkit-scrollbar-track {
+
+}
+
+::-webkit-scrollbar-track-piece {
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #DAE1E8;
+  border: 1px solid #fff;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #BEC8D3;
+}
+
+::-webkit-scrollbar-track-piece:start {
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-track-piece:end {
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-corner {
+}
+
+::-webkit-resizer {
+}
+
+body {
+  background: #fff;
+  font: normal 11px Tahoma, Arial, Helvetica, sans-serif;
+}
+
+#wrapper {
+  min-width: 300px;
+  min-height: 300px;
+
+  #auth-block {
+    text-align: center;
+    line-height: 65px;
+    padding: 0 5px;
+    width: 185px;
+    height: 65px;
+
+    button {
+      @include animation-two(200ms);
+      padding: 10px;
+      width: 100%;
+      background: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      text-transform: uppercase;
+      text-shadow: 0 1px 1px #1460A8;
+      box-shadow: 0 1px 1px #2268B4;
+
+      &:hover {
+        background: #49B6FF;
+        box-shadow: 0 1px 1px #619CDD;
+      }
+    }
+  }
+}
+
+#player-wrapper {
+  @extend .relative;
+  background: #fff;
+  border: 1px solid #DCDDDF;
+  overflow: hidden;
+  min-width: 300px;
+  min-height: 200px;
+  max-height: 590px;
+  width: 360px;
+  border-radius: 2px 2px 0 0;
+
+  .c-size {
+    width: 360px;
+    height: 50px;
+  }
+  .c-wrapper {
+    @extend .relative;
+    width: 360px;
+    z-index: 200;
+
+    #controls {
+      @extend .c-size;
+      box-shadow: 0 0px 3px rgba(0, 0, 0, 0.55);
+
+      .layer {
+        @extend .c-size;
+        background: #F0F1F2;
+      }
+    }
+  }
+
+  ul {
+    margin: 0;
+    padding: 5px 0px 5px 7px;
+    overflow-y: auto;
+    max-height: 540px;
+
+    li {
+      cursor: pointer;
+      height: 32px;
+      line-height: 32px;
+      list-style: none;
+      padding: 0 9px;
+      color: #2B587A;
+      width: 100%;
+
+      span {
+        display: block;
+        float: left;
+      }
+
+      .artist {
+        @extend .text-overflow;
+        font-weight: bold;
+        max-width: 125px;
+      }
+
+      .splitter {
+        @extend .relative;
+        background: #2B587A;
+        top: 16px;
+        margin: 0 4px;
+        width: 8px;
+        height: 1px;
+      }
+
+      .title {
+        @extend .text-overflow;
+        max-width: 150px;
+      }
+
+      .duration {
+        color: #777;
+        float: right;
+      }
+
+      &:hover {
+        background: #edf1f5;
+      }
+
+      &.active {
+        background: #5f7fa2;
+        color: #fff;
+
+        .duration {
+          color: #fff;
+        }
+
+        .splitter {
+          background: #fff;
+        }
+      }
+    }
+  }
+}
+
+#mf-player-wireframe {
+  .buttons {
+    background: url(../images/audio_icons_2x.png) no-repeat scroll;
+  }
+
+  #mf-play {
+    background-position: 0 -25px;
+    background-size: 257px 63px;
+    height: 22px;
+    width: 22px;
+
+    &:hover {
+      background-position: -24px -25px;
+    }
+
+    &:active {
+      background-position: -48px -25px;
+    }
+
+    &.pause {
+      background-position: -72px -25px;
+    }
+    &.pause:active {
+      background-position: -120px -25px;
+    }
+  }
+
+  #mf-song-progress {
+    @extend .relative;
+    background: #D8DEE4;
+    border-radius: 10px;
+  }
+
+  #mf-progress {
+    @include animation-one(250ms);
+    background: #5c7a99;
+    border-radius: 10px;
+    cursor: default;
+    height: 4px;
+    width: 0;
+    z-index: 100;
+  }
+
+  #mf-buffer {
+    @extend .absolute;
+    @include animation-one(250ms);
+    background: #bac7d4;
+    border-radius: 10px;
+    top:0;
+    height: 4px;
+    width: 0;
+    z-index: 90;
+  }
+}

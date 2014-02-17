@@ -1,0 +1,40 @@
+{
+    "name": "__MSG_appName__ (beta)",
+    "description": "__MSG_appDesc__",
+    "version": "0.0.1",
+    "default_locale": "ru",
+    "offline_enabled": true,
+    "minimum_chrome_version": "31",
+    "background": {
+        "persistent": true,
+        "page" : "/templates/background.html"
+
+    },
+    "browser_action": {
+        "name": "__MSG_appName__",
+        "default_icon": {
+            "19": "app-icon.png",
+            "38": "app-icon.png"
+        },
+        "default_title": "__MSG_appName__",
+        "default_popup": "/templates/window.html"
+    },
+    "permissions": [
+        "notifications",
+        "https://*.vk.com/*",
+        "http://*.vk.me/*",
+        "https://*.vk.me/*",
+        "*://*/*"
+    ],
+
+    "icons": {
+        "16": "app-icon.png",
+        "32": "app-icon.png",
+        "48": "app-icon.png",
+        "64": "app-icon.png",
+        "96": "app-icon.png",
+        "128": "app-icon.png",
+        "256": "app-icon.png"
+    },
+    "manifest_version": 2
+}

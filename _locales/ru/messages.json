@@ -1,0 +1,16 @@
+{
+    "appName": {
+        "message": "VK Music Play",
+        "description": "Имя разширения"
+    },
+
+    "appDesc": {
+        "message": "Твоя музыка с тобой всегда и везде",
+        "description": "App description"
+    },
+
+    "auth": {
+        "message": "Войти",
+        "description": "Авторизация Вконтакте"
+    }
+}
