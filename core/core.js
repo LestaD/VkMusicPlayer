@@ -184,7 +184,7 @@ Core.event.changeSongInfo = function(data) {
 };
 
 Core.event.sendSetFirstActive = function(data) {
-    Core.setActiveByIndex(0);
+    Core.setActiveByIndex(1);
 };
 
 Core.event.timeUpdate = function(data) {
