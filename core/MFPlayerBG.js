@@ -137,19 +137,6 @@ MFCore.changeCurrentTime = function(e) {
 
 
 /**
- * Play button action
- */
-MFCore.actionPlayButton = function() {
-    if(MFPlayer.played) {
-        MFPlayer.pause();
-        MFPlay.classList.remove('pause');
-    } else {
-        MFPlayer.play();
-        MFPlay.className += 'pause';
-    }
-};
-
-/**
  * Set player src
  *
  * @param {string} url
@@ -162,6 +149,9 @@ MFCore.set = function(url, duration) {
     MFCore.events();
 };
 
+/**
+ * Init events
+ */
 MFCore.events = function() {
     MFPlayer.ontimeupdate = MFCore.updateState;
     MFPlayer.addEventListener('progress', MFCore.loadProcess);
@@ -174,11 +164,37 @@ MFCore.events = function() {
         if(progressBarClickState)
             MFCore.changeCurrentTime(e);
     });
-    MFSongProgress.addEventListener('mouseup',function() {
+    MFSongProgress.addEventListener('mouseup', function() {
         progressBarClickState = false;
         MFPlayer.currentTime = progressTime;
     });
     MFPlay.addEventListener('click', MFCore.actionPlayButton);
+    MFPlayer.addEventListener('ended', MFCore.playNext)
+};
+
+/**
+ * Play next song in list
+ */
+MFCore.playNext = function() {
+    var next = parseInt(LastActiveIndex) + 1;
+
+    if((next + 1) >= Songs.length)
+        next = 1;
+
+    BG.event.playByIndex(next);
+};
+
+/**
+ * Play prev song in list
+ */
+MFCore.playPrev = function() {
+    var prev = parseInt(LastActiveIndex) - 1;
+
+    console.log(prev);
+    if(prev <= 0)
+        prev = Songs.length - 1;
+
+    BG.event.playByIndex(prev);
 };
 
 /**

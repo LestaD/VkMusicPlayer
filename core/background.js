@@ -12,7 +12,8 @@ var
     Port,
     FirstSong = {},
     FirstLoad = true,
-    ConnectStatus = false;
+    ConnectStatus = false,
+    CurrentSong = {};
 
 /**
  * Background main object
@@ -236,10 +237,18 @@ BG.event.setToPlay = function(data) {
     });
 };
 
+BG.event.playNext = function(data) {
+    MFCore.playNext();
+};
+
+BG.event.playPrev = function(data) {
+    MFCore.playPrev();
+};
+
 /**
  * Play song by index
  *
- * @param {object} data
+ * @param {number} data
  */
 BG.event.playByIndex = function(data) {
     if(typeof(MFPlayer.ontimeupdate) != 'function')
@@ -269,16 +278,18 @@ BG.event.playByIndex = function(data) {
 
     var minutes = VKit.util.secToMin(MFDuration);
 
-    BG.setSongInfo(song.artist, song.title, minutes);
+    CurrentSong =  {
+        artist: song.artist,
+        title: song.title,
+        duration: minutes,
+        realDuration: song.duration
+    };
+
+    BG.setSongInfo(CurrentSong.artist, CurrentSong.title, CurrentSong.duration);
 
     BG.event.send({
         event: 'changeSongInfo',
-        data: {
-            artist: song.artist,
-            title: song.title,
-            duration: minutes,
-            realDuration: song.duration
-        }
+        data: CurrentSong
     });
 
     BG.event.send({
@@ -287,6 +298,18 @@ BG.event.playByIndex = function(data) {
     });
 };
 
+BG.event.getSongDuration = function() {
+    BG.event.send({
+        event: 'setSongDuration',
+        data: CurrentSong.realDuration
+    })
+};
+
+/**
+ * Change current song time
+ *
+ * @param {number} data
+ */
 BG.event.changeCurrentTime = function(data) {
     MFPlayer.currentTime = data;
 };
@@ -331,12 +354,19 @@ BG.setFirstSong = function() {
 
     var song = Songs[index];
 
-    MFDuration = song.duration;
-    BG.setSongInfo(song.artist, song.title, VKit.util.secToMin(MFDuration));
+    CurrentSong = {
+        artist: song.artist,
+        title: song.title,
+        duration: VKit.util.secToMin(MFDuration),
+        realDuration: song.duration
+    };
+
+    MFDuration = CurrentSong.realDuration;
+    BG.setSongInfo(CurrentSong.artist, CurrentSong.title, CurrentSong.duration);
 
     FirstSong = {
         url: song.url,
-        duration: song.duration
+        duration: CurrentSong.realDuration
     };
 };
 

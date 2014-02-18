@@ -91,7 +91,7 @@ Core.event.connect = function() {
  */
 Core.event.listenData = function() {
     chrome.runtime.onConnect.addListener(function(bgPort) {
-        Core.event.checkFirstLoad()
+        Core.event.onOpen();
         bgPort.onMessage.addListener(function(msg) {
 //            console.log(msg);
             Core.event[msg.event](msg.data);
@@ -179,6 +179,17 @@ Core.event.play = function(data) {
     });
 };
 
+Core.event.getSongDuration = function() {
+    Core.event.send({
+        event: 'getSongDuration',
+        data: ''
+    });
+};
+
+Core.event.setSongDuration = function(data) {
+    MFDuration = data;
+};
+
 Core.event.changeSongInfo = function(data) {
     Core.setSongInfo(data.artist, data.title, data.duration);
     MFDuration = data.realDuration;
@@ -202,20 +213,46 @@ Core.event.changePauseToPlay = function(data) {
     MFPlay.classList.remove('pause');
 };
 
+/**
+ * Set width of progress bar element
+ *
+ * @param {string} data
+ */
 Core.event.setProgressBarWidth = function(data) {
     MFProgress.style.width = data;
 };
 
+/**
+ * Set width of load process element
+ *
+ * @param {string} data
+ */
 Core.event.setLoadProgress = function(data) {
     MFBuffer.style.width = data;
 };
 
+/**
+ * Highlight new active song in list
+ *
+ * @param {{oldIndex: number, newIndex: number}} data
+ */
 Core.event.setNewHighLightElement = function(data) {
-    console.log(data);
     Core.removeActiveIndex(data.oldIndex);
     Core.setActiveByIndex(data.newIndex);
+
 };
 
+/**
+ * Send this event when popup will open
+ */
+Core.event.onOpen = function() {
+    Core.event.checkFirstLoad();
+    Core.event.getSongDuration();
+};
+
+/**
+ * Auth user & get songs from background page
+ */
 Core.auth = function() {
     chrome.runtime.getBackgroundPage(function(win) {
         var node = document.importNode(win.document.getElementById('wrapper'), true);

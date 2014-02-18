@@ -161,6 +161,7 @@ body {
       .duration {
         color: #777;
         float: right;
+        font-size:10px;
       }
 
       &:hover {
@@ -185,12 +186,23 @@ body {
 
 #mf-player-wireframe {
   .buttons {
+    @extend .relative;
     background: url(../images/audio_icons_2x.png) no-repeat scroll;
+    background-size: 257px 63px;
+    cursor: pointer;
+    float:left;
+  }
+
+  .play-buttons {
+    float:left;
+    height: 50px;
+    width:66px;
   }
 
   #mf-play {
     background-position: 0 -25px;
-    background-size: 257px 63px;
+    top: 14px;
+    left: 7px;
     height: 22px;
     width: 22px;
 
@@ -210,10 +222,32 @@ body {
     }
   }
 
+  #mf-prev {
+    background-position: -3px -52px;
+    top: 20px;
+    left: 10px;
+    height: 11px;
+    width: 13px;
+    margin: 0;
+  }
+
+  #mf-next {
+    background-position: -18px -52px;
+    top: 20px;
+    left: 14px;
+    height: 11px;
+    width: 13px;
+    margin: 0;
+  }
+
   #mf-song-progress {
     @extend .relative;
     background: #D8DEE4;
     border-radius: 10px;
+    cursor: pointer;
+    float:left;
+    top: 19px;
+    width: 200px;
   }
 
   #mf-progress {
@@ -221,9 +255,8 @@ body {
     @include animation-one(200ms);
     background: #5c7a99;
     border-radius: 10px;
-    cursor: default;
     height: 4px;
-    width: 0;
+    width:0;
     z-index: 100;
   }
 
@@ -236,5 +269,42 @@ body {
     height: 4px;
     width: 0;
     z-index: 90;
+  }
+
+  #mf-artist {
+    @extend .text-overflow;
+    color:#2B5877;
+    display: block;
+    float:left;
+    font-weight: bold;
+  }
+
+  #mf-title {
+    @extend .text-overflow;
+    color:#627A94;
+    display: block;
+  }
+
+  .splitter {
+    @extend .relative;
+    background: #2B587A;
+    top: 7px;
+    float:left;
+    margin: 0 4px;
+    width: 8px;
+    height: 1px;
+  }
+
+  .song-time {
+    @extend .absolute;
+    color:#627a94;
+    top: 13px;
+    right: 93px;
+    font-size:10px;
+  }
+
+  #song-info {
+    @extend .relative;
+    top: 12px;
   }
 }

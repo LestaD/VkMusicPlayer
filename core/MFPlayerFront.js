@@ -21,7 +21,9 @@ var
     MFTimeCurrent,
     MFTimeAll,
     MFArtist,
-    MFTitle;
+    MFTitle,
+    MFNext,
+    MFPrev;
 
 
 /**
@@ -67,6 +69,8 @@ MFCore.setElements = function() {
     MFPlay = document.getElementById('mf-play');
     MFArtist = document.getElementById('mf-artist');
     MFTitle = document.getElementById('mf-title');
+    MFPrev = document.getElementById('mf-prev');
+    MFNext = document.getElementById('mf-next');
 
     songProgressWidth = MFSongProgress.clientWidth;
 };
@@ -123,7 +127,6 @@ MFCore.startPlay = function() {
     MFPlay.className += ' pause';
 };
 
-
 /**
  * Set player src
  *
@@ -133,8 +136,6 @@ MFCore.startPlay = function() {
 MFCore.set = function(url, duration) {
     MFDuration = duration;
     MFTimeAll.textContent = VKit.util.secToMin(duration);
-
-
 };
 
 /**
@@ -156,6 +157,23 @@ MFCore.events = function() {
             data: progressTime
         });
     });
+
+    MFPrev.addEventListener('click', MFCore.playPrev);
+    MFNext.addEventListener('click', MFCore.playNext);
+};
+
+MFCore.playNext = function() {
+    Core.event.send({
+        event: 'playNext',
+        data: ''
+    })
+};
+
+MFCore.playPrev = function() {
+    Core.event.send({
+        event: 'playPrev',
+        data: ''
+    })
 };
 
 /**
