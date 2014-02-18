@@ -48,7 +48,14 @@ MFCore.loadProcess = function() {
             start = bufferedData.end(bufferedSize);
             end = bufferedData.start(bufferedSize);
             width = (((start - end) / MFDuration) * 100).toString();
-            MFBuffer.style.width = width + '%';
+
+            var lp = width + '%';
+            MFBuffer.style.width = lp;
+
+            BG.event.send({
+                event: 'setLoadProgress',
+                data: lp
+            });
         }
     }
 };
@@ -102,8 +109,21 @@ MFCore.updateState = function() {
     if(seconds < 10)
         seconds = '0' + seconds;
 
-    MFProgress.style.width = progressBarWidth + 'px';
-    MFTimeCurrent.textContent = minutes + ':' + seconds;
+    var ct = minutes + ':' + seconds,
+        pbWidth = progressBarWidth + 'px';
+
+    MFProgress.style.width = pbWidth;
+    MFTimeCurrent.textContent = ct;
+
+    BG.event.send({
+        event: 'timeUpdate',
+        data: ct
+    });
+
+    BG.event.send({
+        event: 'setProgressBarWidth',
+        data: pbWidth
+    });
 };
 
 /**
@@ -115,13 +135,13 @@ MFCore.changeCurrentTime = function(e) {
     progressTime = (progressLine / songProgressWidth) * MFDuration;
 };
 
-/**
- * Start play
- */
-MFCore.startPlay = function() {
-    MFPlayer.play();
-    MFPlay.className += ' pause';
-};
+///**
+// * Start play
+// */
+//MFCore.startPlay = function() {
+//    MFPlayer.play();
+//    MFPlay.className += ' pause';
+//};
 
 /**
  * Play button action
@@ -142,12 +162,14 @@ MFCore.actionPlayButton = function() {
  * @param {string} url
  * @param {number} duration
  */
-MFCore.set = function(url, duration, e) {
+MFCore.set = function(url, duration) {
     MFPlayer.src = url;
     MFDuration = duration;
     MFTimeAll.textContent = VKit.util.secToMin(duration);
+};
 
-    MFPlayer.addEventListener('loadedmetadata', MFCore.startPlay);
+MFCore.events = function() {
+//    MFPlayer.addEventListener('loadedmetadata', MFCore.startPlay);
     MFPlayer.addEventListener('timeupdate', MFCore.updateState);
     MFPlayer.addEventListener('progress', MFCore.loadProcess);
     MFSongProgress.addEventListener('mousedown', function(e) {
@@ -171,4 +193,5 @@ MFCore.set = function(url, duration, e) {
  */
 MFCore.init = function() {
     MFCore.setElements();
+    MFCore.events();
 };

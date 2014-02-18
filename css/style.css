@@ -1,7 +1,7 @@
 .absolute, #mf-player-wireframe #mf-buffer {
   position: absolute; }
 
-.relative, #player-wrapper, #player-wrapper .c-wrapper, #player-wrapper ul li .splitter, #mf-player-wireframe #mf-song-progress {
+.relative, #player-wrapper, #player-wrapper .c-wrapper, #player-wrapper ul li .splitter, #mf-player-wireframe #mf-song-progress, #mf-player-wireframe #mf-progress {
   position: relative; }
 
 .fixed {

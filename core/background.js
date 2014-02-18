@@ -11,7 +11,8 @@ var
     LastActiveIndex,
     Port,
     FirstSong = {},
-    FirstLoad = false;
+    FirstLoad = true,
+    ConnectStatus = false;
 
 /**
  * Background main object
@@ -124,6 +125,10 @@ BG.event = {};
  */
 BG.event.connect = function() {
     Port = chrome.runtime.connect();
+
+    Port.onDisconnect.addListener(function(e){
+        ConnectStatus = false;
+    });
 };
 
 /**
@@ -132,6 +137,8 @@ BG.event.connect = function() {
 BG.event.listenData = function() {
     chrome.runtime.onConnect.addListener(function(popup) {
         BG.event.connect();
+        ConnectStatus = true;
+
         popup.onMessage.addListener(function(msg) {
             console.log(msg);
             BG.event[msg.event](msg.data);
@@ -144,7 +151,8 @@ BG.event.listenData = function() {
  * @param {object} data
  */
 BG.event.send = function(data) {
-    Port.postMessage(data);
+    if(ConnectStatus)
+        Port.postMessage(data);
 };
 
 
@@ -174,12 +182,106 @@ BG.event.sendPlay = function(data) {
     console.log(data);
     if(data == null) {
         MFCore.set(FirstSong.url,FirstSong.duration);
+        MFPlay.className += ' pause';
         LastActive.className = 'active';
+
+        BG.event.send({
+            event: 'changePlayToPause',
+            data: ''
+        });
+
         BG.event.send({
             event: 'sendSetFirstActive',
             data: ''
         });
     }
+};
+
+BG.event.checkFirstLoad = function(data) {
+    if(FirstLoad) {
+        BG.event.send({
+            event: 'setFirstLoadToTrue',
+            data: true
+        });
+
+        FirstLoad = false;
+    } else {
+        BG.event.send({
+            event: 'setFirstLoadToFalse',
+            data: false
+        });
+
+        FirstLoad = false;
+    }
+};
+
+BG.event.setToPause = function(data) {
+    MFPlayer.pause();
+    MFPlay.classList.remove('pause');
+
+    BG.event.send({
+        event: 'changePauseToPlay',
+        data: ''
+    });
+};
+
+BG.event.setToPlay = function(data) {
+    MFPlayer.play();
+    MFPlay.className += ' pause';
+
+    BG.event.send({
+        event: 'changePlayToPause',
+        data: ''
+    });
+};
+
+/**
+ * Play song by index
+ *
+ * @param {object} data
+ */
+BG.event.playByIndex = function(data) {
+    var song = Songs[data];
+    MFDuration = song.duration;
+    MFPlayer.src = song.url;
+    MFPlayer.play();
+
+    if(!MFPlay.classList.contains('pause'))
+        MFPlay.className += ' pause';
+
+    BG.removeActiveIndex(LastActiveIndex);
+    BG.setActiveByIndex(data);
+    BG.setLastActive(data);
+
+    BG.event.send({
+        event: 'setNewHighLightElement',
+        data: {
+            oldIndex: LastActiveIndex,
+            newIndex: data
+        }
+    });
+
+    LastActiveIndex = data;
+
+    var minutes = VKit.util.secToMin(MFDuration);
+
+    BG.setSongInfo(song.artist, song.title, minutes);
+
+    BG.event.send({
+        event: 'changeSongInfo',
+        data: {
+            artist: song.artist,
+            title: song.title,
+            duration: minutes
+        }
+    });
+
+    BG.event.send({
+        event: 'changePlayToPause',
+        data: ''
+    });
+
+
 };
 
 /**
@@ -194,7 +296,7 @@ BG.event.firstLoad = function() {
             }
         });
 
-        FirstLoad = true;
+        FirstLoad = false;
     }
 };
 
@@ -205,8 +307,6 @@ BG.event.sendFirstLoad = function(data) {
 
 /**
  * Set first song on load
- *
- * @returns {{url: (*|url|string|string|undefined), duration: (*|Number|number)}}
  */
 BG.setFirstSong = function() {
     if(LastActiveIndex)
@@ -219,14 +319,13 @@ BG.setFirstSong = function() {
         index = element.getAttribute('data-index');
 
     LastActive = element;
+    LastActiveIndex = 1;
 
     var song = Songs[index];
 
     MFPlayer.src = song.url;
     MFDuration = song.duration;
-    MFTimeAll.textContent = VKit.util.secToMin(MFDuration);
-    MFArtist.textContent = song.artist;
-    MFTitle.textContent = song.title;
+    BG.setSongInfo(song.artist, song.title, VKit.util.secToMin(MFDuration));
 
     FirstSong = {
         url: song.url,
@@ -234,8 +333,47 @@ BG.setFirstSong = function() {
     };
 };
 
+/**
+ * Set song info into DOM
+ *
+ * @param {string} artist
+ * @param {string} title
+ * @param {number} totalTime
+ */
+BG.setSongInfo = function(artist, title, totalTime) {
+    MFTimeAll.textContent = totalTime;
+    MFArtist.textContent = artist;
+    MFTitle.textContent = title;
+};
+
+/**
+ * Set last active element
+ *
+ * @param {number} index
+ */
+BG.setLastActive = function(index) {
+    var i = index - 1;
+    LastActive = document.getElementById('player-wrapper').getElementsByTagName('li')[i];
+};
+
+/**
+ * Highlight current song
+ *
+ * @param {number} index
+ */
+BG.setActiveByIndex = function(index) {
+    var i = index - 1;
+    document.getElementById('player-wrapper').getElementsByTagName('li')[i].className = 'active';
+};
+
+/**
+ * Remove highlight from last element
+ *
+ * @param {number} index
+ */
 BG.removeActiveIndex = function(index) {
-    document.getElementById('player-wrapper').getElementsByTagName('li')[index].className = '';
+    var i = index - 1;
+    document.getElementById('player-wrapper').getElementsByTagName('li')[i].className = '';
 };
 
 /**

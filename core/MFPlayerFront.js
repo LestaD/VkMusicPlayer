@@ -123,18 +123,6 @@ MFCore.startPlay = function() {
     MFPlay.className += ' pause';
 };
 
-/**
- * Play button action
- */
-MFCore.actionPlayButton = function() {
-    if(MFPlayer.played) {
-        MFPlayer.pause();
-        MFPlay.classList.remove('pause');
-    } else {
-        MFPlayer.play();
-        MFPlay.className += 'pause';
-    }
-};
 
 /**
  * Set player src
@@ -146,9 +134,6 @@ MFCore.set = function(url, duration) {
     MFDuration = duration;
     MFTimeAll.textContent = VKit.util.secToMin(duration);
 
-    MFPlayer.addEventListener('loadedmetadata', MFCore.startPlay);
-    MFPlayer.addEventListener('timeupdate', MFCore.updateState);
-    MFPlayer.addEventListener('progress', MFCore.loadProcess);
     MFSongProgress.addEventListener('mousedown', function(e) {
         progressBarClickState = true;
         MFCore.changeCurrentTime(e);
@@ -162,7 +147,6 @@ MFCore.set = function(url, duration) {
         progressBarClickState = false;
         Core.send({event:'changeCurrentTime', data: progressTime});
     });
-    MFPlay.addEventListener('click', MFCore.actionPlayButton);
 };
 
 /**

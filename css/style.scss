@@ -217,6 +217,7 @@ body {
   }
 
   #mf-progress {
+    @extend .relative;
     @include animation-one(250ms);
     background: #5c7a99;
     border-radius: 10px;
