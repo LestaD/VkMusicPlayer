@@ -93,7 +93,7 @@ Core.event.listenData = function() {
     chrome.runtime.onConnect.addListener(function(bgPort) {
         Core.event.checkFirstLoad()
         bgPort.onMessage.addListener(function(msg) {
-            console.log(msg);
+//            console.log(msg);
             Core.event[msg.event](msg.data);
         });
     });
@@ -181,10 +181,12 @@ Core.event.play = function(data) {
 
 Core.event.changeSongInfo = function(data) {
     Core.setSongInfo(data.artist, data.title, data.duration);
+    MFDuration = data.realDuration;
 };
 
 Core.event.sendSetFirstActive = function(data) {
     Core.setActiveByIndex(1);
+    MFDuration = data.duration;
 };
 
 Core.event.timeUpdate = function(data) {

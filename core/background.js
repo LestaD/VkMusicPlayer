@@ -179,9 +179,10 @@ BG.event.checkPlayed = function(data) {
  * @param {object} data
  */
 BG.event.sendPlay = function(data) {
-    console.log(data);
     if(data == null) {
         MFCore.set(FirstSong.url,FirstSong.duration);
+        MFPlayer.src = FirstSong.url;
+        MFPlayer.play();
         MFPlay.className += ' pause';
         LastActive.className = 'active';
 
@@ -192,7 +193,7 @@ BG.event.sendPlay = function(data) {
 
         BG.event.send({
             event: 'sendSetFirstActive',
-            data: ''
+            data: FirstSong
         });
     }
 };
@@ -241,6 +242,9 @@ BG.event.setToPlay = function(data) {
  * @param {object} data
  */
 BG.event.playByIndex = function(data) {
+    if(typeof(MFPlayer.ontimeupdate) != 'function')
+        MFCore.events();
+
     var song = Songs[data];
     MFDuration = song.duration;
     MFPlayer.src = song.url;
@@ -272,7 +276,8 @@ BG.event.playByIndex = function(data) {
         data: {
             artist: song.artist,
             title: song.title,
-            duration: minutes
+            duration: minutes,
+            realDuration: song.duration
         }
     });
 
@@ -280,8 +285,10 @@ BG.event.playByIndex = function(data) {
         event: 'changePlayToPause',
         data: ''
     });
+};
 
-
+BG.event.changeCurrentTime = function(data) {
+    MFPlayer.currentTime = data;
 };
 
 /**
@@ -292,7 +299,8 @@ BG.event.firstLoad = function() {
         BG.event.send({
             event: 'firstLoad',
             data: {
-                firstLoad: 'true'
+                firstLoad: 'true',
+                song: FirstSong
             }
         });
 
@@ -323,7 +331,6 @@ BG.setFirstSong = function() {
 
     var song = Songs[index];
 
-    MFPlayer.src = song.url;
     MFDuration = song.duration;
     BG.setSongInfo(song.artist, song.title, VKit.util.secToMin(MFDuration));
 

@@ -134,10 +134,16 @@ MFCore.set = function(url, duration) {
     MFDuration = duration;
     MFTimeAll.textContent = VKit.util.secToMin(duration);
 
+
+};
+
+/**
+ * Player front-end events
+ */
+MFCore.events = function() {
     MFSongProgress.addEventListener('mousedown', function(e) {
         progressBarClickState = true;
         MFCore.changeCurrentTime(e);
-
     });
     MFSongProgress.addEventListener('mousemove', function(e) {
         if(progressBarClickState)
@@ -145,7 +151,10 @@ MFCore.set = function(url, duration) {
     });
     MFSongProgress.addEventListener('mouseup',function() {
         progressBarClickState = false;
-        Core.send({event:'changeCurrentTime', data: progressTime});
+        Core.event.send({
+            event:'changeCurrentTime',
+            data: progressTime
+        });
     });
 };
 
@@ -154,4 +163,5 @@ MFCore.set = function(url, duration) {
  */
 MFCore.init = function() {
     MFCore.setElements();
+    MFCore.events();
 };

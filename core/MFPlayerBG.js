@@ -135,13 +135,6 @@ MFCore.changeCurrentTime = function(e) {
     progressTime = (progressLine / songProgressWidth) * MFDuration;
 };
 
-///**
-// * Start play
-// */
-//MFCore.startPlay = function() {
-//    MFPlayer.play();
-//    MFPlay.className += ' pause';
-//};
 
 /**
  * Play button action
@@ -166,11 +159,11 @@ MFCore.set = function(url, duration) {
     MFPlayer.src = url;
     MFDuration = duration;
     MFTimeAll.textContent = VKit.util.secToMin(duration);
+    MFCore.events();
 };
 
 MFCore.events = function() {
-//    MFPlayer.addEventListener('loadedmetadata', MFCore.startPlay);
-    MFPlayer.addEventListener('timeupdate', MFCore.updateState);
+    MFPlayer.ontimeupdate = MFCore.updateState;
     MFPlayer.addEventListener('progress', MFCore.loadProcess);
     MFSongProgress.addEventListener('mousedown', function(e) {
         progressBarClickState = true;
@@ -193,5 +186,5 @@ MFCore.events = function() {
  */
 MFCore.init = function() {
     MFCore.setElements();
-    MFCore.events();
+
 };
