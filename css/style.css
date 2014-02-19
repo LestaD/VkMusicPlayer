@@ -237,11 +237,11 @@ body {
   display: block;
   float: left;
   font-weight: bold;
-  max-width: 65px; }
+  max-width: 85px; }
 #mf-player-wireframe #mf-title {
   color: #627A94;
   display: block;
-  max-width: 90px; }
+  max-width: 140px; }
 #mf-player-wireframe .splitter {
   background: #2B587A;
   top: 7px;
