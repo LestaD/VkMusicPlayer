@@ -127,7 +127,7 @@ BG.event = {};
 BG.event.connect = function() {
     Port = chrome.runtime.connect();
 
-    Port.onDisconnect.addListener(function(e){
+    Port.onDisconnect.addListener(function(e) {
         ConnectStatus = false;
     });
 };
@@ -181,7 +181,7 @@ BG.event.checkPlayed = function(data) {
  */
 BG.event.sendPlay = function(data) {
     if(data == null) {
-        MFCore.set(FirstSong.url,FirstSong.duration);
+        MFCore.set(FirstSong.url, FirstSong.duration);
         MFPlayer.src = FirstSong.url;
         MFPlayer.play();
         MFPlay.className += ' pause';
@@ -229,7 +229,8 @@ BG.event.setToPause = function(data) {
 
 BG.event.setToPlay = function(data) {
     MFPlayer.play();
-    MFPlay.className += ' pause';
+    if(!MFPlay.classList.contains('pause'))
+        MFPlay.className += ' pause';
 
     BG.event.send({
         event: 'changePlayToPause',
@@ -278,7 +279,7 @@ BG.event.playByIndex = function(data) {
 
     var minutes = VKit.util.secToMin(MFDuration);
 
-    CurrentSong =  {
+    CurrentSong = {
         artist: song.artist,
         title: song.title,
         duration: minutes,
@@ -311,7 +312,23 @@ BG.event.getSongDuration = function() {
  * @param {number} data
  */
 BG.event.changeCurrentTime = function(data) {
-    MFPlayer.currentTime = data;
+    if(MFPlayer.src != '') {
+        MFPlayer.pause();
+        MFPlayer.currentTime = data;
+        MFPlayer.play();
+        BG.event.setToPlay('true');
+    }
+};
+
+/**
+ * Change volume
+ *
+ * @param {object} data
+ */
+BG.event.changeVolume = function(data) {
+    MFVolume.value = data.volumeValue;
+    MFPlayer.volume = data.volume;
+    MFVolumeLine.style.width = data.volumeWidth;
 };
 
 /**

@@ -30,31 +30,21 @@
                             <span id="mf-title"></span>
                         </div>
                         <div id="mf-song-progress" class="song-progress">
-                            <div id="mf-progress">
-                                <div class="button-holder">
-                                    <div class="progress-button"></div>
+                            <div class="bg-progress">
+                                <div id="mf-progress">
+                                    <div class="circle-button"></div>
                                 </div>
+                                <div id="mf-buffer"></div>
                             </div>
-                            <div id="mf-buffer"></div>
                         </div>
                         <div class="song-time">
                             <span id="mf-current-time">00:00</span>
-                            <span class="time-splitter"> / </span>
                             <span id="mf-duration">00:00</span>
                         </div>
-                        <div class="volume">
-                            <div class="volume-holder">
-                                <div class="volume-bar-holder">
-                                    <div class="volume-bar">
-                                        <div class="volume-button-holder">
-                                            <div class="volume-button"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="volume-icon v-change-0">
-                                <span> </span>
-                            </div>
+                        <div id="mf-volume-wrapper">
+                            <div id="mf-volume-line"></div>
+                            <div class="volume-bg"></div>
+                            <input id="mf-volume" type="range" min="0" max="100" value="100"/>
                         </div>
                     </div>
                 </div>

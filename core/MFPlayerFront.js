@@ -2,15 +2,11 @@ var
     progressLine = 0,
     progressTime = 0,
     songProgressWidth = 0,
-    y = 0,
-    vtime = 0,
-    volume = 0,
     progressBarWidth = 0,
     progressBarClickState = false,
-    volumeClickState = false,
-    volumeHoverState = false,
-    playState = false,
-    lastVolume,
+    volume = 0,
+    volumeBarClickState = false,
+    volumeMoveState = false,
     PlayerWrapper,
     MFPlayer,
     MFBuffer,
@@ -23,7 +19,10 @@ var
     MFArtist,
     MFTitle,
     MFNext,
-    MFPrev;
+    MFPrev,
+    MFVolumeWrapper,
+    MFVolumeLine,
+    MFVolume;
 
 
 /**
@@ -71,6 +70,9 @@ MFCore.setElements = function() {
     MFTitle = document.getElementById('mf-title');
     MFPrev = document.getElementById('mf-prev');
     MFNext = document.getElementById('mf-next');
+    MFVolumeWrapper = document.getElementById('mf-volume-wrapper');
+    MFVolumeLine = document.getElementById('mf-volume-line');
+    MFVolume = document.getElementById('mf-volume');
 
     songProgressWidth = MFSongProgress.clientWidth;
 };
@@ -150,18 +152,25 @@ MFCore.events = function() {
         if(progressBarClickState)
             MFCore.changeCurrentTime(e);
     });
-    MFSongProgress.addEventListener('mouseup',function() {
+    MFSongProgress.addEventListener('mouseup', function() {
         progressBarClickState = false;
         Core.event.send({
-            event:'changeCurrentTime',
+            event: 'changeCurrentTime',
             data: progressTime
         });
     });
 
     MFPrev.addEventListener('click', MFCore.playPrev);
     MFNext.addEventListener('click', MFCore.playNext);
+
+    MFVolume.addEventListener('change', function(e) {
+        MFCore.changeVolume(e);
+    });
 };
 
+/**
+ * Play next song
+ */
 MFCore.playNext = function() {
     Core.event.send({
         event: 'playNext',
@@ -169,11 +178,34 @@ MFCore.playNext = function() {
     })
 };
 
+/**
+ * Play prev song
+ */
 MFCore.playPrev = function() {
     Core.event.send({
         event: 'playPrev',
         data: ''
     })
+};
+
+/**
+ * Change player volume
+ *
+ * @param {event} e
+ */
+MFCore.changeVolume = function(e) {
+    var width = MFVolume.value + '%';
+    MFVolumeLine.style.width = width;
+    volume = MFVolume.value / MFVolume.max;
+
+    Core.event.send({
+        event: 'changeVolume',
+        data: {
+            volume: volume,
+            volumeWidth: width,
+            volumeValue: MFVolume.value
+        }
+    });
 };
 
 /**

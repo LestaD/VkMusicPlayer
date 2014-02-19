@@ -2,15 +2,8 @@ var
     progressLine = 0,
     progressTime = 0,
     songProgressWidth = 0,
-    y = 0,
-    vtime = 0,
-    volume = 0,
     progressBarWidth = 0,
     progressBarClickState = false,
-    volumeClickState = false,
-    volumeHoverState = false,
-    playState = false,
-    lastVolume,
     PlayerWrapper,
     MFPlayer,
     MFBuffer,
@@ -21,7 +14,10 @@ var
     MFTimeCurrent,
     MFTimeAll,
     MFArtist,
-    MFTitle;
+    MFTitle,
+    MFVolumeWrapper,
+    MFVolumeLine,
+    MFVolume;
 
 
 /**
@@ -74,6 +70,9 @@ MFCore.setElements = function() {
     MFPlay = document.getElementById('mf-play');
     MFArtist = document.getElementById('mf-artist');
     MFTitle = document.getElementById('mf-title');
+    MFVolumeWrapper = document.getElementById('mf-volume-wrapper');
+    MFVolumeLine = document.getElementById('mf-volume-line');
+    MFVolume = document.getElementById('mf-volume');
 
     songProgressWidth = MFSongProgress.clientWidth;
 };
@@ -168,8 +167,15 @@ MFCore.events = function() {
         progressBarClickState = false;
         MFPlayer.currentTime = progressTime;
     });
-    MFPlay.addEventListener('click', MFCore.actionPlayButton);
-    MFPlayer.addEventListener('ended', MFCore.playNext)
+    MFPlayer.addEventListener('ended', MFCore.playNext);
+};
+
+/**
+ * Change volume
+ * @param {event} e
+ */
+MFCore.changeVolume = function(e) {
+
 };
 
 /**
