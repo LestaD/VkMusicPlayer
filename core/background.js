@@ -13,7 +13,8 @@ var
     FirstSong = {},
     FirstLoad = true,
     ConnectStatus = false,
-    CurrentSong = {};
+    CurrentSong = {},
+    LastVolume = 0;
 
 /**
  * Background main object
@@ -42,18 +43,27 @@ BG.elements = function() {
 /**
  * Load all user audio
  */
-BG.getAllAudio = function() {
+BG.getAllAudio = function(callback) {
     var userID = VKit.authInfo('userID');
 
     VKit.api('audio.get', ['owner_id=' + userID, 'need_user=0'], function(response) {
         Songs = JSON.parse(response).response;
 
-        var list = document.createElement('ul'),
+        var oldList = PlayerWrapper.getElementsByTagName('ul')[0] || undefined;
+
+        if(oldList)
+            PlayerWrapper.removeChild(oldList);
+
+        var
+            list = document.createElement('ul'),
             liCache = document.createElement('li'),
             spanCache = document.createElement('span');
 
+        list.setAttribute('id','audio-list');
+
         for(var i = 1, size = Songs.length; i < size; i++) {
-            var li = liCache.cloneNode(false),
+            var
+                li = liCache.cloneNode(false),
                 name = spanCache.cloneNode(false),
                 splitter = spanCache.cloneNode(false),
                 artist = spanCache.cloneNode(false),
@@ -91,20 +101,15 @@ BG.getAllAudio = function() {
         PlayerWrapper.appendChild(list);
         chrome.browserAction.enable();
         BG.setFirstSong();
+
+        if(callback)
+            callback();
     });
-
-
-};
-
-BG.play = function(index) {
-//    BG.setActiveSong(index);
-//    MFPlayer.src = Songs[index].url;
-//    MFPlayer.play();
 };
 
 BG.setActiveSong = function(index) {
-    var eIndex = index - 1;
-    var e = document.getElementById('player-wrapper').getElementsByTagName('li')[eIndex];
+    var eIndex = index - 1,
+        e = document.getElementById('player-wrapper').getElementsByTagName('li')[eIndex];
 
     if(LastActive)
         LastActive.className = '';
@@ -217,6 +222,15 @@ BG.event.checkFirstLoad = function(data) {
     }
 };
 
+BG.event.mute = function() {
+    LastVolume = MFPlayer.volume ? MFPlayer.volume : 1;
+    MFPlayer.volume = 0;
+};
+
+BG.event.unmute = function() {
+    MFPlayer.volume = LastVolume;
+};
+
 BG.event.setToPause = function(data) {
     MFPlayer.pause();
     MFPlay.classList.remove('pause');
@@ -225,14 +239,21 @@ BG.event.setToPause = function(data) {
         event: 'changePauseToPlay',
         data: ''
     });
-
-
 };
 
 BG.event.setToPlay = function(data) {
     MFPlayer.play();
     if(!MFPlay.classList.contains('pause'))
         MFPlay.className += ' pause';
+
+    BG.setActiveByIndex(LastActiveIndex);
+
+    if(LastActiveIndex == 1) {
+        BG.event.send({
+            event: 'sendSetFirstActive',
+            data: ''
+        });
+    }
 
     BG.event.send({
         event: 'changePlayToPause',
@@ -257,8 +278,12 @@ BG.event.playByIndex = function(data) {
     if(typeof(MFPlayer.ontimeupdate) != 'function')
         MFCore.events();
 
+
     var song = Songs[data];
     MFDuration = song.duration;
+
+    console.log(song.duration);
+
     MFPlayer.src = song.url;
     MFPlayer.play();
 
@@ -324,7 +349,6 @@ BG.event.changeCurrentTime = function(data) {
     if(MFPlayer.src != '') {
         MFPlayer.pause();
         MFPlayer.currentTime = data;
-        MFPlayer.play();
         BG.event.setToPlay('true');
     }
 };
@@ -363,6 +387,28 @@ BG.event.sendFirstLoad = function(data) {
 };
 
 /**
+ * Update audio list
+ * @param data
+ */
+BG.event.updateList = function(data) {
+    BG.getAllAudio(function() {
+        MFCore.set(FirstSong.url, FirstSong.duration);
+        MFPlayer.src = FirstSong.url;
+        MFPlay.classList.remove('pause');
+
+        BG.event.send({
+            event: 'setSongDuration',
+            date: CurrentSong.realDuration
+        });
+
+        BG.event.send({
+            event: 'reloadContent',
+            data: ''
+        });
+    });
+};
+
+/**
  * Set first song on load
  */
 BG.setFirstSong = function() {
@@ -386,6 +432,8 @@ BG.setFirstSong = function() {
         duration: VKit.util.secToMin(MFDuration),
         realDuration: song.duration
     };
+
+    console.log(CurrentSong.realDuration);
 
     MFDuration = CurrentSong.realDuration;
     BG.setSongInfo(CurrentSong.artist, CurrentSong.title, CurrentSong.duration);
@@ -443,6 +491,7 @@ BG.removeActiveIndex = function(index) {
  * Init function
  */
 BG.init = function() {
+    setTranslation();
     MFCore.init();
     BG.event.listenData();
     BG.elements();

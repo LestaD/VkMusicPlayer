@@ -5,7 +5,17 @@
     },
 
     "appDesc": {
-        "message": "You music with you everywhere",
+        "message": "Your music with you everywhere",
         "description": "App description"
+    },
+
+    "auth": {
+        "message": "Sign in",
+        "description": "VKontakte Authorization"
+    },
+
+    "update": {
+        "message": "Update",
+        "description": "Update audio list"
     }
 }

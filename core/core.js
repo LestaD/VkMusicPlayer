@@ -3,7 +3,8 @@ var
     Songs,
     LastActive,
     LastActiveIndex,
-    FirstLoad;
+    FirstLoad,
+    UpdateList;
 
 /**
  * Main object
@@ -93,7 +94,7 @@ Core.event.listenData = function() {
     chrome.runtime.onConnect.addListener(function(bgPort) {
         Core.event.onOpen();
         bgPort.onMessage.addListener(function(msg) {
-//            console.log(msg);
+            console.log(msg);
             Core.event[msg.event](msg.data);
         });
     });
@@ -187,6 +188,7 @@ Core.event.getSongDuration = function() {
 };
 
 Core.event.setSongDuration = function(data) {
+    console.log(data);
     MFDuration = data;
 };
 
@@ -197,7 +199,6 @@ Core.event.changeSongInfo = function(data) {
 
 Core.event.sendSetFirstActive = function(data) {
     Core.setActiveByIndex(1);
-    MFDuration = data.duration;
 };
 
 Core.event.timeUpdate = function(data) {
@@ -239,7 +240,23 @@ Core.event.setLoadProgress = function(data) {
 Core.event.setNewHighLightElement = function(data) {
     Core.removeActiveIndex(data.oldIndex);
     Core.setActiveByIndex(data.newIndex);
+};
 
+/**
+ * Update list of audio
+ */
+Core.event.updateList = function() {
+    Core.event.send({
+        event: 'updateList',
+        data: ''
+    });
+};
+
+Core.event.reloadContent = function(data) {
+    console.log(document.getElementById('wrapper'));
+    document.body.removeChild(document.getElementById('wrapper'));
+
+    Core.loadBackgroundContent(true);
 };
 
 /**
@@ -254,20 +271,40 @@ Core.event.onOpen = function() {
  * Auth user & get songs from background page
  */
 Core.auth = function() {
+    Core.loadBackgroundContent();
+};
+
+Core.loadBackgroundContent = function(port) {
     chrome.runtime.getBackgroundPage(function(win) {
         var node = document.importNode(win.document.getElementById('wrapper'), true);
         document.body.appendChild(node);
+
         Core.audioEvent();
 
         if(win.LastActiveIndex)
             LastActiveIndex = win.LastActiveIndex;
 
         MFCore.init();
-        Core.event.listenData();
-        Core.event.connect();
-        Core.event.play();
+        Core.setElements();
+        Core.setEvents();
 
+        if(!port) {
+            Core.event.listenData();
+            Core.event.connect();
+        } else {
+            Core.event.onOpen();
+        }
+
+        Core.event.play();
     });
+};
+
+Core.setEvents = function() {
+    UpdateList.addEventListener('click', Core.event.updateList);
+};
+
+Core.setElements = function() {
+    UpdateList = document.getElementById('update-list');
 };
 
 Core.init = function() {

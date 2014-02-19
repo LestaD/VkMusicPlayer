@@ -3,6 +3,7 @@ var
     progressTime = 0,
     songProgressWidth = 0,
     progressBarWidth = 0,
+    progressBarMoveState = false,
     progressBarClickState = false,
     volume = 0,
     volumeBarClickState = false,
@@ -117,6 +118,8 @@ MFCore.updateState = function() {
  * @param {event} e
  */
 MFCore.changeCurrentTime = function(e) {
+    console.log(MFDuration);
+
     progressLine = e.pageX - MFSongProgress.getBoundingClientRect().left;
     progressTime = (progressLine / songProgressWidth) * MFDuration;
 };

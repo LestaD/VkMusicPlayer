@@ -170,13 +170,6 @@ MFCore.events = function() {
     MFPlayer.addEventListener('ended', MFCore.playNext);
 };
 
-/**
- * Change volume
- * @param {event} e
- */
-MFCore.changeVolume = function(e) {
-
-};
 
 /**
  * Play next song in list
