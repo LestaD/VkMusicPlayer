@@ -225,6 +225,8 @@ BG.event.setToPause = function(data) {
         event: 'changePauseToPlay',
         data: ''
     });
+
+
 };
 
 BG.event.setToPlay = function(data) {
@@ -297,6 +299,13 @@ BG.event.playByIndex = function(data) {
         event: 'changePlayToPause',
         data: ''
     });
+
+    BG.event.send({
+        event: 'setFirstLoadToFalse',
+        data: false
+    });
+
+    FirstLoad = false;
 };
 
 BG.event.getSongDuration = function() {
