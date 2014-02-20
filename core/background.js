@@ -279,11 +279,8 @@ BG.event.playByIndex = function(data) {
     if(typeof(MFPlayer.ontimeupdate) != 'function')
         MFCore.events();
 
-
     var song = Songs[data];
     MFDuration = song.duration;
-
-    console.log(song.duration);
 
     MFPlayer.src = song.url;
     MFPlayer.play();
@@ -458,6 +455,18 @@ BG.setSongInfo = function(artist, title, totalTime) {
     MFTitle.textContent = title;
 };
 
+
+/**
+ * Set desktop notification
+ *
+ * @param {{type: string, title: string, message: string, iconUrl: string}} options
+ */
+BG.setNotification = function(options) {
+    chrome.notifications.create('',options, function(id) {
+
+    });
+};
+
 /**
  * Set last active element
  *
@@ -497,6 +506,8 @@ BG.init = function() {
     BG.event.listenData();
     BG.elements();
     BG.checkForAuth();
+
+
 };
 
 window.addEventListener('DOMContentLoaded', BG.init);

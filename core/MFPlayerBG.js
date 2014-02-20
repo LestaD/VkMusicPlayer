@@ -181,6 +181,15 @@ MFCore.playNext = function() {
         next = 1;
 
     BG.event.playByIndex(next);
+
+    if(!ConnectStatus) {
+        BG.setNotification({
+            type: 'basic',
+            title: CurrentSong.title,
+            message: CurrentSong.artist + ' - ' + CurrentSong.title + ' ' + CurrentSong.duration,
+            iconUrl: '/app-icon.png'
+        });
+    }
 };
 
 /**
@@ -189,7 +198,6 @@ MFCore.playNext = function() {
 MFCore.playPrev = function() {
     var prev = parseInt(LastActiveIndex) - 1;
 
-    console.log(prev);
     if(prev <= 0)
         prev = Songs.length - 1;
 
@@ -201,5 +209,4 @@ MFCore.playPrev = function() {
  */
 MFCore.init = function() {
     MFCore.setElements();
-
 };

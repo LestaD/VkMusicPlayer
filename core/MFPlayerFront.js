@@ -6,8 +6,6 @@ var
     progressBarMoveState = false,
     progressBarClickState = false,
     volume = 0,
-    volumeBarClickState = false,
-    volumeMoveState = false,
     PlayerWrapper,
     MFPlayer,
     MFBuffer,
