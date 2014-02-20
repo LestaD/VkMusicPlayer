@@ -49,6 +49,7 @@ BG.getAllAudio = function(callback) {
     VKit.api('audio.get', ['owner_id=' + userID, 'need_user=0'], function(response) {
         Songs = JSON.parse(response).response;
 
+        MFProgress.style.width = 0;
         var oldList = PlayerWrapper.getElementsByTagName('ul')[0] || undefined;
 
         if(oldList)
