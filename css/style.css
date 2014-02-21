@@ -42,8 +42,7 @@
   background: transparent !important; }
 
 ::-webkit-scrollbar-thumb {
-  background: #DAE1E8;
-  border: 1px solid #fff; }
+  background: #DAE1E8; }
 
 ::-webkit-scrollbar-thumb:hover {
   background: #BEC8D3; }
@@ -58,44 +57,21 @@ body {
   background: #fff;
   font: normal 11px tahoma, arial, verdana, sans-serif, Lucida Sans; }
 
-#wrapper {
-  min-width: 300px;
-  min-height: 300px; }
-  #wrapper #auth-block {
-    text-align: center;
-    line-height: 65px;
-    padding: 0 5px;
-    width: 185px;
-    height: 65px; }
-    #wrapper #auth-block button {
-      -webkit-transition: all 200ms cubic-bezier(0, 0, 0.58, 1);
-      -moz-transition: all 200ms cubic-bezier(0, 0, 0.58, 1);
-      -o-transition: all 200ms cubic-bezier(0, 0, 0.58, 1);
-      transition: all 200ms cubic-bezier(0, 0, 0.58, 1);
-      -webkit-transition-timing-function: cubic-bezier(0, 0, 0.58, 1);
-      -moz-transition-timing-function: cubic-bezier(0, 0, 0.58, 1);
-      -o-transition-timing-function: cubic-bezier(0, 0, 0.58, 1);
-      transition-timing-function: cubic-bezier(0, 0, 0.58, 1);
-      padding: 10px;
-      width: 100%;
-      background: #3498db;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      font-size: 13px;
-      text-transform: uppercase;
-      text-shadow: 0 1px 1px #1460A8;
-      box-shadow: 0 1px 1px #2268B4; }
-      #wrapper #auth-block button:hover {
-        background: #49B6FF;
-        box-shadow: 0 1px 1px #619CDD; }
+#wrapper #auth-block {
+  text-align: center;
+  line-height: 65px; }
+  #wrapper #auth-block #vk-logo {
+    background: url(/images/vk-logo.gif) no-repeat;
+    background-size: 175px;
+    width: 175px;
+    height: 50px; }
 
 #player-wrapper {
   background: #fff;
   border: 1px solid #DCDDDF;
   overflow: hidden;
   min-width: 300px;
-  min-height: 200px;
+  min-height: 553px;
   max-height: 555px;
   width: 420px;
   border-radius: 2px 2px 0 0; }
@@ -113,7 +89,8 @@ body {
     margin: 0 0 35px;
     padding: 5px 0px 5px 7px;
     overflow-y: auto;
-    max-height: 465px; }
+    max-height: 465px;
+    width: 100%; }
     #player-wrapper ul li {
       cursor: pointer;
       height: 32px;

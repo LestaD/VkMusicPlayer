@@ -1,10 +1,11 @@
-chrome.browserAction.disable();
-chrome.browserAction.setBadgeBackgroundColor({color: '#4E729A'});
+if(localStorage['authInfo'] != undefined)
+    chrome.browserAction.disable();
 
+chrome.browserAction.setBadgeBackgroundColor({color: '#4E729A'});
 
 var
     AuthBlock,
-    PlayerWrapper,
+    PlayerWrapperBG,
     MFPlayer,
     Songs,
     LastActive,
@@ -24,10 +25,15 @@ var
 var BG = {};
 
 BG.checkForAuth = function() {
-    if(VKit.authInfo('token') != undefined) {
+    if(localStorage['authInfo'] != undefined) {
         AuthBlock.style.display = 'none';
-        PlayerWrapper.style.display = 'block';
+        PlayerWrapperBG.style.display = 'block';
+        MFCore.init();
+        BG.event.listenData();
         BG.getAllAudio();
+    } else {
+        PlayerWrapperBG.style.display = 'none';
+        BG.event.listenData();
     }
 };
 
@@ -36,7 +42,7 @@ BG.checkForAuth = function() {
  */
 BG.elements = function() {
     AuthBlock = document.getElementById('auth-block');
-    PlayerWrapper = document.getElementById('player-wrapper');
+    PlayerWrapperBG = document.getElementById('player-wrapper');
     MFPlayer = document.getElementById('mf-player');
 };
 
@@ -50,10 +56,10 @@ BG.getAllAudio = function(callback) {
         Songs = JSON.parse(response).response;
 
         MFProgress.style.width = 0;
-        var oldList = PlayerWrapper.getElementsByTagName('ul')[0] || undefined;
+        var oldList = PlayerWrapperBG.getElementsByTagName('ul')[0] || undefined;
 
         if(oldList)
-            PlayerWrapper.removeChild(oldList);
+            PlayerWrapperBG.removeChild(oldList);
 
         var
             list = document.createElement('ul'),
@@ -99,7 +105,7 @@ BG.getAllAudio = function(callback) {
             list.appendChild(li);
         }
 
-        PlayerWrapper.appendChild(list);
+        PlayerWrapperBG.appendChild(list);
         chrome.browserAction.enable();
         BG.setFirstSong();
 
@@ -406,6 +412,12 @@ BG.event.updateList = function(data) {
     });
 };
 
+BG.event.openAuth = function(data) {
+    VKit.openAuthWindow(function() {
+
+    });
+};
+
 /**
  * Set first song on load
  */
@@ -502,12 +514,8 @@ BG.removeActiveIndex = function(index) {
  */
 BG.init = function() {
     setTranslation();
-    MFCore.init();
-    BG.event.listenData();
     BG.elements();
     BG.checkForAuth();
-
-
 };
 
 window.addEventListener('DOMContentLoaded', BG.init);

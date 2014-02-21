@@ -20,6 +20,7 @@
         "default_popup": "/templates/window.html"
     },
     "permissions": [
+        "tabs",
         "notifications",
         "https://*.vk.com/*",
         "http://*.vk.me/*",

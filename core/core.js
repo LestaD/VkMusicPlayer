@@ -210,6 +210,11 @@ Core.event.changePlayToPause = function(data) {
         MFPlay.className += ' pause';
 };
 
+/**
+ *
+ *
+ * @param data
+ */
 Core.event.changePauseToPlay = function(data) {
     MFPlay.classList.remove('pause');
 };
@@ -252,11 +257,26 @@ Core.event.updateList = function() {
     });
 };
 
+/**
+ * Reload popup #wrapper element
+ *
+ * @param data
+ */
 Core.event.reloadContent = function(data) {
     console.log(document.getElementById('wrapper'));
     document.body.removeChild(document.getElementById('wrapper'));
 
     Core.loadBackgroundContent(true);
+};
+
+/**
+ * Open window for authorization in VK.com
+ */
+Core.event.authorize = function() {
+    Core.event.send({
+        event: 'openAuth',
+        data: ''
+    });
 };
 
 /**
@@ -274,39 +294,63 @@ Core.auth = function() {
     Core.loadBackgroundContent();
 };
 
+/**
+ * Load background page
+ *
+ * @param {object} port
+ */
 Core.loadBackgroundContent = function(port) {
     chrome.runtime.getBackgroundPage(function(win) {
         var node = document.importNode(win.document.getElementById('wrapper'), true);
         document.body.appendChild(node);
 
-        Core.audioEvent();
+        if(localStorage['authInfo'] != undefined) {
+            Core.audioEvent();
 
-        if(win.LastActiveIndex)
-            LastActiveIndex = win.LastActiveIndex;
+            if(win.LastActiveIndex)
+                LastActiveIndex = win.LastActiveIndex;
 
-        MFCore.init();
-        Core.setElements();
-        Core.setEvents();
+            MFCore.init();
+            Core.setElements();
+            Core.setEvents();
 
-        if(!port) {
+            if(!port) {
+                Core.event.listenData();
+                Core.event.connect();
+            } else {
+                Core.event.onOpen();
+            }
+
+            Core.event.play();
+        } else {
+            var authButton = document.getElementById('vk-auth');
+
             Core.event.listenData();
             Core.event.connect();
-        } else {
-            Core.event.onOpen();
-        }
+            console.log(Port);
 
-        Core.event.play();
+            authButton.addEventListener('click', Core.event.authorize);
+        }
     });
 };
 
+/**
+ * Init events
+ */
 Core.setEvents = function() {
     UpdateList.addEventListener('click', Core.event.updateList);
 };
 
+/**
+ * Init DOM elements
+ */
 Core.setElements = function() {
     UpdateList = document.getElementById('update-list');
 };
 
+/**
+ * Init functions
+ */
 Core.init = function() {
     Core.auth();
 };

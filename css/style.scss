@@ -29,7 +29,6 @@
 
 ::-webkit-scrollbar-thumb {
   background: #DAE1E8;
-  border: 1px solid #fff;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -56,33 +55,15 @@ body {
 }
 
 #wrapper {
-  min-width: 300px;
-  min-height: 300px;
 
   #auth-block {
     text-align: center;
     line-height: 65px;
-    padding: 0 5px;
-    width: 185px;
-    height: 65px;
-
-    button {
-      @include animation-two(200ms);
-      padding: 10px;
-      width: 100%;
-      background: #3498db;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      font-size: 13px;
-      text-transform: uppercase;
-      text-shadow: 0 1px 1px #1460A8;
-      box-shadow: 0 1px 1px #2268B4;
-
-      &:hover {
-        background: #49B6FF;
-        box-shadow: 0 1px 1px #619CDD;
-      }
+    #vk-logo {
+      background: url(/images/vk-logo.gif) no-repeat;
+      background-size:175px;
+      width:175px;
+      height: 50px;
     }
   }
 }
@@ -95,7 +76,7 @@ $cWidth: 420px;
   border: 1px solid #DCDDDF;
   overflow: hidden;
   min-width: 300px;
-  min-height: 200px;
+  min-height: 553px;
   max-height: 555px;
   width: $cWidth;
   border-radius: 2px 2px 0 0;
@@ -125,6 +106,7 @@ $cWidth: 420px;
     padding: 5px 0px 5px 7px;
     overflow-y: auto;
     max-height: 465px;
+    width:100%;
 
     li {
       cursor: pointer;
