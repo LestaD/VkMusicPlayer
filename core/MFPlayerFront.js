@@ -3,7 +3,6 @@ var
     progressTime = 0,
     songProgressWidth = 0,
     progressBarWidth = 0,
-    progressBarMoveState = false,
     progressBarClickState = false,
     volume = 0,
     PlayerWrapper,
