@@ -23,10 +23,8 @@
         "notifications",
         "https://*.vk.com/*",
         "http://*.vk.me/*",
-        "https://*.vk.me/*",
-        "*://*/*"
+        "https://*.vk.me/*"
     ],
-
     "icons": {
         "16": "app-icon.png",
         "32": "app-icon.png",
