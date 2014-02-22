@@ -17,5 +17,10 @@
     "update": {
         "message": "Update",
         "description": "Update audio list"
+    },
+
+    "updating": {
+        "message": "Updating the list of audio",
+        "description": "Updating the list of audio"
     }
 }

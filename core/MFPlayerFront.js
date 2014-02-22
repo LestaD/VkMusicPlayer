@@ -31,28 +31,6 @@ var
 var MFCore = {};
 
 /**
- * Show audio loading progress
- */
-MFCore.loadProcess = function() {
-
-    var
-        bufferedData = MFPlayer.buffered,
-        bufferedSize = bufferedData.length,
-        end,
-        start,
-        width;
-
-    if(bufferedSize > 0) {
-        while(bufferedSize--) {
-            start = bufferedData.end(bufferedSize);
-            end = bufferedData.start(bufferedSize);
-            width = (((start - end) / MFDuration) * 100).toString();
-            MFBuffer.style.width = width + '%';
-        }
-    }
-};
-
-/**
  * Init DOM elements
  */
 MFCore.setElements = function() {
@@ -75,48 +53,12 @@ MFCore.setElements = function() {
     songProgressWidth = MFSongProgress.clientWidth;
 };
 
-/**
- * Update track timeline
- */
-MFCore.updateState = function() {
-    var
-        songTime = Math.round((parseFloat(MFProgress.style.width) / songProgressWidth) * MFDuration),
-        seconds = 0,
-        minutes = 0;
-
-    if(songTime) {
-        minutes = Math.floor(songTime / 60);
-        seconds = Math.round(songTime) - (60 * minutes);
-
-        if(seconds > 59) {
-            seconds = Math.round(songTime) - (60 * minutes);
-
-            if(seconds == 60) {
-                minutes = Math.round(songTime / 60);
-                seconds = 0;
-            }
-        }
-    }
-
-    progressBarWidth = ((MFPlayer.currentTime / MFDuration) * songProgressWidth);
-
-    if(minutes < 10)
-        minutes = '0' + minutes;
-
-    if(seconds < 10)
-        seconds = '0' + seconds;
-
-    MFProgress.style.width = progressBarWidth + 'px';
-    MFTimeCurrent.textContent = minutes + ':' + seconds;
-};
 
 /**
  * Change current time by mouse clicking
  * @param {event} e
  */
 MFCore.changeCurrentTime = function(e) {
-    console.log(MFDuration);
-
     progressLine = e.pageX - MFSongProgress.getBoundingClientRect().left;
     progressTime = (progressLine / songProgressWidth) * MFDuration;
 };

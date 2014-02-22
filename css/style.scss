@@ -55,14 +55,16 @@ body {
 }
 
 #wrapper {
+  @include animation-one(250ms);
+  opacity: 0;
 
   #auth-block {
     text-align: center;
     line-height: 65px;
     #vk-logo {
       background: url(/images/vk-logo.gif) no-repeat;
-      background-size:175px;
-      width:175px;
+      background-size: 175px;
+      width: 175px;
       height: 50px;
     }
   }
@@ -106,7 +108,7 @@ $cWidth: 420px;
     padding: 5px 0px 5px 7px;
     overflow-y: auto;
     max-height: 465px;
-    width:100%;
+    width: 100%;
 
     li {
       cursor: pointer;
@@ -145,7 +147,7 @@ $cWidth: 420px;
       .duration {
         color: #777;
         float: right;
-        font-size:10px;
+        font-size: 10px;
       }
 
       &:hover {
@@ -186,13 +188,13 @@ $cWidth: 420px;
     background: url(../images/audio_icons_2x.png) no-repeat scroll;
     background-size: 257px 63px;
     cursor: pointer;
-    float:left;
+    float: left;
   }
 
   .play-buttons {
-    float:left;
+    float: left;
     height: 50px;
-    width:66px;
+    width: 66px;
   }
 
   #mf-play {
@@ -256,7 +258,7 @@ $cWidth: 420px;
     @extend .relative;
     border-radius: 10px;
     cursor: pointer;
-    float:left;
+    float: left;
     top: 19px;
     height: 15px;
     width: $songWidth;
@@ -273,7 +275,7 @@ $cWidth: 420px;
     background: #5c7a99;
     border-radius: 10px;
     height: 4px;
-    width:0;
+    width: 0;
     z-index: 100;
   }
 
@@ -287,7 +289,7 @@ $cWidth: 420px;
     @include animation-one(250ms);
     background: #bac7d4;
     border-radius: 10px;
-    top:0;
+    top: 0;
     height: 4px;
     width: 0;
     max-width: 100%;
@@ -296,25 +298,25 @@ $cWidth: 420px;
 
   #mf-artist {
     @extend .text-overflow;
-    color:#2B5877;
+    color: #2B5877;
     display: block;
-    float:left;
+    float: left;
     font-weight: bold;
     max-width: 85px;
   }
 
   #mf-title {
     @extend .text-overflow;
-    color:#627A94;
+    color: #627A94;
     display: block;
-    max-width:140px;
+    max-width: 140px;
   }
 
   .splitter {
     @extend .relative;
     background: #2B587A;
     top: 7px;
-    float:left;
+    float: left;
     margin: 0 4px;
     width: 8px;
     height: 1px;
@@ -322,22 +324,22 @@ $cWidth: 420px;
 
   .song-time {
     @extend .absolute;
-    color:#627a94;
+    color: #627a94;
     top: 13px;
     right: 85px;
-    font-size:10px;
+    font-size: 10px;
   }
 
   #song-info {
     @extend .relative;
     cursor: default;
-    float:left;
+    float: left;
     top: 12px;
     width: $songWidth;
   }
 
   #mf-duration {
-    display:none;
+    display: none;
   }
 
   #mf-volume {
@@ -369,16 +371,16 @@ $cWidth: 420px;
     right: 12px;
     top: 27px;
     cursor: pointer;
-    height:15px;
-    width:55px;
+    height: 15px;
+    width: 55px;
 
     #mf-volume-line {
       @extend .relative;
-      top:5px;
+      top: 5px;
       background-color: #5c7a99;
       border-radius: 10px;
       height: 4px;
-      width:100%;
+      width: 100%;
       z-index: 100;
     }
 
@@ -388,7 +390,7 @@ $cWidth: 420px;
       border-radius: 10px;
       top: 5px;
       height: 4px;
-      width:100%;
+      width: 100%;
     }
 
     &:active {
@@ -399,37 +401,63 @@ $cWidth: 420px;
   }
 }
 
-
 .regular-button {
   background: #6d8fb3;
-  background: -moz-linear-gradient(top,  #6d8fb3 0%, #517397 100%);
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#6d8fb3), color-stop(100%,#517397));
-  background: -webkit-linear-gradient(top,  #6d8fb3 0%,#517397 100%);
-  background: -o-linear-gradient(top,  #6d8fb3 0%,#517397 100%);
-  background: -ms-linear-gradient(top,  #6d8fb3 0%,#517397 100%);
-  background: linear-gradient(to bottom,  #6d8fb3 0%,#517397 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6d8fb3', endColorstr='#517397',GradientType=0 );
-  border:none;
+  background: -moz-linear-gradient(top, #6d8fb3 0%, #517397 100%);
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #6d8fb3), color-stop(100%, #517397));
+  background: -webkit-linear-gradient(top, #6d8fb3 0%, #517397 100%);
+  background: -o-linear-gradient(top, #6d8fb3 0%, #517397 100%);
+  background: -ms-linear-gradient(top, #6d8fb3 0%, #517397 100%);
+  background: linear-gradient(to bottom, #6d8fb3 0%, #517397 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#6d8fb3', endColorstr='#517397', GradientType=0);
+  border: none;
   border-bottom: 1px solid #496b93;
-  border-radius:3px;
+  border-radius: 3px;
   cursor: pointer;
   text-shadow: 0 1px 0 #5578A0;
   padding: 6px 16px;
-  color:#fff;
+  color: #fff;
   font: normal 11px tahoma, arial, verdana, sans-serif, Lucida Sans;
 
   &:hover {
     background: #7395b9;
-    background: -moz-linear-gradient(top,  #7395b9 0%, #597b9f 100%);
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#7395b9), color-stop(100%,#597b9f));
-    background: -webkit-linear-gradient(top,  #7395b9 0%,#597b9f 100%);
-    background: -o-linear-gradient(top,  #7395b9 0%,#597b9f 100%);
-    background: -ms-linear-gradient(top,  #7395b9 0%,#597b9f 100%);
-    background: linear-gradient(to bottom,  #7395b9 0%,#597b9f 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#7395b9', endColorstr='#597b9f',GradientType=0 );
+    background: -moz-linear-gradient(top, #7395b9 0%, #597b9f 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #7395b9), color-stop(100%, #597b9f));
+    background: -webkit-linear-gradient(top, #7395b9 0%, #597b9f 100%);
+    background: -o-linear-gradient(top, #7395b9 0%, #597b9f 100%);
+    background: -ms-linear-gradient(top, #7395b9 0%, #597b9f 100%);
+    background: linear-gradient(to bottom, #7395b9 0%, #597b9f 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#7395b9', endColorstr='#597b9f', GradientType=0);
   }
 
   &:active {
     background: #5e80a5;
+  }
+}
+
+#bg-overlay {
+  @include animation-one(250ms);
+  @extend .fixed;
+  background: rgba(0, 0, 0, .4);
+  display: none;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 9999;
+
+  .overlay-txt {
+    @include animation-one(350ms);
+    background: #fff url(../images/preloader.GIF) 10px center no-repeat;
+    background-size: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.46);
+    margin-top: -55px;
+    line-height: 50px;
+    text-align: center;
+    height: 50px;
+    width: 100%;
+
+    &.show {
+      margin-top: 0;
+    }
   }
 }

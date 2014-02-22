@@ -4,7 +4,7 @@
 .relative, #player-wrapper, #player-wrapper .c-wrapper, #player-wrapper ul li .splitter, #mf-player-wireframe .buttons, #mf-player-wireframe #mf-song-progress, #mf-player-wireframe #mf-progress, #mf-player-wireframe .splitter, #mf-player-wireframe #song-info, #mf-player-wireframe #mf-volume-wrapper #mf-volume-line {
   position: relative; }
 
-.fixed, .app-nav {
+.fixed, .app-nav, #bg-overlay {
   position: fixed; }
 
 .text-overflow, #player-wrapper ul li .artist, #player-wrapper ul li .title, #mf-player-wireframe #mf-artist, #mf-player-wireframe #mf-title {
@@ -57,14 +57,24 @@ body {
   background: #fff;
   font: normal 11px tahoma, arial, verdana, sans-serif, Lucida Sans; }
 
-#wrapper #auth-block {
-  text-align: center;
-  line-height: 65px; }
-  #wrapper #auth-block #vk-logo {
-    background: url(/images/vk-logo.gif) no-repeat;
-    background-size: 175px;
-    width: 175px;
-    height: 50px; }
+#wrapper {
+  -webkit-transition: all 250ms cubic-bezier(0.165, 0.84, 0.44, 1);
+  -moz-transition: all 250ms cubic-bezier(0.165, 0.84, 0.44, 1);
+  -o-transition: all 250ms cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: all 250ms cubic-bezier(0.165, 0.84, 0.44, 1);
+  -webkit-transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+  -moz-transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+  -o-transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+  opacity: 0; }
+  #wrapper #auth-block {
+    text-align: center;
+    line-height: 65px; }
+    #wrapper #auth-block #vk-logo {
+      background: url(/images/vk-logo.gif) no-repeat;
+      background-size: 175px;
+      width: 175px;
+      height: 50px; }
 
 #player-wrapper {
   background: #fff;
@@ -296,7 +306,7 @@ body {
   background: -o-linear-gradient(top, #6d8fb3 0%, #517397 100%);
   background: -ms-linear-gradient(top, #6d8fb3 0%, #517397 100%);
   background: linear-gradient(to bottom, #6d8fb3 0%, #517397 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#6d8fb3', endColorstr='#517397',GradientType=0 );
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#6d8fb3', endColorstr='#517397', GradientType=0);
   border: none;
   border-bottom: 1px solid #496b93;
   border-radius: 3px;
@@ -313,6 +323,41 @@ body {
     background: -o-linear-gradient(top, #7395b9 0%, #597b9f 100%);
     background: -ms-linear-gradient(top, #7395b9 0%, #597b9f 100%);
     background: linear-gradient(to bottom, #7395b9 0%, #597b9f 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#7395b9', endColorstr='#597b9f',GradientType=0 ); }
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#7395b9', endColorstr='#597b9f', GradientType=0); }
   .regular-button:active {
     background: #5e80a5; }
+
+#bg-overlay {
+  -webkit-transition: all 250ms cubic-bezier(0.165, 0.84, 0.44, 1);
+  -moz-transition: all 250ms cubic-bezier(0.165, 0.84, 0.44, 1);
+  -o-transition: all 250ms cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: all 250ms cubic-bezier(0.165, 0.84, 0.44, 1);
+  -webkit-transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+  -moz-transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+  -o-transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  z-index: 9999; }
+  #bg-overlay .overlay-txt {
+    -webkit-transition: all 350ms cubic-bezier(0.165, 0.84, 0.44, 1);
+    -moz-transition: all 350ms cubic-bezier(0.165, 0.84, 0.44, 1);
+    -o-transition: all 350ms cubic-bezier(0.165, 0.84, 0.44, 1);
+    transition: all 350ms cubic-bezier(0.165, 0.84, 0.44, 1);
+    -webkit-transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+    -moz-transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+    -o-transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+    transition-timing-function: cubic-bezier(0.165, 0.84, 0.44, 1);
+    background: white url(../images/preloader.GIF) 10px center no-repeat;
+    background-size: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.46);
+    margin-top: -55px;
+    line-height: 50px;
+    text-align: center;
+    height: 50px;
+    width: 100%; }
+    #bg-overlay .overlay-txt.show {
+      margin-top: 0; }

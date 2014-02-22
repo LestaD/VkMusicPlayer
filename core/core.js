@@ -4,7 +4,9 @@ var
     LastActive,
     LastActiveIndex,
     FirstLoad,
-    UpdateList;
+    UpdateList,
+    Overlay,
+    OverlayTxt;
 
 /**
  * Main object
@@ -211,7 +213,7 @@ Core.event.changePlayToPause = function(data) {
 };
 
 /**
- *
+ * Change icon to pause
  *
  * @param data
  */
@@ -251,6 +253,8 @@ Core.event.setNewHighLightElement = function(data) {
  * Update list of audio
  */
 Core.event.updateList = function() {
+    Core.showOverlay();
+    Core.hideOpacity('wrapper');
     Core.event.send({
         event: 'updateList',
         data: ''
@@ -263,10 +267,11 @@ Core.event.updateList = function() {
  * @param data
  */
 Core.event.reloadContent = function(data) {
-    console.log(document.getElementById('wrapper'));
-    document.body.removeChild(document.getElementById('wrapper'));
-
-    Core.loadBackgroundContent(true);
+    document.getElementById('main').removeChild(document.getElementById('wrapper'));
+    Core.loadBackgroundContent(true,'wrapper', function() {
+        Core.hideOverlay();
+        Core.showOpacity('wrapper');
+    });
 };
 
 /**
@@ -287,6 +292,40 @@ Core.event.onOpen = function() {
     Core.event.getSongDuration();
 };
 
+Core.showOverlay = function() {
+    Overlay.style.display = 'block';
+    setTimeout(function() {
+        OverlayTxt.className += ' show';
+    }, 50);
+};
+
+Core.hideOverlay = function() {
+    OverlayTxt.classList.remove('show');
+
+    setTimeout(function() {
+        Overlay.style.display = 'none';
+    }, 50);
+};
+
+/**
+ * Set opacity to 1
+ *
+ * @param {string} elementID
+ */
+Core.showOpacity = function(elementID) {
+    document.getElementById(elementID).className = 'show-opacity';
+};
+
+
+/**
+ * Set opacity to 0
+ *
+ * @param {string} elementID
+ */
+Core.hideOpacity = function(elementID) {
+    document.getElementById(elementID).className = 'hide-opacity';
+};
+
 /**
  * Auth user & get songs from background page
  */
@@ -297,12 +336,21 @@ Core.auth = function() {
 /**
  * Load background page
  *
- * @param {object} port
+ * @param {object|boolean} port
+ * @param {string} elementID
+ * @param {function} callback
  */
-Core.loadBackgroundContent = function(port) {
+Core.loadBackgroundContent = function(port, elementID, callback) {
     chrome.runtime.getBackgroundPage(function(win) {
-        var node = document.importNode(win.document.getElementById('wrapper'), true);
-        document.body.appendChild(node);
+        var node;
+
+        if(elementID && elementID != '') {
+            node = document.importNode(win.document.getElementById(elementID), true);
+            document.getElementById('main').appendChild(node);
+        } else {
+            node = document.importNode(win.document.getElementById('main'), true);
+            document.body.appendChild(node);
+        }
 
         if(localStorage['authInfo'] != undefined) {
             Core.audioEvent();
@@ -327,10 +375,14 @@ Core.loadBackgroundContent = function(port) {
 
             Core.event.listenData();
             Core.event.connect();
-            console.log(Port);
 
             authButton.addEventListener('click', Core.event.authorize);
         }
+
+        Core.showOpacity('wrapper');
+
+        if(callback)
+            callback();
     });
 };
 
@@ -346,6 +398,8 @@ Core.setEvents = function() {
  */
 Core.setElements = function() {
     UpdateList = document.getElementById('update-list');
+    Overlay = document.getElementById('bg-overlay');
+    OverlayTxt = document.getElementById('overlay-txt');
 };
 
 /**

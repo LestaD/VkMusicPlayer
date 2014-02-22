@@ -50,6 +50,9 @@ BG.elements = function() {
  * Load all user audio
  */
 BG.getAllAudio = function(callback) {
+    chrome.browserAction.disable();
+    chrome.browserAction.setBadgeText({text: '0'});
+
     var userID = VKit.authInfo('userID');
 
     VKit.api('audio.get', ['owner_id=' + userID, 'need_user=0'], function(response) {
@@ -443,8 +446,6 @@ BG.setFirstSong = function() {
         realDuration: song.duration
     };
 
-    console.log(CurrentSong.realDuration);
-
     MFDuration = CurrentSong.realDuration;
     BG.setSongInfo(CurrentSong.artist, CurrentSong.title, CurrentSong.duration);
 
@@ -475,7 +476,11 @@ BG.setSongInfo = function(artist, title, totalTime) {
  */
 BG.setNotification = function(options) {
     chrome.notifications.create('',options, function(id) {
+        setTimeout(function() {
+            chrome.notifications.clear(id,function(cleared) {
 
+            });
+        }, 2500);
     });
 };
 
