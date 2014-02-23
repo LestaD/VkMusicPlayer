@@ -5,6 +5,7 @@
     "default_locale": "ru",
     "offline_enabled": true,
     "minimum_chrome_version": "31",
+    "options_page": "/templates/settings.html",
     "background": {
         "persistent": true,
         "page" : "/templates/background.html"

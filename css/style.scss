@@ -75,10 +75,9 @@ $cWidth: 420px;
 #player-wrapper {
   @extend .relative;
   background: #fff;
-  border: 1px solid #DCDDDF;
   overflow: hidden;
   min-width: 300px;
-  min-height: 553px;
+  min-height: 300px;
   max-height: 555px;
   width: $cWidth;
   border-radius: 2px 2px 0 0;
@@ -107,7 +106,7 @@ $cWidth: 420px;
     margin: 0 0 35px;
     padding: 5px 0px 5px 7px;
     overflow-y: auto;
-    max-height: 465px;
+    max-height: 414px;
     width: 100%;
 
     li {
@@ -168,18 +167,6 @@ $cWidth: 420px;
       }
     }
   }
-}
-
-.app-nav {
-  @extend .fixed;
-  background: #F2F2F2;
-  border-top: 1px solid #DAE1E8;
-  height: 35px;
-  width: 418px;
-  bottom: 1px;
-  z-index: 100;
-  line-height: 35px;
-  padding: 0 7px;
 }
 
 #mf-player-wireframe {
@@ -435,6 +422,18 @@ $cWidth: 420px;
   }
 }
 
+.rb-1 {
+  background: none;
+  border:none;
+  color:#2B587A;
+  cursor: pointer;
+  font: normal 11px tahoma, arial, verdana, sans-serif, Lucida Sans;
+
+  &:hover {
+    background: rgba(219, 227, 235, 0.5);
+  }
+}
+
 #bg-overlay {
   @include animation-one(250ms);
   @extend .fixed;
@@ -459,5 +458,21 @@ $cWidth: 420px;
     &.show {
       margin-top: 0;
     }
+  }
+}
+
+.app-nav {
+  @extend .absolute;
+  background: #F2F2F2;
+  border-top: 1px solid #DAE1E8;
+  display: flex;
+  line-height: 35px;
+  height: 35px;
+  width: 100%;
+  bottom: 0;
+  z-index: 100;
+
+  button {
+    width: 100%;
   }
 }

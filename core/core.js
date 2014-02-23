@@ -6,7 +6,8 @@ var
     FirstLoad,
     UpdateList,
     Overlay,
-    OverlayTxt;
+    OverlayTxt,
+    Settings;
 
 /**
  * Main object
@@ -151,7 +152,7 @@ Core.event.playSong = function(e) {
 
     var index = element.getAttribute('data-index');
 
-    MFTimeCurrent.textContent = '00:00';
+    MFTimeCurrent.textContent = '0:00';
     MFBuffer.style.width = 0;
     MFProgress.style.width = 0;
 
@@ -253,6 +254,7 @@ Core.event.setNewHighLightElement = function(data) {
  * Update list of audio
  */
 Core.event.updateList = function() {
+    Core.setSizeToMain();
     Core.showOverlay();
     Core.hideOpacity('wrapper');
     Core.event.send({
@@ -268,9 +270,10 @@ Core.event.updateList = function() {
  */
 Core.event.reloadContent = function(data) {
     document.getElementById('main').removeChild(document.getElementById('wrapper'));
-    Core.loadBackgroundContent(true,'wrapper', function() {
+    Core.loadBackgroundContent(true, 'wrapper', function() {
         Core.hideOverlay();
         Core.showOpacity('wrapper');
+        Core.removeSizeFromMain();
     });
 };
 
@@ -290,6 +293,22 @@ Core.event.authorize = function() {
 Core.event.onOpen = function() {
     Core.event.checkFirstLoad();
     Core.event.getSongDuration();
+};
+
+/**
+ * Set width and height to #main
+ */
+Core.setSizeToMain = function() {
+    var MainBlock = document.getElementById('main');
+    MainBlock.style.width = MainBlock.clientWidth + 'px';
+    MainBlock.style.height = MainBlock.clientHeight + 'px';
+};
+
+/**
+ * Remove style attribute from #main
+ */
+Core.removeSizeFromMain = function() {
+    document.getElementById('main').removeAttribute('style');
 };
 
 Core.showOverlay = function() {
@@ -346,7 +365,7 @@ Core.loadBackgroundContent = function(port, elementID, callback) {
 
         if(elementID && elementID != '') {
             node = document.importNode(win.document.getElementById(elementID), true);
-            document.getElementById('main').appendChild(node);
+            document.getElementById('main').insertBefore(node, document.getElementById('app-nav-block'));
         } else {
             node = document.importNode(win.document.getElementById('main'), true);
             document.body.appendChild(node);
@@ -372,6 +391,7 @@ Core.loadBackgroundContent = function(port, elementID, callback) {
             Core.event.play();
         } else {
             var authButton = document.getElementById('vk-auth');
+            document.getElementById('app-nav-block').style.display = 'none';
 
             Core.event.listenData();
             Core.event.connect();
@@ -386,11 +406,16 @@ Core.loadBackgroundContent = function(port, elementID, callback) {
     });
 };
 
+Core.openSettings = function() {
+    chrome.tabs.create({url: chrome.runtime.getURL('/templates/settings.html')});
+};
+
 /**
  * Init events
  */
 Core.setEvents = function() {
     UpdateList.addEventListener('click', Core.event.updateList);
+    Settings.addEventListener('click', Core.openSettings);
 };
 
 /**
@@ -400,6 +425,7 @@ Core.setElements = function() {
     UpdateList = document.getElementById('update-list');
     Overlay = document.getElementById('bg-overlay');
     OverlayTxt = document.getElementById('overlay-txt');
+    Settings = document.getElementById('settings');
 };
 
 /**

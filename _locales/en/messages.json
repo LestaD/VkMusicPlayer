@@ -22,5 +22,10 @@
     "updating": {
         "message": "Updating the list of audio",
         "description": "Updating the list of audio"
+    },
+
+    "settings": {
+        "message": "Settings",
+        "description": "App settings"
     }
 }

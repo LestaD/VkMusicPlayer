@@ -53,10 +53,10 @@ BG.getAllAudio = function(callback) {
     chrome.browserAction.disable();
     chrome.browserAction.setBadgeText({text: '0'});
 
-    var userID = VKit.authInfo('userID');
+    var userID = VKit.getActiveAccount();
 
     VKit.api('audio.get', ['owner_id=' + userID, 'need_user=0'], function(response) {
-        Songs = JSON.parse(response).response;
+        Songs = JSON.parse(response).response || undefined;
 
         MFProgress.style.width = 0;
         var oldList = PlayerWrapperBG.getElementsByTagName('ul')[0] || undefined;
@@ -69,51 +69,53 @@ BG.getAllAudio = function(callback) {
             liCache = document.createElement('li'),
             spanCache = document.createElement('span');
 
-        list.setAttribute('id','audio-list');
+        list.setAttribute('id', 'audio-list');
 
-        for(var i = 1, size = Songs.length; i < size; i++) {
-            var
-                li = liCache.cloneNode(false),
-                name = spanCache.cloneNode(false),
-                splitter = spanCache.cloneNode(false),
-                artist = spanCache.cloneNode(false),
-                duration = spanCache.cloneNode(false),
-                index = i.toString();
+        if(Songs) {
+            for(var i = 1, size = Songs.length; i < size; i++) {
+                var
+                    li = liCache.cloneNode(false),
+                    name = spanCache.cloneNode(false),
+                    splitter = spanCache.cloneNode(false),
+                    artist = spanCache.cloneNode(false),
+                    duration = spanCache.cloneNode(false),
+                    index = i.toString();
 
-            /**
-             * Audio object
-             *
-             * @type {{aid: number, artist: string, duration: number, genre: number, lyrics_id: number, owner_id: number, title: string, url: string}}
-             */
-            var audio = Songs[i];
+                /**
+                 * Audio object
+                 *
+                 * @type {{aid: number, artist: string, duration: number, genre: number, lyrics_id: number, owner_id: number, title: string, url: string}}
+                 */
+                var audio = Songs[i];
 
-            //set content
-            name.textContent = audio.title;
-            artist.textContent = audio.artist;
-            duration.textContent = VKit.util.secToMin(audio.duration);
+                //set content
+                name.textContent = audio.title;
+                artist.textContent = audio.artist;
+                duration.textContent = VKit.util.secToMin(audio.duration);
 
-            //set class
-            name.className = 'title';
-            splitter.className = 'splitter';
-            artist.className = 'artist';
-            duration.className = 'duration';
+                //set class
+                name.className = 'title';
+                splitter.className = 'splitter';
+                artist.className = 'artist';
+                duration.className = 'duration';
 
-            li.appendChild(artist);
-            li.appendChild(splitter);
-            li.appendChild(name);
-            li.appendChild(duration);
-            li.setAttribute('data-index', index);
+                li.appendChild(artist);
+                li.appendChild(splitter);
+                li.appendChild(name);
+                li.appendChild(duration);
+                li.setAttribute('data-index', index);
 
-            chrome.browserAction.setBadgeText({text: index});
-            list.appendChild(li);
+                chrome.browserAction.setBadgeText({text: index});
+                list.appendChild(li);
+            }
+
+            PlayerWrapperBG.appendChild(list);
+            chrome.browserAction.enable();
+            BG.setFirstSong();
+
+            if(callback)
+                callback();
         }
-
-        PlayerWrapperBG.appendChild(list);
-        chrome.browserAction.enable();
-        BG.setFirstSong();
-
-        if(callback)
-            callback();
     });
 };
 
@@ -144,6 +146,7 @@ BG.event.connect = function() {
 
     Port.onDisconnect.addListener(function(e) {
         ConnectStatus = false;
+        console.log('disconnected');
     });
 };
 
@@ -170,7 +173,6 @@ BG.event.send = function(data) {
     if(ConnectStatus)
         Port.postMessage(data);
 };
-
 
 BG.event.checkPlayed = function(data) {
     if(MFPlayer.src == '') {
@@ -421,6 +423,15 @@ BG.event.openAuth = function(data) {
     });
 };
 
+BG.event.setActiveUser = function(data) {
+    VKit.setActiveAccount(data);
+    BG.event.updateList();
+    BG.event.send({
+        event: 'updateSettingsView',
+        data: ''
+    });
+};
+
 /**
  * Set first song on load
  */
@@ -475,9 +486,9 @@ BG.setSongInfo = function(artist, title, totalTime) {
  * @param {{type: string, title: string, message: string, iconUrl: string}} options
  */
 BG.setNotification = function(options) {
-    chrome.notifications.create('',options, function(id) {
+    chrome.notifications.create('', options, function(id) {
         setTimeout(function() {
-            chrome.notifications.clear(id,function(cleared) {
+            chrome.notifications.clear(id, function(cleared) {
 
             });
         }, 2500);
