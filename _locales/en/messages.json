@@ -27,5 +27,61 @@
     "settings": {
         "message": "Settings",
         "description": "App settings"
+    },
+
+    "accounts": {
+        "message": "Accounts"
+    },
+
+    "active": {
+        "message": "Active"
+    },
+
+    "notActive": {
+        "message": "Not active"
+    },
+
+    "add": {
+        "message": "Add"
+    },
+
+    "addUser": {
+        "message": "Add user"
+    },
+
+    "searchUserExample": {
+        "message": "Enter user ID for example: 12376771 or his address for example: smokeelow"
+    },
+
+    "userNotFound": {
+        "message": "User not found"
+    },
+
+    "alreadyInYourList": {
+        "message": "This user is already added into your list"
+    },
+
+    "delete": {
+        "message": "Delete"
+    },
+
+    "itsYou": {
+        "message": "It's you"
+    },
+
+    "developedBy": {
+        "message": "Developed by"
+    },
+
+    "author": {
+        "message": "Sergey Bevzuk"
+    },
+
+    "activate": {
+        "message": "Activate"
+    },
+
+    "noSongs": {
+        "message": "List of audio is empty"
     }
 }
