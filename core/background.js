@@ -583,8 +583,11 @@ BG.setActiveByIndex = function(index) {
  * @param {number} index
  */
 BG.removeActiveIndex = function(index) {
-    var i = index - 1;
-    document.getElementById('player-wrapper').getElementsByTagName('li')[i].className = '';
+    var i = index - 1,
+        element = document.getElementById('player-wrapper').getElementsByTagName('li')[i] || undefined;
+
+    if(element)
+        element.className = '';
 };
 
 /**
