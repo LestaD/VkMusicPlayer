@@ -9,7 +9,8 @@ var
     OverlayTxt,
     Settings,
     CurrentUser,
-    AllUsers;
+    AllUsers,
+    RightClick = true;
 
 /**
  * Main object
@@ -89,7 +90,7 @@ Core.event = {};
  * Create connection
  */
 Core.event.connect = function() {
-    Port = chrome.runtime.connect();
+    Port = chrome.runtime.connect({name: 'core'});
 };
 
 /**
@@ -421,6 +422,11 @@ Core.openSettings = function() {
     chrome.tabs.create({url: chrome.runtime.getURL('/templates/settings.html')});
 };
 
+/**
+ * Show all users
+ *
+ * @param {event} e
+ */
 Core.openAllUsers = function(e) {
     CurrentUser.getElementsByClassName('user')[0].classList.toggle('active');
 
@@ -434,8 +440,12 @@ Core.openAllUsers = function(e) {
     }
 };
 
+/**
+ * Choose user playlist
+ */
 Core.allUsersEvents = function() {
-    var users = AllUsers.getElementsByClassName('user');
+    var users = AllUsers.getElementsByClassName('user'),
+        currUser = CurrentUser.getElementsByClassName('user')[0];
 
     for(var i = 0, size = users.length; i < size; i++) {
         users[i].addEventListener('click', function(e) {
@@ -443,9 +453,11 @@ Core.allUsersEvents = function() {
             Core.showOverlay();
             Core.hideOpacity('wrapper');
 
-            CurrentUser.getElementsByClassName('user')[0].classList.toggle('active');
+            currUser.classList.toggle('active');
             AllUsers.removeAttribute('style');
             AllUsers.className = '';
+            CurrentUser.removeChild(currUser);
+            CurrentUser.appendChild(this);
 
             Core.event.send({
                 event: 'setActiveUser',
@@ -477,11 +489,25 @@ Core.setElements = function() {
     AllUsers = document.getElementById('all-users');
 };
 
+
+/**
+ * Control right click
+ */
+Core.rightClick = function() {
+    document.addEventListener('contextmenu', function(e) {
+        if(!RightClick) {
+            e.preventDefault();
+            return false;
+        }
+    });
+};
+
 /**
  * Init functions
  */
 Core.init = function() {
     Core.auth();
+    Core.rightClick();
 };
 
 window.addEventListener('DOMContentLoaded', Core.init);

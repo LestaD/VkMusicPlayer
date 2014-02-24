@@ -12,7 +12,8 @@ var
     FirstLoad = true,
     ConnectStatus = false,
     CurrentSong = {},
-    LastVolume = 0;
+    LastVolume = 0,
+    EmptyList;
 
 /**
  * Background main object
@@ -41,6 +42,7 @@ BG.elements = function() {
     AuthBlock = document.getElementById('auth-block');
     PlayerWrapperBG = document.getElementById('player-wrapper');
     MFPlayer = document.getElementById('mf-player');
+    EmptyList = document.getElementById('empty-list');
 };
 
 /**
@@ -50,6 +52,7 @@ BG.elements = function() {
  * @param {boolean} type
  */
 BG.getAllAudio = function(callback, type) {
+    chrome.browserAction.disable();
     BG.getUsersList();
     chrome.browserAction.setBadgeText({text: '0'});
 
@@ -109,6 +112,8 @@ BG.getAllAudio = function(callback, type) {
                 list.appendChild(li);
             }
 
+            EmptyList.style.display = 'none';
+            PlayerWrapperBG.style.display = 'block';
             PlayerWrapperBG.appendChild(list);
             chrome.browserAction.enable();
             BG.setFirstSong();
@@ -116,6 +121,10 @@ BG.getAllAudio = function(callback, type) {
             if(callback)
                 callback();
         } else {
+            PlayerWrapperBG.style.display= 'none';
+            EmptyList.style.display = 'block';
+            chrome.browserAction.enable();
+
             if(callback)
                 callback();
         }
@@ -192,11 +201,10 @@ BG.event = {};
  * Create connection
  */
 BG.event.connect = function() {
-    Port = chrome.runtime.connect();
+    Port = chrome.runtime.connect({name: 'bg'});
 
     Port.onDisconnect.addListener(function(e) {
         ConnectStatus = false;
-        console.log('disconnected');
     });
 };
 
@@ -206,11 +214,7 @@ BG.event.connect = function() {
 BG.event.listenData = function() {
     chrome.runtime.onConnect.addListener(function(popup) {
         BG.event.connect();
-
-        if(popup.name == 'settings')
-            ConnectStatus = false;
-        else
-            ConnectStatus = true;
+        ConnectStatus = true;
 
         popup.onMessage.addListener(function(msg) {
             console.log(msg);

@@ -21,19 +21,22 @@ Settings.event = {};
  */
 Settings.event.connect = function() {
     setTimeout(function() {
-        Port = chrome.runtime.connect();
-    }, 250);
+        Port = chrome.runtime.connect({name: 'settings'});
+    }, 300);
 };
 
 /**
  * Listen for data
  */
 Settings.event.listenData = function() {
-    chrome.runtime.onConnect.addListener(function(bgPort) {
-        bgPort.onMessage.addListener(function(msg) {
-            if(Settings.event.hasOwnProperty(msg.event))
-                Settings.event[msg.event](msg.data);
-        });
+    chrome.runtime.onConnect.addListener(function(port) {
+        if(port.name == 'bg') {
+            port.onMessage.addListener(function(msg) {
+                console.log(msg);
+                if(Settings.event.hasOwnProperty(msg.event))
+                    Settings.event[msg.event](msg.data);
+            });
+        }
     });
 };
 
