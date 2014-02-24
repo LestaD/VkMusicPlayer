@@ -106,6 +106,11 @@ Settings.loadAccounts = function() {
                 VKit.removeUserInfo(this.getAttribute('data-id'));
                 Settings.clearElement(AccountsBlock);
                 Settings.loadAccounts();
+
+                Settings.event.send({
+                    event:'updateUsersList',
+                    data: ''
+                });
             });
 
             userWrapper.appendChild(del);
@@ -216,6 +221,11 @@ Settings.addUser = function() {
                             Settings.clearElement(AccountsBlock);
                             Settings.loadAccounts();
                             Settings.hideOverlay();
+
+                            Settings.event.send({
+                                event:'updateUsersList',
+                                data: ''
+                            });
                         });
 
                         ModalContent.appendChild(menuWrapper);
@@ -223,8 +233,6 @@ Settings.addUser = function() {
 
                     result.appendChild(userWrapper);
                 }
-
-
             });
         } else {
             Settings.clearElement(result);
@@ -240,9 +248,10 @@ Settings.removeButtonsFromModal = function() {
     var buttons = ModalContent.getElementsByClassName('bottom-buttons') || undefined;
 
     if(buttons) {
-        for(var i = 0 , size = buttons.length; i < size; i++)
+        for(var i = 0 , size = buttons.length; i < size; i++) {
             if(buttons[i])
                 ModalContent.removeChild(buttons[i]);
+        }
     }
 }
 
@@ -272,7 +281,6 @@ Settings.setEvents = function() {
 };
 
 Settings.init = function() {
-
     Settings.event.listenData();
     Settings.event.connect();
     setTranslation();

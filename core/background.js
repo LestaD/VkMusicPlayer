@@ -1,6 +1,3 @@
-if(localStorage['authInfo'] != undefined)
-    chrome.browserAction.disable();
-
 chrome.browserAction.setBadgeBackgroundColor({color: '#4E729A'});
 
 var
@@ -48,9 +45,12 @@ BG.elements = function() {
 
 /**
  * Load all user audio
+ *
+ * @param {function} callback
+ * @param {boolean} type
  */
-BG.getAllAudio = function(callback) {
-    chrome.browserAction.disable();
+BG.getAllAudio = function(callback, type) {
+    BG.getUsersList();
     chrome.browserAction.setBadgeText({text: '0'});
 
     var userID = VKit.getActiveAccount();
@@ -71,7 +71,7 @@ BG.getAllAudio = function(callback) {
 
         list.setAttribute('id', 'audio-list');
 
-        if(Songs) {
+        if(Songs && !type) {
             for(var i = 1, size = Songs.length; i < size; i++) {
                 var
                     li = liCache.cloneNode(false),
@@ -115,8 +115,58 @@ BG.getAllAudio = function(callback) {
 
             if(callback)
                 callback();
+        } else {
+            if(callback)
+                callback();
         }
     });
+};
+
+BG.getUsersList = function() {
+    var usersInfo = VKit.getUserInfo(),
+        img = document.createElement('img'),
+        div = document.createElement('div'),
+        activeUser = document.getElementById('current-user'),
+        allUsers = document.getElementById('all-users');
+
+    BG.clearElement(activeUser);
+    BG.clearElement(allUsers);
+
+    for(var i in usersInfo) {
+        var user = usersInfo[i],
+            name = div.cloneNode(false),
+            userWrapper = div.cloneNode(false),
+            photo = img.cloneNode(false);
+
+        photo.src = user.photo;
+        name.textContent = user.firstName + ' ' + user.lastName;
+
+        photo.className = 'user-photo';
+        name.className = 'user-name';
+
+        userWrapper.className = 'user';
+        userWrapper.setAttribute('data-id', user.id);
+
+        userWrapper.appendChild(photo);
+        userWrapper.appendChild(name);
+
+        if(VKit.getActiveAccount() == user.id) {
+            var uw = userWrapper.cloneNode(true);
+            activeUser.appendChild(userWrapper);
+
+            uw.className += ' active';
+            allUsers.appendChild(uw);
+        } else {
+            allUsers.appendChild(userWrapper);
+        }
+    }
+};
+
+BG.clearElement = function(element) {
+    var i = element.childElementCount;
+
+    while(--i >= 0)
+        element.removeChild(element.firstChild);
 };
 
 BG.setActiveSong = function(index) {
@@ -156,7 +206,11 @@ BG.event.connect = function() {
 BG.event.listenData = function() {
     chrome.runtime.onConnect.addListener(function(popup) {
         BG.event.connect();
-        ConnectStatus = true;
+
+        if(popup.name == 'settings')
+            ConnectStatus = false;
+        else
+            ConnectStatus = true;
 
         popup.onMessage.addListener(function(msg) {
             console.log(msg);
@@ -414,7 +468,7 @@ BG.event.updateList = function(data) {
             event: 'reloadContent',
             data: ''
         });
-    });
+    }, false);
 };
 
 BG.event.openAuth = function(data) {
@@ -430,6 +484,10 @@ BG.event.setActiveUser = function(data) {
         event: 'updateSettingsView',
         data: ''
     });
+};
+
+BG.event.updateUsersList = function(data) {
+    BG.getUsersList();
 };
 
 /**

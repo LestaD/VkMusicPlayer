@@ -179,6 +179,7 @@ MFCore.playNext = function() {
 
     BG.event.playByIndex(next);
 
+    console.log(ConnectStatus);
     if(!ConnectStatus) {
         BG.setNotification({
             type: 'basic',

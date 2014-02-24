@@ -424,8 +424,8 @@ $cWidth: 420px;
 
 .rb-1 {
   background: none;
-  border:none;
-  color:#2B587A;
+  border: none;
+  color: #2B587A;
   cursor: pointer;
   font: normal 11px tahoma, arial, verdana, sans-serif, Lucida Sans;
 
@@ -474,5 +474,57 @@ $cWidth: 420px;
 
   button {
     width: 100%;
+  }
+}
+
+#change-user {
+  @extend .relative;
+  text-align: left;
+
+  img {
+    border-radius: 10px;
+    height: 20px;
+    width: 20px;
+    margin: 6px 5px 0 0
+  }
+
+  .user {
+    display: flex;
+    padding: 0 5px;
+    width: 100%;
+    height: 35px;
+
+    &.active, &.active:hover {
+      background: #DAE2E8;
+    }
+
+    &:hover {
+      background: rgba(219, 227, 235, 0.5);
+    }
+  }
+
+  .user-name {
+    @extend .text-overflow;
+    max-width: 99px;
+    margin:10px 0 0;
+  }
+
+  #all-users {
+    @include animation-one(350ms);
+    @extend .absolute;
+    background: #F2F2F2;
+    border: 1px solid #DAE1E8;
+    box-shadow: 0 0 0px #000;
+    max-height: 212px;
+    overflow-y: auto;
+    top:0;
+    width: 100%;
+    z-index: 1;
+  }
+
+  #current-user {
+    background: #F2F2F2;
+    @extend .relative;
+    z-index: 100;
   }
 }

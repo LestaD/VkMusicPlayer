@@ -7,7 +7,9 @@ var
     UpdateList,
     Overlay,
     OverlayTxt,
-    Settings;
+    Settings,
+    CurrentUser,
+    AllUsers;
 
 /**
  * Main object
@@ -98,7 +100,9 @@ Core.event.listenData = function() {
         Core.event.onOpen();
         bgPort.onMessage.addListener(function(msg) {
             console.log(msg);
-            Core.event[msg.event](msg.data);
+
+            if(Core.event.hasOwnProperty(msg.event))
+                Core.event[msg.event](msg.data);
         });
     });
 };
@@ -371,6 +375,13 @@ Core.loadBackgroundContent = function(port, elementID, callback) {
             document.body.appendChild(node);
         }
 
+        //users
+        var users = document.importNode(win.document.getElementById('change-user'), true),
+            NavBlock = document.getElementById('app-nav-block');
+
+        NavBlock.removeChild(document.getElementById('change-user'));
+        NavBlock.insertBefore(users, document.getElementById('update-list'));
+
         if(localStorage['authInfo'] != undefined) {
             Core.audioEvent();
 
@@ -410,12 +421,48 @@ Core.openSettings = function() {
     chrome.tabs.create({url: chrome.runtime.getURL('/templates/settings.html')});
 };
 
+Core.openAllUsers = function(e) {
+    CurrentUser.getElementsByClassName('user')[0].classList.toggle('active');
+
+    if(AllUsers.classList.contains('opened')) {
+        AllUsers.removeAttribute('style');
+        AllUsers.className = '';
+    } else {
+        var arr = ['-', AllUsers.clientHeight - 1, 'px'];
+        AllUsers.style.top = arr.join('');
+        AllUsers.className = 'opened';
+    }
+};
+
+Core.allUsersEvents = function() {
+    var users = AllUsers.getElementsByClassName('user');
+
+    for(var i = 0, size = users.length; i < size; i++) {
+        users[i].addEventListener('click', function(e) {
+            Core.setSizeToMain();
+            Core.showOverlay();
+            Core.hideOpacity('wrapper');
+
+            CurrentUser.getElementsByClassName('user')[0].classList.toggle('active');
+            AllUsers.removeAttribute('style');
+            AllUsers.className = '';
+
+            Core.event.send({
+                event: 'setActiveUser',
+                data: this.getAttribute('data-id')
+            });
+        });
+    }
+};
+
 /**
  * Init events
  */
 Core.setEvents = function() {
     UpdateList.addEventListener('click', Core.event.updateList);
     Settings.addEventListener('click', Core.openSettings);
+    CurrentUser.addEventListener('click', Core.openAllUsers);
+    Core.allUsersEvents();
 };
 
 /**
@@ -426,6 +473,8 @@ Core.setElements = function() {
     Overlay = document.getElementById('bg-overlay');
     OverlayTxt = document.getElementById('overlay-txt');
     Settings = document.getElementById('settings');
+    CurrentUser = document.getElementById('current-user');
+    AllUsers = document.getElementById('all-users');
 };
 
 /**
