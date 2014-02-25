@@ -420,6 +420,7 @@ Core.loadBackgroundContent = function(port, elementID, callback) {
 
 Core.openSettings = function() {
     chrome.tabs.create({url: chrome.runtime.getURL('/templates/settings.html')});
+    window.close();
 };
 
 /**
