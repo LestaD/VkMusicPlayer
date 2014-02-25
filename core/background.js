@@ -27,7 +27,6 @@ BG.checkForAuth = function() {
         AuthBlock.style.display = 'none';
         PlayerWrapperBG.style.display = 'block';
         MFCore.init();
-        BG.event.listenData();
         BG.getAllAudio();
     } else {
         PlayerWrapperBG.style.display = 'none';
