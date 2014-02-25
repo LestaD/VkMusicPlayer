@@ -10,7 +10,8 @@ var
     Settings,
     CurrentUser,
     AllUsers,
-    RightClick = true;
+    RightClick = true,
+    RepeatSong;
 
 /**
  * Main object
@@ -282,6 +283,21 @@ Core.event.reloadContent = function(data) {
     });
 };
 
+Core.event.setRepeatSong = function() {
+    Core.event.send({
+        event: 'setRepeatSong',
+        data: ''
+    });
+};
+
+Core.event.setActiveRepeat = function() {
+    RepeatSong.className = 'active';
+};
+
+Core.event.setNonActiveRepeat = function() {
+    RepeatSong.className = '';
+};
+
 /**
  * Open window for authorization in VK.com
  */
@@ -475,6 +491,7 @@ Core.setEvents = function() {
     UpdateList.addEventListener('click', Core.event.updateList);
     Settings.addEventListener('click', Core.openSettings);
     CurrentUser.addEventListener('click', Core.openAllUsers);
+    RepeatSong.addEventListener('click', Core.event.setRepeatSong);
     Core.allUsersEvents();
 };
 
@@ -488,6 +505,7 @@ Core.setElements = function() {
     Settings = document.getElementById('settings');
     CurrentUser = document.getElementById('current-user');
     AllUsers = document.getElementById('all-users');
+    RepeatSong = document.getElementById('repeat-song');
 };
 
 

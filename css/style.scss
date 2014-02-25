@@ -539,3 +539,21 @@ $cWidth: 420px;
   height: 200px;
   width: 420px;
 }
+
+#repeat-song{
+  @include animation-two(200ms);
+  @extend .absolute;
+  top: 13px;
+  right: 53px;
+  background: url(/images/audio_icons_2x.png) -32px -49px no-repeat;
+  background-size: 257px 63px;
+  cursor: pointer;
+  text-indent: -9999px;
+  opacity: 0.6;
+  height: 14px;
+  width:14px;
+
+  &.active{
+    opacity: 1 !important;
+  }
+}

@@ -1,4 +1,4 @@
-.absolute, #mf-player-wireframe .circle-button, #mf-player-wireframe #mf-buffer, #mf-player-wireframe .song-time, #mf-player-wireframe #mf-volume-wrapper, #mf-player-wireframe #mf-volume-wrapper .volume-bg, .app-nav, #change-user #all-users {
+.absolute, #mf-player-wireframe .circle-button, #mf-player-wireframe #mf-buffer, #mf-player-wireframe .song-time, #mf-player-wireframe #mf-volume-wrapper, #mf-player-wireframe #mf-volume-wrapper .volume-bg, .app-nav, #change-user #all-users, #repeat-song {
   position: absolute; }
 
 .relative, #player-wrapper, #player-wrapper .c-wrapper, #player-wrapper ul li .splitter, #mf-player-wireframe .buttons, #mf-player-wireframe #mf-song-progress, #mf-player-wireframe #mf-progress, #mf-player-wireframe .splitter, #mf-player-wireframe #song-info, #mf-player-wireframe #mf-volume-wrapper #mf-volume-line, #change-user, #change-user #current-user {
@@ -421,3 +421,24 @@ body {
   line-height: 150px;
   height: 200px;
   width: 420px; }
+
+#repeat-song {
+  -webkit-transition: all 200ms cubic-bezier(0, 0, 0.58, 1);
+  -moz-transition: all 200ms cubic-bezier(0, 0, 0.58, 1);
+  -o-transition: all 200ms cubic-bezier(0, 0, 0.58, 1);
+  transition: all 200ms cubic-bezier(0, 0, 0.58, 1);
+  -webkit-transition-timing-function: cubic-bezier(0, 0, 0.58, 1);
+  -moz-transition-timing-function: cubic-bezier(0, 0, 0.58, 1);
+  -o-transition-timing-function: cubic-bezier(0, 0, 0.58, 1);
+  transition-timing-function: cubic-bezier(0, 0, 0.58, 1);
+  top: 13px;
+  right: 53px;
+  background: url(/images/audio_icons_2x.png) -32px -49px no-repeat;
+  background-size: 257px 63px;
+  cursor: pointer;
+  text-indent: -9999px;
+  opacity: 0.6;
+  height: 14px;
+  width: 14px; }
+  #repeat-song.active {
+    opacity: 1 !important; }

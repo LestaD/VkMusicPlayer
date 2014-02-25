@@ -172,14 +172,17 @@ MFCore.events = function() {
  * Play next song in list
  */
 MFCore.playNext = function() {
-    var next = parseInt(LastActiveIndex) + 1;
+    if(RepeatSong) {
+        BG.event.playByIndex(LastActiveIndex);
+    } else {
+        var next = parseInt(LastActiveIndex) + 1;
 
-    if((next + 1) >= Songs.length)
-        next = 1;
+        if((next + 1) >= Songs.length)
+            next = 1;
 
-    BG.event.playByIndex(next);
+        BG.event.playByIndex(next);
+    }
 
-    console.log(ConnectStatus);
     if(!ConnectStatus) {
         BG.setNotification({
             type: 'basic',

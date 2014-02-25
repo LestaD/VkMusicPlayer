@@ -11,9 +11,12 @@ var
     FirstSong = {},
     FirstLoad = true,
     ConnectStatus = false,
+    DataListen = false,
+    RepeatSong = false,
     CurrentSong = {},
     LastVolume = 0,
-    EmptyList;
+    EmptyList,
+    RepeatSongEl;
 
 /**
  * Background main object
@@ -27,6 +30,7 @@ BG.checkForAuth = function() {
         AuthBlock.style.display = 'none';
         PlayerWrapperBG.style.display = 'block';
         MFCore.init();
+        BG.event.listenData();
         BG.getAllAudio();
     } else {
         PlayerWrapperBG.style.display = 'none';
@@ -42,6 +46,7 @@ BG.elements = function() {
     PlayerWrapperBG = document.getElementById('player-wrapper');
     MFPlayer = document.getElementById('mf-player');
     EmptyList = document.getElementById('empty-list');
+    RepeatSongEl = document.getElementById('repeat-song');
 };
 
 /**
@@ -211,15 +216,18 @@ BG.event.connect = function() {
  * Listen for data
  */
 BG.event.listenData = function() {
-    chrome.runtime.onConnect.addListener(function(popup) {
-        BG.event.connect();
-        ConnectStatus = true;
+    if(!DataListen) {
+        chrome.runtime.onConnect.addListener(function(popup) {
+            DataListen = true;
+            BG.event.connect();
+            ConnectStatus = true;
 
-        popup.onMessage.addListener(function(msg) {
-            console.log(msg);
-            BG.event[msg.event](msg.data);
+            popup.onMessage.addListener(function(msg) {
+                console.log(msg);
+                BG.event[msg.event](msg.data);
+            });
         });
-    });
+    }
 };
 
 /**
@@ -404,6 +412,27 @@ BG.event.getSongDuration = function() {
         event: 'setSongDuration',
         data: CurrentSong.realDuration
     })
+};
+
+BG.event.setRepeatSong = function(data) {
+    console.log(RepeatSong);
+    if(RepeatSong) {
+        RepeatSong = false;
+        RepeatSongEl.className = '';
+
+        BG.event.send({
+            event: 'setNonActiveRepeat',
+            data: ''
+        });
+    } else {
+        RepeatSong = true;
+        RepeatSongEl.className = 'active';
+
+        BG.event.send({
+            event: 'setActiveRepeat',
+            data: ''
+        });
+    }
 };
 
 /**
