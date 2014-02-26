@@ -1,4 +1,4 @@
-VkMusicPlayer
+VK Music Player
 =============
 
 It's  chrome extension that allows listen your music or other users [VKontakte](http://vk.com/).
