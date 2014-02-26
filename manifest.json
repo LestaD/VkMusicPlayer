@@ -19,8 +19,15 @@
         "default_title": "__MSG_appName__",
         "default_popup": "/templates/window.html"
     },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["/core/content.js"]
+        }
+    ],
     "permissions": [
         "tabs",
+        "activeTab",
         "notifications",
         "https://*.vk.com/*",
         "http://*.vk.me/*",

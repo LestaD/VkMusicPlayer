@@ -203,6 +203,15 @@ MFCore.playPrev = function() {
         prev = Songs.length - 1;
 
     BG.event.playByIndex(prev);
+
+    if(!ConnectStatus) {
+        BG.setNotification({
+            type: 'basic',
+            title: CurrentSong.title,
+            message: CurrentSong.artist + ' - ' + CurrentSong.title + ' ' + CurrentSong.duration,
+            iconUrl: '/app-icon.png'
+        });
+    }
 };
 
 /**

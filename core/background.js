@@ -217,12 +217,17 @@ BG.event.connect = function() {
  */
 BG.event.listenData = function() {
     if(!DataListen) {
-        chrome.runtime.onConnect.addListener(function(popup) {
+        chrome.runtime.onConnect.addListener(function(port) {
             DataListen = true;
             BG.event.connect();
-            ConnectStatus = true;
 
-            popup.onMessage.addListener(function(msg) {
+            if(port.name == 'content' || port.name == 'settings')
+                ConnectStatus = false;
+            else
+                ConnectStatus = true;
+
+            console.log(port);
+            port.onMessage.addListener(function(msg) {
                 console.log(msg);
                 BG.event[msg.event](msg.data);
             });
@@ -309,13 +314,17 @@ BG.event.unmute = function() {
 };
 
 BG.event.setToPause = function(data) {
-    MFPlayer.pause();
-    MFPlay.classList.remove('pause');
+    if(MFPlayer.paused) {
+        BG.event.setToPlay();
+    } else {
+        MFPlayer.pause();
+        MFPlay.classList.remove('pause');
 
-    BG.event.send({
-        event: 'changePauseToPlay',
-        data: ''
-    });
+        BG.event.send({
+            event: 'changePauseToPlay',
+            data: ''
+        });
+    }
 };
 
 BG.event.setToPlay = function(data) {
