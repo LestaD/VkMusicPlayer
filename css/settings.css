@@ -1,7 +1,7 @@
 .absolute, .info div, .info .delete-user, .info .activate, .info .top-button, .info .its-you, .bottom-buttons {
   position: absolute; }
 
-.relative, #wrapper, #wrapper #accounts-block, .info {
+.relative, #wrapper, #wrapper #accounts-block, .info, #hot-keys .keys-pair .splitter {
   position: relative; }
 
 .fixed, #bg-overlay, #modal-window {
@@ -220,3 +220,24 @@ a {
   margin: 10px 0 20px; }
   #developer a {
     margin: 0 0 0 5px; }
+
+#hot-keys .keys-pair {
+  padding: 10px;
+  border-left: 9px solid #C9D8DF;
+  background-color: #F5F7F8;
+  margin: 10px;
+  height: 34px; }
+  #hot-keys .keys-pair .splitter {
+    background: #000;
+    margin: 0 10px;
+    top: 7px;
+    height: 1px;
+    width: 5px; }
+  #hot-keys .keys-pair .keys {
+    font-weight: bold; }
+  #hot-keys .keys-pair span {
+    display: block;
+    float: left; }
+
+.simple-text {
+  margin: 10px; }

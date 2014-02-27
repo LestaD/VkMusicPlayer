@@ -267,23 +267,8 @@ BG.event.checkPlayed = function(data) {
  * @param {object} data
  */
 BG.event.sendPlay = function(data) {
-    if(data == null) {
-        MFCore.set(FirstSong.url, FirstSong.duration);
-        MFPlayer.src = FirstSong.url;
-        MFPlayer.play();
-        MFPlay.className += ' pause';
-        LastActive.className = 'active';
-
-        BG.event.send({
-            event: 'changePlayToPause',
-            data: ''
-        });
-
-        BG.event.send({
-            event: 'sendSetFirstActive',
-            data: FirstSong
-        });
-    }
+    if(data == null)
+        BG.event.playByIndex(LastActiveIndex);
 };
 
 BG.event.checkFirstLoad = function(data) {
@@ -328,6 +313,9 @@ BG.event.setToPause = function(data) {
 };
 
 BG.event.setToPlay = function(data) {
+    if(FirstLoad)
+        BG.event.playByIndex(LastActiveIndex);
+
     MFPlayer.play();
     if(!MFPlay.classList.contains('pause'))
         MFPlay.className += ' pause';
@@ -348,7 +336,11 @@ BG.event.setToPlay = function(data) {
 };
 
 BG.event.playNext = function(data) {
-    MFCore.playNext();
+    console.log(data);
+    if(data)
+        MFCore.playNext(data);
+    else
+        MFCore.playNext();
 };
 
 BG.event.playPrev = function(data) {
@@ -424,7 +416,6 @@ BG.event.getSongDuration = function() {
 };
 
 BG.event.setRepeatSong = function(data) {
-    console.log(RepeatSong);
     if(RepeatSong) {
         RepeatSong = false;
         RepeatSongEl.className = '';
@@ -529,6 +520,11 @@ BG.event.setActiveUser = function(data) {
 
 BG.event.updateUsersList = function(data) {
     BG.getUsersList();
+};
+
+BG.event.openPlayer = function(data) {
+    var url = chrome.runtime.getURL('/templates/window.html');
+    window.open(url, 'new', 'width=420,height=555,toolbar=0');
 };
 
 /**

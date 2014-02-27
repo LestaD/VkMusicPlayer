@@ -116,7 +116,7 @@ MFCore.events = function() {
 MFCore.playNext = function() {
     Core.event.send({
         event: 'playNext',
-        data: ''
+        data: true
     })
 };
 

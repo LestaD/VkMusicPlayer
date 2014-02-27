@@ -171,8 +171,13 @@ MFCore.events = function() {
 /**
  * Play next song in list
  */
-MFCore.playNext = function() {
-    if(RepeatSong) {
+MFCore.playNext = function(force) {
+    var fp = false;
+
+    if(typeof force == 'boolean')
+        fp = true;
+
+    if(RepeatSong && !fp) {
         BG.event.playByIndex(LastActiveIndex);
     } else {
         var next = parseInt(LastActiveIndex) + 1;

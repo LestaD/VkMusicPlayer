@@ -282,3 +282,35 @@ a {
     margin: 0 0 0 5px;
   }
 }
+
+#hot-keys {
+  .keys-pair {
+    padding: 10px;
+    border-left: 9px solid #C9D8DF;;
+    background-color: #F5F7F8;
+    margin: 10px;
+    height: 34px;
+
+    .splitter {
+      @extend .relative;
+      background: #000;
+      margin: 0 10px;
+      top:7px;
+      height: 1px;
+      width:5px;
+    }
+
+    .keys {
+      font-weight: bold;
+    }
+
+    span {
+      display: block;
+      float:left;
+    }
+  }
+}
+
+.simple-text {
+  margin: 10px;
+}

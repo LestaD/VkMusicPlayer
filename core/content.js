@@ -1,6 +1,12 @@
 var
     Port,
+    mainKey,
     KeysPressed = [];
+
+if(navigator.userAgent.indexOf('Macintosh') > -1)
+    mainKey = 91;
+else
+    mainKey= 17;
 
 var ContentJS = {};
 
@@ -8,14 +14,6 @@ ContentJS.event = {};
 
 ContentJS.event.connect = function() {
     Port = chrome.runtime.connect({name: 'content'});
-};
-
-ContentJS.event.listenData = function() {
-    chrome.runtime.onConnect.addListener(function(port) {
-        port.onMessage.addListener(function(msg) {
-            console.log(msg);
-        });
-    });
 };
 
 ContentJS.event.send = function(data) {
@@ -26,27 +24,45 @@ ContentJS.trackKeys = function() {
     document.addEventListener('keydown', function(e) {
         KeysPressed[e.keyCode] = true;
 
-        if(KeysPressed[16] && KeysPressed[68]) {
+        if(KeysPressed[mainKey] && KeysPressed[120]) {
             ContentJS.event.send({
                 event: 'playNext',
-                data: ''
+                data: true
             });
-        } else if(KeysPressed[16] && KeysPressed[65]) {
+            delete KeysPressed[120];
+        } else if(KeysPressed[mainKey] && KeysPressed[118]) {
             ContentJS.event.send({
                 event: 'playPrev',
                 data: ''
             });
-        } else if(KeysPressed[16] && KeysPressed[83]) {
+            delete KeysPressed[118];
+        } else if(KeysPressed[mainKey] && KeysPressed[119]) {
             ContentJS.event.send({
                 event: 'setToPause',
                 data: ''
             });
-        } else if(KeysPressed[16] && KeysPressed[82]) {
+            delete KeysPressed[119];
+        } else if(KeysPressed[mainKey] && KeysPressed[121]) {
             ContentJS.event.send({
                 event: 'updateList',
                 data: ''
             });
+            delete KeysPressed[121];
+        } else if(KeysPressed[mainKey] && KeysPressed[117]) {
+            ContentJS.event.send({
+                event: 'setRepeatSong',
+                data: ''
+            });
+            delete KeysPressed[117];
         }
+//        } else if(KeysPressed[mainKey] && KeysPressed[87]) {
+//            ContentJS.event.send({
+//                event: 'openPlayer',
+//                data: ''
+//            });
+//            delete KeysPressed[mainKey];
+//            delete KeysPressed[87];
+//        }
     });
 
     document.addEventListener('keyup', function(e) {
@@ -55,10 +71,9 @@ ContentJS.trackKeys = function() {
 };
 
 ContentJS.init = function() {
-
     ContentJS.trackKeys();
-    ContentJS.event.listenData();
     ContentJS.event.connect();
+
 };
 
 ContentJS.init();

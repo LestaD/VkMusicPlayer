@@ -83,5 +83,33 @@
 
     "noSongs": {
         "message": "List of audio is empty"
+    },
+
+    "repeatSong": {
+        "message": "Repeat current song"
+    },
+
+    "hotKeys": {
+        "message": "Hot keys"
+    },
+
+    "nextSong": {
+        "message": "Next song"
+    },
+
+    "prevSong": {
+        "message": "Previous song"
+    },
+
+    "pauseOrPlaySong": {
+        "message": "Play / Pause"
+    },
+
+    "updateSongs": {
+        "message": "Update(reload) list of audio"
+    },
+
+    "keysWorkTxt": {
+        "message": "Hot keys work on all pages except the pages of this application (settings page and popup), as well as all service pages Google Chrome."
     }
 }
