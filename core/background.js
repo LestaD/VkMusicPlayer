@@ -240,7 +240,7 @@ BG.event.listenData = function() {
  * @param {object} data
  */
 BG.event.send = function(data) {
-    if(ConnectStatus)
+//    if(ConnectStatus)
         Port.postMessage(data);
 };
 

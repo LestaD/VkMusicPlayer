@@ -51,6 +51,8 @@ Settings.event.setActiveUser = function(e) {
         event: 'setActiveUser',
         data: id
     });
+
+    Settings.event.updateSettingsView();
 };
 
 
