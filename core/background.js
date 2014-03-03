@@ -240,7 +240,7 @@ BG.event.listenData = function() {
  * @param {object} data
  */
 BG.event.send = function(data) {
-//    if(ConnectStatus)
+    if(ConnectStatus)
         Port.postMessage(data);
 };
 
@@ -512,7 +512,8 @@ BG.event.openAuth = function(data) {
 BG.event.setActiveUser = function(data) {
     VKit.setActiveAccount(data);
     BG.event.updateList();
-    BG.event.send({
+
+    Port.postMessage({
         event: 'updateSettingsView',
         data: ''
     });
