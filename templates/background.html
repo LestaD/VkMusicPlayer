@@ -49,6 +49,7 @@
                                 <input id="mf-volume" type="range" min="0" max="100" value="100"/>
                             </div>
                             <div id="repeat-song" title="" i18n-locale="repeatSong" i18n-title="repeatSong"></div>
+                            <div id="shuffle-play" i18n-title="shuffle"></div>
                         </div>
                     </div>
                 </div>
@@ -57,12 +58,20 @@
         <div id="empty-list" i18n-locale="noSongs"></div>
     </div>
     <div id="app-nav-block" class="app-nav">
-        <button id="change-user" class="rb-1">
-            <div id="all-users"></div>
-            <div id="current-user"></div>
-        </button>
-        <button id="update-list" class="rb-1" i18n-locale="update"></button>
-        <button id="settings" class="rb-1" i18n-locale="settings"></button>
+        <div class="regular-buttons">
+            <button id="change-user" class="rb-1">
+                <div id="all-users"></div>
+                <div id="current-user"></div>
+            </button>
+            <button id="albums" class="rb-1">
+                <div id="album-list"></div>
+                <div id="album-title" i18n-locale="albums"></div>
+            </button>
+        </div>
+        <div class="icon-buttons">
+            <div id="update-list" i18n-title="update"></div>
+            <div id="settings" i18n-title="settings"></div>
+        </div>
     </div>
     <div id="bg-overlay">
         <div id="overlay-txt" class="overlay-txt" i18n-locale="updating"></div>

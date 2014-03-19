@@ -177,15 +177,21 @@ MFCore.playNext = function(force) {
     if(typeof force == 'boolean')
         fp = true;
 
-    if(RepeatSong && !fp) {
-        BG.event.playByIndex(LastActiveIndex);
+    if(ShuffleSongs) {
+        var random = Math.floor((Math.random()*Songs.length));
+
+        BG.event.playByIndex(random);
     } else {
-        var next = parseInt(LastActiveIndex) + 1;
+        if(RepeatSong && !fp) {
+            BG.event.playByIndex(LastActiveIndex);
+        } else {
+            var next = parseInt(LastActiveIndex) + 1;
 
-        if((next + 1) >= Songs.length)
-            next = 1;
+            if((next + 1) > Songs.length)
+                next = 1;
 
-        BG.event.playByIndex(next);
+            BG.event.playByIndex(next);
+        }
     }
 
     if(!ConnectStatus) {
@@ -204,10 +210,16 @@ MFCore.playNext = function(force) {
 MFCore.playPrev = function() {
     var prev = parseInt(LastActiveIndex) - 1;
 
-    if(prev <= 0)
-        prev = Songs.length - 1;
+    if(ShuffleSongs) {
+        var random = Math.floor((Math.random()*Songs.length));
 
-    BG.event.playByIndex(prev);
+        BG.event.playByIndex(random);
+    } else {
+        if(prev <= 0)
+            prev = Songs.length - 1;
+
+        BG.event.playByIndex(prev);
+    }
 
     if(!ConnectStatus) {
         BG.setNotification({

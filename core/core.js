@@ -11,7 +11,11 @@ var
     CurrentUser,
     AllUsers,
     RightClick = true,
-    RepeatSong;
+    RepeatSong,
+    AlbumList,
+    AlbumTitle,
+    AudioList,
+    ShuffleSongs;
 
 /**
  * Main object
@@ -20,17 +24,33 @@ var
  */
 var Core = {};
 
-Core.audioEvent = function() {
+Core.audioEvent = function () {
     var songs = document.getElementById('player-wrapper').getElementsByTagName('li');
 
     for(var i = 0, size = songs.length; i < size; i++) {
         var song = songs[i];
+        song.getElementsByTagName('a')[0].addEventListener('click', Core.downloadSong);
 
         song.addEventListener('click', Core.event.playSong);
     }
 };
 
-Core.play = function(e) {
+Core.downloadSong = function (e) {
+    e.preventDefault();
+
+    var index = e.target.parentNode.getAttribute('data-index');
+
+    Core.event.send({
+        event: 'downloadSong',
+        data: {
+            index: index
+        }
+    });
+
+    return false;
+};
+
+Core.play = function (e) {
     if(LastActiveIndex)
         Core.removeActiveIndex(LastActiveIndex);
 
@@ -48,11 +68,9 @@ Core.play = function(e) {
 
     element.className = 'active';
     LastActive = element;
-
-//    MFCore.set(Songs[index].url, Songs[index].duration);
 };
 
-Core.removeActiveIndex = function(index) {
+Core.removeActiveIndex = function (index) {
     var i = index - 1;
     document.getElementById('player-wrapper').getElementsByTagName('li')[i].className = '';
 };
@@ -62,7 +80,7 @@ Core.removeActiveIndex = function(index) {
  *
  * @param {number} index
  */
-Core.setActiveByIndex = function(index) {
+Core.setActiveByIndex = function (index) {
     var i = index - 1;
     document.getElementById('player-wrapper').getElementsByTagName('li')[i].className = 'active';
 };
@@ -74,7 +92,7 @@ Core.setActiveByIndex = function(index) {
  * @param {string} title
  * @param {number} totalTime
  */
-Core.setSongInfo = function(artist, title, totalTime) {
+Core.setSongInfo = function (artist, title, totalTime) {
     MFTimeAll.textContent = totalTime;
     MFArtist.textContent = artist;
     MFTitle.textContent = title;
@@ -90,17 +108,17 @@ Core.event = {};
 /**
  * Create connection
  */
-Core.event.connect = function() {
+Core.event.connect = function () {
     Port = chrome.runtime.connect({name: 'core'});
 };
 
 /**
  * Listen for data
  */
-Core.event.listenData = function() {
-    chrome.runtime.onConnect.addListener(function(bgPort) {
+Core.event.listenData = function () {
+    chrome.runtime.onConnect.addListener(function (bgPort) {
         Core.event.onOpen();
-        bgPort.onMessage.addListener(function(msg) {
+        bgPort.onMessage.addListener(function (msg) {
             console.log(msg);
 
             if(Core.event.hasOwnProperty(msg.event))
@@ -109,11 +127,11 @@ Core.event.listenData = function() {
     });
 };
 
-Core.event.send = function(data) {
+Core.event.send = function (data) {
     Port.postMessage(data);
 };
 
-Core.event.checkFirstLoad = function() {
+Core.event.checkFirstLoad = function () {
     Core.event.send({
         event: 'checkFirstLoad',
         data: ''
@@ -125,7 +143,7 @@ Core.event.checkFirstLoad = function() {
  *
  * @param {object} data
  */
-Core.event.setFirstLoadToTrue = function(data) {
+Core.event.setFirstLoadToTrue = function (data) {
     FirstLoad = data;
 };
 
@@ -134,42 +152,43 @@ Core.event.setFirstLoadToTrue = function(data) {
  *
  * @param {object} data
  */
-Core.event.setFirstLoadToFalse = function(data) {
+Core.event.setFirstLoadToFalse = function (data) {
     FirstLoad = data;
 };
 
 /**
  * Play song
  */
-Core.event.sendPlay = function() {
+Core.event.sendPlay = function () {
     Core.event.send({
         event: 'sendPlay',
         data: null
     });
 };
 
-Core.event.playSong = function(e) {
-    var element;
+Core.event.playSong = function (e) {
+    var element = e.target;
 
-    if(e.target.nodeName == 'LI')
-        element = e.target;
-    else
-        element = e.target.parentNode;
+    if(element.className != 'save-song' && element.className != 'add-song') {
 
-    var index = element.getAttribute('data-index');
+        if(element.nodeName != 'LI')
+            element = element.parentNode;
 
-    MFTimeCurrent.textContent = '0:00';
-    MFBuffer.style.width = 0;
-    MFProgress.style.width = 0;
+        var index = element.getAttribute('data-index');
 
-    Core.event.send({
-        event: 'playByIndex',
-        data: index
-    });
+        MFTimeCurrent.textContent = '0:00';
+        MFBuffer.style.width = 0;
+        MFProgress.style.width = 0;
+
+        Core.event.send({
+            event: 'playByIndex',
+            data: index
+        });
+    }
 };
 
-Core.event.play = function(data) {
-    MFPlay.addEventListener('click', function() {
+Core.event.play = function (data) {
+    MFPlay.addEventListener('click', function () {
         if(FirstLoad) {
             Core.event.sendPlay();
             FirstLoad = false;
@@ -189,32 +208,36 @@ Core.event.play = function(data) {
     });
 };
 
-Core.event.getSongDuration = function() {
+Core.event.getSongDuration = function () {
     Core.event.send({
         event: 'getSongDuration',
         data: ''
     });
 };
 
-Core.event.setSongDuration = function(data) {
-    console.log(data);
-    MFDuration = data;
+Core.event.setSongDuration = function (data) {
+    if(data) {
+        MFDuration = data.dur;
+
+        if(data.index)
+            Core.scrollToSong(AudioList.getElementsByTagName('li')[data.index]);
+    }
 };
 
-Core.event.changeSongInfo = function(data) {
+Core.event.changeSongInfo = function (data) {
     Core.setSongInfo(data.artist, data.title, data.duration);
     MFDuration = data.realDuration;
 };
 
-Core.event.sendSetFirstActive = function(data) {
+Core.event.sendSetFirstActive = function (data) {
     Core.setActiveByIndex(1);
 };
 
-Core.event.timeUpdate = function(data) {
+Core.event.timeUpdate = function (data) {
     MFTimeCurrent.textContent = data;
 };
 
-Core.event.changePlayToPause = function(data) {
+Core.event.changePlayToPause = function (data) {
     if(!MFPlay.classList.contains('pause'))
         MFPlay.className += ' pause';
 };
@@ -224,7 +247,7 @@ Core.event.changePlayToPause = function(data) {
  *
  * @param data
  */
-Core.event.changePauseToPlay = function(data) {
+Core.event.changePauseToPlay = function (data) {
     MFPlay.classList.remove('pause');
 };
 
@@ -233,7 +256,7 @@ Core.event.changePauseToPlay = function(data) {
  *
  * @param {string} data
  */
-Core.event.setProgressBarWidth = function(data) {
+Core.event.setProgressBarWidth = function (data) {
     MFProgress.style.width = data;
 };
 
@@ -242,7 +265,7 @@ Core.event.setProgressBarWidth = function(data) {
  *
  * @param {string} data
  */
-Core.event.setLoadProgress = function(data) {
+Core.event.setLoadProgress = function (data) {
     MFBuffer.style.width = data;
 };
 
@@ -251,15 +274,17 @@ Core.event.setLoadProgress = function(data) {
  *
  * @param {{oldIndex: number, newIndex: number}} data
  */
-Core.event.setNewHighLightElement = function(data) {
+Core.event.setNewHighLightElement = function (data) {
     Core.removeActiveIndex(data.oldIndex);
     Core.setActiveByIndex(data.newIndex);
+    var index = data.newIndex - 1;
+    Core.scrollToSong(AudioList.getElementsByTagName('li')[index]);
 };
 
 /**
  * Update list of audio
  */
-Core.event.updateList = function() {
+Core.event.updateList = function () {
     Core.setSizeToMain();
     Core.showOverlay();
     Core.hideOpacity('wrapper');
@@ -274,34 +299,34 @@ Core.event.updateList = function() {
  *
  * @param data
  */
-Core.event.reloadContent = function(data) {
+Core.event.reloadContent = function (data) {
     document.getElementById('main').removeChild(document.getElementById('wrapper'));
-    Core.loadBackgroundContent(true, 'wrapper', function() {
+    Core.loadBackgroundContent(true, 'wrapper', function () {
         Core.hideOverlay();
         Core.showOpacity('wrapper');
         Core.removeSizeFromMain();
     });
 };
 
-Core.event.setRepeatSong = function() {
+Core.event.setRepeatSong = function () {
     Core.event.send({
         event: 'setRepeatSong',
         data: ''
     });
 };
 
-Core.event.setActiveRepeat = function() {
+Core.event.setActiveRepeat = function () {
     RepeatSong.className = 'active';
 };
 
-Core.event.setNonActiveRepeat = function() {
+Core.event.setNonActiveRepeat = function () {
     RepeatSong.className = '';
 };
 
 /**
  * Open window for authorization in VK.com
  */
-Core.event.authorize = function() {
+Core.event.authorize = function () {
     Core.event.send({
         event: 'openAuth',
         data: ''
@@ -311,15 +336,23 @@ Core.event.authorize = function() {
 /**
  * Send this event when popup will open
  */
-Core.event.onOpen = function() {
+Core.event.onOpen = function () {
     Core.event.checkFirstLoad();
     Core.event.getSongDuration();
+};
+
+Core.event.setShuffleToActive = function(data) {
+    ShuffleSongs.className = 'active';
+};
+
+Core.event.setShuffleToDisable = function(data) {
+    ShuffleSongs.className = '';
 };
 
 /**
  * Set width and height to #main
  */
-Core.setSizeToMain = function() {
+Core.setSizeToMain = function () {
     var MainBlock = document.getElementById('main');
     MainBlock.style.width = MainBlock.clientWidth + 'px';
     MainBlock.style.height = MainBlock.clientHeight + 'px';
@@ -328,21 +361,21 @@ Core.setSizeToMain = function() {
 /**
  * Remove style attribute from #main
  */
-Core.removeSizeFromMain = function() {
+Core.removeSizeFromMain = function () {
     document.getElementById('main').removeAttribute('style');
 };
 
-Core.showOverlay = function() {
+Core.showOverlay = function () {
     Overlay.style.display = 'block';
-    setTimeout(function() {
+    setTimeout(function () {
         OverlayTxt.className += ' show';
     }, 50);
 };
 
-Core.hideOverlay = function() {
+Core.hideOverlay = function () {
     OverlayTxt.classList.remove('show');
 
-    setTimeout(function() {
+    setTimeout(function () {
         Overlay.style.display = 'none';
     }, 50);
 };
@@ -352,7 +385,7 @@ Core.hideOverlay = function() {
  *
  * @param {string} elementID
  */
-Core.showOpacity = function(elementID) {
+Core.showOpacity = function (elementID) {
     document.getElementById(elementID).className = 'show-opacity';
 };
 
@@ -362,14 +395,14 @@ Core.showOpacity = function(elementID) {
  *
  * @param {string} elementID
  */
-Core.hideOpacity = function(elementID) {
+Core.hideOpacity = function (elementID) {
     document.getElementById(elementID).className = 'hide-opacity';
 };
 
 /**
  * Auth user & get songs from background page
  */
-Core.auth = function() {
+Core.auth = function () {
     Core.loadBackgroundContent();
 };
 
@@ -380,24 +413,18 @@ Core.auth = function() {
  * @param {string} elementID
  * @param {function} callback
  */
-Core.loadBackgroundContent = function(port, elementID, callback) {
-    chrome.runtime.getBackgroundPage(function(win) {
+Core.loadBackgroundContent = function (port, elementID, callback) {
+    chrome.runtime.getBackgroundPage(function (win) {
         var node;
 
         if(elementID && elementID != '') {
-            node = document.importNode(win.document.getElementById(elementID), true);
-            document.getElementById('main').insertBefore(node, document.getElementById('app-nav-block'));
+            document.body.removeChild(document.getElementById('main'));
+            node = document.importNode(win.document.getElementById('main'), true);
+            document.body.appendChild(node);
         } else {
             node = document.importNode(win.document.getElementById('main'), true);
             document.body.appendChild(node);
         }
-
-        //users
-        var users = document.importNode(win.document.getElementById('change-user'), true),
-            NavBlock = document.getElementById('app-nav-block');
-
-        NavBlock.removeChild(document.getElementById('change-user'));
-        NavBlock.insertBefore(users, document.getElementById('update-list'));
 
         if(localStorage['authInfo'] != undefined) {
             Core.audioEvent();
@@ -434,9 +461,18 @@ Core.loadBackgroundContent = function(port, elementID, callback) {
     });
 };
 
-Core.openSettings = function() {
+Core.openSettings = function () {
     chrome.tabs.create({url: chrome.runtime.getURL('/templates/settings.html')});
     window.close();
+};
+
+Core.scrollToSong = function (element) {
+    var offset = element.offsetTop - element.clientHeight - AudioList.scrollTop;
+
+    if(offset > AudioList.clientHeight)
+        element.scrollIntoView(false);
+    else if (offset < 0)
+        element.scrollIntoView(true);
 };
 
 /**
@@ -444,7 +480,7 @@ Core.openSettings = function() {
  *
  * @param {event} e
  */
-Core.openAllUsers = function(e) {
+Core.openAllUsers = function (e) {
     CurrentUser.getElementsByClassName('user')[0].classList.toggle('active');
 
     if(AllUsers.classList.contains('opened')) {
@@ -458,14 +494,32 @@ Core.openAllUsers = function(e) {
 };
 
 /**
+ * Show all user albums
+ *
+ * @param {event} e
+ */
+Core.openAlbums = function (e) {
+    AlbumTitle.classList.toggle('active');
+
+    if(AlbumList.classList.contains('opened')) {
+        AlbumList.removeAttribute('style');
+        AlbumList.className = '';
+    } else {
+        var arr = ['-', AlbumList.clientHeight - 1, 'px'];
+        AlbumList.style.top = arr.join('');
+        AlbumList.className = 'opened';
+    }
+};
+
+/**
  * Choose user playlist
  */
-Core.allUsersEvents = function() {
+Core.allUsersEvents = function () {
     var users = AllUsers.getElementsByClassName('user'),
         currUser = CurrentUser.getElementsByClassName('user')[0];
 
     for(var i = 0, size = users.length; i < size; i++) {
-        users[i].addEventListener('click', function(e) {
+        users[i].addEventListener('click', function (e) {
             Core.setSizeToMain();
             Core.showOverlay();
             Core.hideOpacity('wrapper');
@@ -484,21 +538,61 @@ Core.allUsersEvents = function() {
     }
 };
 
+Core.allAlbumsEvents = function () {
+    var allAlbums = AlbumList.getElementsByTagName('div');
+
+    for(var i = 0, size = allAlbums.length; i < size; i++) {
+        allAlbums[i].addEventListener('click', function (e) {
+            Core.setSizeToMain();
+            Core.showOverlay();
+            Core.hideOpacity('wrapper');
+
+            this.classList.toggle('active');
+            AlbumTitle.textContent = this.textContent == chrome.i18n.getMessage('allSongs') ? chrome.i18n.getMessage('albums') : this.textContent;
+            var dID = this.getAttribute('data-id'),
+                rID;
+
+            if(dID == 'null')
+                rID = undefined;
+            else
+                rID = dID;
+
+            Core.event.send({
+                event: 'loadAlbum',
+                data: {
+                    id: rID,
+                    title: this.textContent
+                }
+            });
+        });
+    }
+};
+
+Core.shuffleSongs = function() {
+    Core.event.send({
+        event:'setShuffleSongs',
+        data: ''
+    });
+};
+
 /**
  * Init events
  */
-Core.setEvents = function() {
+Core.setEvents = function () {
     UpdateList.addEventListener('click', Core.event.updateList);
     Settings.addEventListener('click', Core.openSettings);
     CurrentUser.addEventListener('click', Core.openAllUsers);
     RepeatSong.addEventListener('click', Core.event.setRepeatSong);
     Core.allUsersEvents();
+    Core.allAlbumsEvents();
+    AlbumTitle.addEventListener('click', Core.openAlbums);
+    ShuffleSongs.addEventListener('click', Core.shuffleSongs);
 };
 
 /**
  * Init DOM elements
  */
-Core.setElements = function() {
+Core.setElements = function () {
     UpdateList = document.getElementById('update-list');
     Overlay = document.getElementById('bg-overlay');
     OverlayTxt = document.getElementById('overlay-txt');
@@ -506,14 +600,18 @@ Core.setElements = function() {
     CurrentUser = document.getElementById('current-user');
     AllUsers = document.getElementById('all-users');
     RepeatSong = document.getElementById('repeat-song');
+    AlbumList = document.getElementById('album-list');
+    AlbumTitle = document.getElementById('album-title');
+    AudioList = document.getElementById('audio-list');
+    ShuffleSongs = document.getElementById('shuffle-play');
 };
 
 
 /**
  * Control right click
  */
-Core.rightClick = function() {
-    document.addEventListener('contextmenu', function(e) {
+Core.rightClick = function () {
+    document.addEventListener('contextmenu', function (e) {
         if(!RightClick) {
             e.preventDefault();
             return false;
@@ -524,7 +622,7 @@ Core.rightClick = function() {
 /**
  * Init functions
  */
-Core.init = function() {
+Core.init = function () {
     Core.auth();
     Core.rightClick();
 };

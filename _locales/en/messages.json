@@ -15,8 +15,7 @@
     },
 
     "update": {
-        "message": "Update",
-        "description": "Update audio list"
+        "message": "Update"
     },
 
     "updating": {
@@ -111,5 +110,25 @@
 
     "keysWorkTxt": {
         "message": "Hot keys work on all pages except the pages of this application (settings page and popup), as well as all service pages Google Chrome."
+    },
+
+    "albums": {
+        "message": "Albums"
+    },
+
+    "allSongs": {
+        "message": "All Songs"
+    },
+
+    "download": {
+        "message": "Download"
+    },
+
+    "addToAlbum": {
+        "message": "Add to album"
+    },
+
+    "shuffle": {
+        "message": "Shuffle"
     }
 }

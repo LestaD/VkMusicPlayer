@@ -55,14 +55,6 @@ ContentJS.trackKeys = function() {
             });
             delete KeysPressed[117];
         }
-//        } else if(KeysPressed[mainKey] && KeysPressed[87]) {
-//            ContentJS.event.send({
-//                event: 'openPlayer',
-//                data: ''
-//            });
-//            delete KeysPressed[mainKey];
-//            delete KeysPressed[87];
-//        }
     });
 
     document.addEventListener('keyup', function(e) {

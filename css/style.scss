@@ -110,6 +110,7 @@ $cWidth: 420px;
     width: 100%;
 
     li {
+      @extend .relative;
       cursor: pointer;
       height: 32px;
       line-height: 32px;
@@ -121,6 +122,32 @@ $cWidth: 420px;
       span {
         display: block;
         float: left;
+      }
+
+      .save-song, .add-song {
+        @include animation-one(250ms);
+        @extend .absolute;
+        display: none;
+        background-size: 15px;
+        opacity: 0.6;
+        right: 50px;
+        top: 9px;
+        height: 15px;
+        width: 15px;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+
+      .save-song {
+        background-image: url(/images/save-icon.png);
+        right: 10px;
+      }
+
+      .add-song {
+        background-image: url(/images/add-icon.png);
+        right: 35px;
       }
 
       .artist {
@@ -151,11 +178,23 @@ $cWidth: 420px;
 
       &:hover {
         background: #edf1f5;
+
+        .save-song, .add-song {
+          display: block;
+        }
+
+        .duration {
+          display: none;
+        }
       }
 
       &.active {
         background: #5f7fa2;
         color: #fff;
+
+        .save-song, .add-song {
+          background-position: 0 -15px;
+        }
 
         .duration {
           color: #fff;
@@ -323,7 +362,7 @@ $cWidth: 420px;
     float: left;
     top: 12px;
     width: $songWidth;
-    height:13px;
+    height: 13px;
   }
 
   #mf-duration {
@@ -466,7 +505,6 @@ $cWidth: 420px;
   @extend .absolute;
   background: #F2F2F2;
   border-top: 1px solid #DAE1E8;
-  display: flex;
   line-height: 35px;
   height: 35px;
   width: 100%;
@@ -475,6 +513,20 @@ $cWidth: 420px;
 
   button {
     width: 100%;
+  }
+
+  .regular-buttons {
+    display: flex;
+    float: left;
+    width: 280px;
+  }
+
+  .icon-buttons {
+    float: right;
+
+    & > div {
+
+    }
   }
 }
 
@@ -500,33 +552,78 @@ $cWidth: 420px;
     }
 
     &:hover {
-      background: rgba(219, 227, 235, 0.5);
+      background: #e6eaee;
     }
   }
 
   .user-name {
     @extend .text-overflow;
     max-width: 99px;
-    margin:10px 0 0;
+    margin: 10px 0 0;
   }
 
-  #all-users {
-    @include animation-one(350ms);
-    @extend .absolute;
-    background: #F2F2F2;
-    border: 1px solid #DAE1E8;
-    box-shadow: 0 0 0px #000;
-    max-height: 175px;
-    overflow-y: auto;
-    top:0;
-    width: 100%;
-    z-index: 1;
+}
+
+.title-nav-button {
+  background: #F2F2F2;
+  @extend .relative;
+  z-index: 100;
+}
+
+.popup-slide-nav {
+  @include animation-one(350ms);
+  @extend .absolute;
+  background: #F2F2F2;
+  border: 1px solid #DAE1E8;
+  box-shadow: 0 0 0px #000;
+  max-height: 175px;
+  overflow-y: auto;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+}
+
+#albums {
+  @extend .relative;
+}
+
+#current-user {
+  @extend .title-nav-button;
+}
+
+#album-title {
+  @extend .text-overflow;
+  @extend .title-nav-button;
+  line-height: 35px;
+  height: 35px;
+
+  &.active, &.active:hover {
+    background: #DAE2E8;
   }
 
-  #current-user {
-    background: #F2F2F2;
+  &:hover {
+    background: #e6eaee;
+  }
+}
+
+#all-users, #album-list {
+  @extend .popup-slide-nav;
+}
+
+#album-list {
+  & > div {
+    @extend .text-overflow;
     @extend .relative;
-    z-index: 100;
+    line-height: 35px;
+    height: 35px;
+
+    &.active, &.active:hover {
+      background: #DAE2E8;
+    }
+
+    &:hover {
+      background: #e6eaee;
+    }
   }
 }
 
@@ -540,7 +637,7 @@ $cWidth: 420px;
   width: 420px;
 }
 
-#repeat-song{
+#repeat-song {
   @include animation-two(200ms);
   @extend .absolute;
   top: 13px;
@@ -551,10 +648,55 @@ $cWidth: 420px;
   text-indent: -9999px;
   opacity: 0.6;
   height: 14px;
-  width:14px;
+  width: 14px;
 
-  &.active{
+  &.active {
     opacity: 1 !important;
   }
 }
 
+#shuffle-play {
+  @include animation-two(200ms);
+  @extend .absolute;
+  top: 12px;
+  right: 36px;
+  background: url(/images/audio_icons_2x.png) -49px -49px no-repeat;
+  background-size: 257px 63px;
+  cursor: pointer;
+  text-indent: -9999px;
+  opacity: 0.6;
+  height: 14px;
+  width: 14px;
+
+  &.active {
+    opacity: 1 !important;
+  }
+}
+
+#update-list {
+  background: url(/images/update-icon.png) center center no-repeat;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+#settings {
+  background: url(/images/settings-icon.png) center center no-repeat;
+  margin: 0 15px 0 10px;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+#update-list, #settings {
+  @include animation-one(250ms);
+  background-size: 19px;
+  cursor: pointer;
+  margin-top: 5px;
+  float: left;
+  opacity: 0.6;
+  height: 25px;
+  width: 25px;
+}

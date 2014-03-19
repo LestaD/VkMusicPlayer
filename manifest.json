@@ -1,13 +1,13 @@
 {
     "name": "__MSG_appName__",
     "description": "__MSG_appDesc__",
-    "version": "0.1.7",
+    "version": "0.1.9",
     "default_locale": "ru",
     "minimum_chrome_version": "30",
     "options_page": "/templates/settings.html",
     "background": {
         "persistent": true,
-        "page" : "/templates/background.html"
+        "page": "/templates/background.html"
 
     },
     "browser_action": {
@@ -28,6 +28,7 @@
     "permissions": [
         "tabs",
         "activeTab",
+        "downloads",
         "notifications",
         "https://*.vk.com/*",
         "http://*.vk.me/*",
