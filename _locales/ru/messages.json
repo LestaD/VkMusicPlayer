@@ -131,5 +131,17 @@
 
     "shuffle": {
         "message": "Перемешать"
+    },
+
+    "commonSettings": {
+        "message": "Общее"
+    },
+
+    "showNumberOfSongs": {
+        "message": "Показывать количество песен на значке"
+    },
+
+    "showSongDurationOnBadge": {
+        "message": "Показывать продолжительность песни на значке"
     }
 }

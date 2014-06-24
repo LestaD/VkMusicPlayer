@@ -5,7 +5,7 @@
   margin: 0;
   outline: none;
   @include box-sizing(border-box);
-  @include appearance(none);
+  //  @include appearance(none);
 }
 
 html {
@@ -174,19 +174,19 @@ a {
   }
 
   .delete-user, .activate {
-    width:100px;
+    width: 100px;
   }
 
   .activate, .top-button {
     @extend .absolute;
-    top:7px;
-    right:0;
+    top: 7px;
+    right: 0;
   }
 
   .its-you {
     @extend .absolute;
-    top:35px;
-    left:115px;
+    top: 35px;
+    left: 115px;
     color: #bbb;
   }
 
@@ -295,9 +295,9 @@ a {
       @extend .relative;
       background: #000;
       margin: 0 10px;
-      top:7px;
+      top: 7px;
       height: 1px;
-      width:5px;
+      width: 5px;
     }
 
     .keys {
@@ -306,11 +306,24 @@ a {
 
     span {
       display: block;
-      float:left;
+      float: left;
     }
   }
 }
 
 .simple-text {
   margin: 10px;
+}
+
+#common-settings {
+  .set-line {
+    border: solid #B9C4DA;
+    border-width: 1px 0;
+    margin-bottom: -1px;
+    padding:15px;
+
+    input[type="checkbox"] {
+      margin: 0 10px 0 0;
+    }
+  }
 }

@@ -17,8 +17,10 @@ var
     MFTitle,
     MFVolumeWrapper,
     MFVolumeLine,
-    MFVolume;
-
+    MFVolume,
+    SongCurrentDuration = '0:00',
+    ShowSongsOnBadge = localStorage['showSongsOnBadge'],
+    ShowSongDurationOnBadge = localStorage['showSongDuration'];
 
 /**
  * MF Player Core
@@ -30,7 +32,7 @@ var MFCore = {};
 /**
  * Show audio loading progress
  */
-MFCore.loadProcess = function() {
+MFCore.loadProcess = function () {
 
     var
         bufferedData = MFPlayer.buffered,
@@ -39,8 +41,8 @@ MFCore.loadProcess = function() {
         start,
         width;
 
-    if(bufferedSize > 0) {
-        while(bufferedSize--) {
+    if (bufferedSize > 0) {
+        while (bufferedSize--) {
             start = bufferedData.end(bufferedSize);
             end = bufferedData.start(bufferedSize);
             width = (((start - end) / MFDuration) * 100).toString();
@@ -59,9 +61,9 @@ MFCore.loadProcess = function() {
 /**
  * Init DOM elements
  */
-MFCore.setElements = function() {
+MFCore.setElements = function () {
     PlayerWrapper = document.getElementById('player-bound');
-    MFPlayer = document.getElementById('mf-player');
+    MFPlayer = new Audio();
     MFBuffer = document.getElementById('mf-buffer');
     MFProgress = document.getElementById('mf-progress');
     MFSongProgress = document.getElementById('mf-song-progress');
@@ -80,20 +82,20 @@ MFCore.setElements = function() {
 /**
  * Update track timeline
  */
-MFCore.updateState = function() {
+MFCore.updateState = function () {
     var
         songTime = Math.round((parseFloat(MFProgress.style.width) / songProgressWidth) * MFDuration),
         seconds = 0,
         minutes = 0;
 
-    if(songTime) {
+    if (songTime) {
         minutes = Math.floor(songTime / 60);
         seconds = Math.round(songTime) - (60 * minutes);
 
-        if(seconds > 59) {
+        if (seconds > 59) {
             seconds = Math.round(songTime) - (60 * minutes);
 
-            if(seconds == 60) {
+            if (seconds == 60) {
                 minutes = Math.round(songTime / 60);
                 seconds = 0;
             }
@@ -102,7 +104,7 @@ MFCore.updateState = function() {
 
     progressBarWidth = ((MFPlayer.currentTime / MFDuration) * songProgressWidth);
 
-    if(seconds < 10)
+    if (seconds < 10)
         seconds = '0' + seconds;
 
     var ct = minutes + ':' + seconds,
@@ -110,6 +112,12 @@ MFCore.updateState = function() {
 
     MFProgress.style.width = pbWidth;
     MFTimeCurrent.textContent = ct;
+    SongCurrentDuration = ct;
+
+    if (ShowSongDurationOnBadge == 'true') {
+        console.log(ct);
+        chrome.browserAction.setBadgeText({text: SongCurrentDuration});
+    }
 
     BG.event.send({
         event: 'timeUpdate',
@@ -126,7 +134,7 @@ MFCore.updateState = function() {
  * Change current time by mouse clicking
  * @param {event} e
  */
-MFCore.changeCurrentTime = function(e) {
+MFCore.changeCurrentTime = function (e) {
     progressLine = e.pageX - MFSongProgress.getBoundingClientRect().left;
     progressTime = (progressLine / songProgressWidth) * MFDuration;
 };
@@ -138,7 +146,7 @@ MFCore.changeCurrentTime = function(e) {
  * @param {string} url
  * @param {number} duration
  */
-MFCore.set = function(url, duration) {
+MFCore.set = function (url, duration) {
     MFPlayer.src = url;
     MFDuration = duration;
     MFTimeAll.textContent = VKit.util.secToMin(duration);
@@ -148,19 +156,19 @@ MFCore.set = function(url, duration) {
 /**
  * Init events
  */
-MFCore.events = function() {
+MFCore.events = function () {
     MFPlayer.ontimeupdate = MFCore.updateState;
     MFPlayer.addEventListener('progress', MFCore.loadProcess);
-    MFSongProgress.addEventListener('mousedown', function(e) {
+    MFSongProgress.addEventListener('mousedown', function (e) {
         progressBarClickState = true;
         MFCore.changeCurrentTime(e);
 
     });
-    MFSongProgress.addEventListener('mousemove', function(e) {
-        if(progressBarClickState)
+    MFSongProgress.addEventListener('mousemove', function (e) {
+        if (progressBarClickState)
             MFCore.changeCurrentTime(e);
     });
-    MFSongProgress.addEventListener('mouseup', function() {
+    MFSongProgress.addEventListener('mouseup', function () {
         progressBarClickState = false;
         MFPlayer.currentTime = progressTime;
     });
@@ -171,30 +179,30 @@ MFCore.events = function() {
 /**
  * Play next song in list
  */
-MFCore.playNext = function(force) {
+MFCore.playNext = function (force) {
     var fp = false;
 
-    if(typeof force == 'boolean')
+    if (typeof force == 'boolean')
         fp = true;
 
-    if(ShuffleSongs) {
-        var random = Math.floor((Math.random()*Songs.length));
+    if (ShuffleSongs) {
+        var random = Math.floor((Math.random() * Songs.length));
 
         BG.event.playByIndex(random);
     } else {
-        if(RepeatSong && !fp) {
+        if (RepeatSong && !fp) {
             BG.event.playByIndex(LastActiveIndex);
         } else {
             var next = parseInt(LastActiveIndex) + 1;
 
-            if((next + 1) > Songs.length)
+            if ((next + 1) > Songs.length)
                 next = 1;
 
             BG.event.playByIndex(next);
         }
     }
 
-    if(!ConnectStatus) {
+    if (!ConnectStatus) {
         BG.setNotification({
             type: 'basic',
             title: CurrentSong.title,
@@ -207,21 +215,21 @@ MFCore.playNext = function(force) {
 /**
  * Play prev song in list
  */
-MFCore.playPrev = function() {
+MFCore.playPrev = function () {
     var prev = parseInt(LastActiveIndex) - 1;
 
-    if(ShuffleSongs) {
-        var random = Math.floor((Math.random()*Songs.length));
+    if (ShuffleSongs) {
+        var random = Math.floor((Math.random() * Songs.length));
 
         BG.event.playByIndex(random);
     } else {
-        if(prev <= 0)
+        if (prev <= 0)
             prev = Songs.length - 1;
 
         BG.event.playByIndex(prev);
     }
 
-    if(!ConnectStatus) {
+    if (!ConnectStatus) {
         BG.setNotification({
             type: 'basic',
             title: CurrentSong.title,
@@ -234,6 +242,6 @@ MFCore.playPrev = function() {
 /**
  * Init Player
  */
-MFCore.init = function() {
+MFCore.init = function () {
     MFCore.setElements();
 };

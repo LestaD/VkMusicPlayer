@@ -130,5 +130,17 @@
 
     "shuffle": {
         "message": "Shuffle"
+    },
+
+    "commonSettings": {
+        "message": "Common"
+    },
+
+    "showNumberOfSongs": {
+        "message": "Show number of songs on badge"
+    },
+
+    "showSongDurationOnBadge": {
+        "message": "Show song duration on badge"
     }
 }

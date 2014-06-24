@@ -5,6 +5,10 @@ var
     ModalTitle,
     AddUser,
     AccountsBlock,
+    ShowSongsNumber,
+    ShowSongDuration,
+    ShowSN = localStorage['showSongsOnBadge'],
+    ShowSD = localStorage['showSongDuration'],
     Port;
 
 var Settings = {};
@@ -19,8 +23,8 @@ Settings.event = {};
 /**
  * Create connection
  */
-Settings.event.connect = function() {
-    setTimeout(function() {
+Settings.event.connect = function () {
+    setTimeout(function () {
         Port = chrome.runtime.connect({name: 'settings'});
     }, 300);
 };
@@ -28,23 +32,23 @@ Settings.event.connect = function() {
 /**
  * Listen for data
  */
-Settings.event.listenData = function() {
-    chrome.runtime.onConnect.addListener(function(port) {
-        if(port.name == 'bg') {
-            port.onMessage.addListener(function(msg) {
+Settings.event.listenData = function () {
+    chrome.runtime.onConnect.addListener(function (port) {
+        if (port.name == 'bg') {
+            port.onMessage.addListener(function (msg) {
                 console.log(msg);
-                if(Settings.event.hasOwnProperty(msg.event))
+                if (Settings.event.hasOwnProperty(msg.event))
                     Settings.event[msg.event](msg.data);
             });
         }
     });
 };
 
-Settings.event.send = function(data) {
+Settings.event.send = function (data) {
     Port.postMessage(data);
 };
 
-Settings.event.setActiveUser = function(e) {
+Settings.event.setActiveUser = function (e) {
     var id = e.target.getAttribute('data-id');
 
     Settings.event.send({
@@ -53,18 +57,24 @@ Settings.event.setActiveUser = function(e) {
     });
 };
 
-
-Settings.event.updateSettingsView = function(data) {
+Settings.event.updateSettingsView = function (data) {
     Settings.clearElement(AccountsBlock);
     Settings.loadAccounts();
 };
 
-Settings.loadAccounts = function() {
+Settings.event.showSongsOnBadge = function () {
+    Settings.event.send({
+        event: 'showSongsOnBadge',
+        data: ShowSongsNumber.checked
+    });
+};
+
+Settings.loadAccounts = function () {
     var usersInfo = VKit.getUserInfo(),
         div = document.createElement('div'),
         authInfo = JSON.parse(localStorage['authInfo']);
 
-    for(var i in usersInfo) {
+    for (var i in usersInfo) {
         var user = usersInfo[i],
             avatar = document.createElement('img'),
             name = div.cloneNode(false),
@@ -91,7 +101,7 @@ Settings.loadAccounts = function() {
         userWrapper.appendChild(name);
         userWrapper.appendChild(status);
 
-        if(i == VKit.getActiveAccount()) {
+        if (i == VKit.getActiveAccount()) {
             status.className = 'active';
             status.textContent = chrome.i18n.getMessage('active');
             del.className += ' top-button';
@@ -104,14 +114,14 @@ Settings.loadAccounts = function() {
             userWrapper.appendChild(active);
         }
 
-        if(authInfo.userID != user.id) {
-            del.addEventListener('click', function(e) {
+        if (authInfo.userID != user.id) {
+            del.addEventListener('click', function (e) {
                 VKit.removeUserInfo(this.getAttribute('data-id'));
                 Settings.clearElement(AccountsBlock);
                 Settings.loadAccounts();
 
                 Settings.event.send({
-                    event:'updateUsersList',
+                    event: 'updateUsersList',
                     data: ''
                 });
             });
@@ -126,7 +136,7 @@ Settings.loadAccounts = function() {
 
             userWrapper.appendChild(you);
 
-            if(AccountsBlock.getElementsByClassName('info')[0])
+            if (AccountsBlock.getElementsByClassName('info')[0])
                 AccountsBlock.insertBefore(userWrapper, AccountsBlock.getElementsByClassName('info')[0]);
             else
                 AccountsBlock.appendChild(userWrapper);
@@ -134,14 +144,14 @@ Settings.loadAccounts = function() {
     }
 };
 
-Settings.clearElement = function(element) {
+Settings.clearElement = function (element) {
     var i = element.childElementCount;
 
-    while(--i >= 0)
+    while (--i >= 0)
         element.removeChild(element.firstChild);
 };
 
-Settings.addUser = function() {
+Settings.addUser = function () {
     ModalTitle.textContent = chrome.i18n.getMessage('addUser');
 
     var input = document.createElement('input'),
@@ -158,25 +168,25 @@ Settings.addUser = function() {
     input.setAttribute('placeholder', chrome.i18n.getMessage('searchUserExample'))
     input.className = 'user-find';
 
-    input.addEventListener('input', function(e) {
+    input.addEventListener('input', function (e) {
         searchUser(this);
     });
 
-    input.addEventListener('keyup', function(e) {
-        if(e.which == 13)
+    input.addEventListener('keyup', function (e) {
+        if (e.which == 13)
             searchUser(this);
     });
 
     function searchUser(e) {
-        if(e.value != '' && e.value != '0') {
+        if (e.value != '' && e.value != '0') {
             input.className += ' searching';
 
-            VKit.api('users.get', ['user_ids=' + e.value, 'fields=photo_100'], function(response) {
+            VKit.api('users.get', ['user_ids=' + e.value, 'fields=photo_100'], function (response) {
                 input.classList.remove('searching');
 
                 var userInfo = JSON.parse(response);
 
-                if(userInfo.error != undefined) {
+                if (userInfo.error != undefined) {
                     Settings.removeButtonsFromModal();
                     Settings.clearElement(result);
                     result.appendChild(error);
@@ -210,10 +220,10 @@ Settings.addUser = function() {
 
                     menuWrapper.appendChild(button);
 
-                    if(VKit.getUserInfo(info.uid) != undefined)
+                    if (VKit.getUserInfo(info.uid) != undefined)
                         userWrapper.appendChild(exist);
                     else {
-                        button.addEventListener('click', function() {
+                        button.addEventListener('click', function () {
                             VKit.saveUserInfo({
                                 id: info.uid,
                                 firstName: info.first_name,
@@ -226,7 +236,7 @@ Settings.addUser = function() {
                             Settings.hideOverlay();
 
                             Settings.event.send({
-                                event:'updateUsersList',
+                                event: 'updateUsersList',
                                 data: ''
                             });
                         });
@@ -247,49 +257,101 @@ Settings.addUser = function() {
     Settings.showOverlay();
 };
 
-Settings.removeButtonsFromModal = function() {
+Settings.removeButtonsFromModal = function () {
     var buttons = ModalContent.getElementsByClassName('bottom-buttons') || undefined;
 
-    if(buttons) {
-        for(var i = 0 , size = buttons.length; i < size; i++) {
-            if(buttons[i])
+    if (buttons) {
+        for (var i = 0 , size = buttons.length; i < size; i++) {
+            if (buttons[i])
                 ModalContent.removeChild(buttons[i]);
         }
     }
 }
 
-Settings.showOverlay = function() {
+Settings.showOverlay = function () {
     Overlay.style.display = 'block';
     ModalWindow.style.display = 'block';
 };
 
-Settings.hideOverlay = function() {
+Settings.hideOverlay = function () {
     Overlay.style.display = 'none';
     ModalWindow.style.display = 'none';
     Settings.clearElement(ModalContent);
 };
 
-Settings.setElements = function() {
+Settings.setElements = function () {
     Overlay = document.getElementById('bg-overlay');
     ModalWindow = document.getElementById('modal-window');
     ModalContent = document.getElementById('modal-content');
     ModalTitle = document.getElementById('modal-title');
     AddUser = document.getElementById('add-acc');
     AccountsBlock = document.getElementById('accounts-block');
+    ShowSongsNumber = document.getElementById('show-songs-number');
+    ShowSongDuration = document.getElementById('show-song-duration');
 };
 
-Settings.setEvents = function() {
+Settings.setEvents = function () {
     AddUser.addEventListener('click', Settings.addUser);
     Overlay.addEventListener('click', Settings.hideOverlay);
+    ShowSongsNumber.addEventListener('change', Settings.songsNumberAction);
+    ShowSongDuration.addEventListener('change', Settings.songsDurationAction);
 };
 
-Settings.init = function() {
+Settings.songsNumberAction = function (e) {
+    var el = e.target;
+
+    if (el.checked == true) {
+        ShowSongDuration.checked = false;
+        Settings.setLocalStorage('showSongDuration', 'false');
+    }
+
+    Settings.setLocalStorage('showSongsOnBadge', el.checked);
+    Settings.event.showSongsOnBadge();
+};
+
+Settings.songsDurationAction = function (e) {
+    var el = e.target;
+
+    if (el.checked == true) {
+        ShowSongsNumber.checked = false;
+        Settings.setLocalStorage('showSongsOnBadge', 'false');
+    }
+
+    Settings.setLocalStorage('showSongDuration', el.checked);
+    Settings.event.send({
+        event:'showSongDuration',
+        data: el.checked
+    });
+};
+
+Settings.setLocalStorage = function (key, val) {
+    localStorage[key] = val;
+};
+
+Settings.common = function () {
+    if (ShowSN == 'true') {
+        ShowSongsNumber.checked = true;
+    } else {
+        ShowSongsNumber.checked = false;
+    }
+
+    console.log(ShowSD);
+    if (ShowSD == 'true') {
+        ShowSongDuration.checked = true;
+    } else {
+        ShowSongDuration.checked = false;
+    }
+};
+
+Settings.init = function () {
     Settings.event.listenData();
     Settings.event.connect();
     setTranslation();
     Settings.setElements();
+    Settings.common();
     Settings.setEvents();
     Settings.loadAccounts();
+
 };
 
 window.addEventListener('DOMContentLoaded', Settings.init);

@@ -1,4 +1,11 @@
 chrome.browserAction.setBadgeBackgroundColor({color: '#4E729A'});
+if (localStorage['showSongsOnBadge'] == undefined) {
+    localStorage['showSongsOnBadge'] = true;
+}
+
+if (localStorage['showSongDuration'] == undefined) {
+    localStorage['showSongDuration'] = false;
+}
 
 var
     AuthBlock,
@@ -19,7 +26,8 @@ var
     RepeatSongEl,
     AlbumID = '',
     ShuffleSongs = false,
-    ShuffleSongsEl;
+    ShuffleSongsEl,
+    SongsCount = 0;
 
 /**
  * Background main object
@@ -29,7 +37,7 @@ var
 var BG = {};
 
 BG.checkForAuth = function () {
-    if(localStorage['authInfo'] != undefined) {
+    if (localStorage['authInfo'] != undefined) {
         AuthBlock.style.display = 'none';
         PlayerWrapperBG.style.display = 'block';
         MFCore.init();
@@ -64,15 +72,17 @@ BG.elements = function () {
 BG.getAllAudio = function (callback, type, api, albumID) {
     chrome.browserAction.disable();
     BG.getUsersList();
-    chrome.browserAction.setBadgeText({text: '0'});
+    if (ShowSongsOnBadge == 'true') {
+        chrome.browserAction.setBadgeText({text: '0'});
+    }
 
     var userID = VKit.getActiveAccount();
 
-    if(!api) {
+    if (!api) {
         VKit.api('audio.get', ['owner_id=' + userID, 'need_user=0'], function (response) {
             renderAudioList(response);
         });
-    } else if(api == 'albums') {
+    } else if (api == 'albums') {
         VKit.api('audio.get', ['owner_id=' + userID, 'album_id=' + albumID, 'need_user=0'], function (response) {
             renderAudioList(response);
         });
@@ -85,18 +95,18 @@ BG.getAllAudio = function (callback, type, api, albumID) {
 
         BG.clearElement(AlbumList);
 
-        if(!albumID)
+        if (!albumID)
             allSongs.className = 'active';
 
         allSongs.textContent = chrome.i18n.getMessage('allSongs');
         allSongs.setAttribute('data-id', 'null');
         AlbumList.appendChild(allSongs);
 
-        for(var i = 1, size = Albums.length; i < size; i++) {
+        for (var i = 1, size = Albums.length; i < size; i++) {
             var data = Albums[i],
                 album = document.createElement('div');
 
-            if(albumID && data.album_id == albumID)
+            if (albumID && data.album_id == albumID)
                 album.className = 'active';
 
             album.textContent = data.title;
@@ -113,7 +123,7 @@ BG.getAllAudio = function (callback, type, api, albumID) {
         MFProgress.style.width = 0;
         var oldList = PlayerWrapperBG.getElementsByTagName('ul')[0] || undefined;
 
-        if(oldList)
+        if (oldList)
             PlayerWrapperBG.removeChild(oldList);
 
         var list = document.createElement('ul'),
@@ -122,8 +132,8 @@ BG.getAllAudio = function (callback, type, api, albumID) {
 
         list.setAttribute('id', 'audio-list');
 
-        if(Songs && !type) {
-            for(var i = 1, size = Songs.length; i < size; i++) {
+        if (Songs && !type) {
+            for (var i = 1, size = Songs.length; i < size; i++) {
                 var li = liCache.cloneNode(false),
                     name = spanCache.cloneNode(false),
                     splitter = spanCache.cloneNode(false),
@@ -164,8 +174,18 @@ BG.getAllAudio = function (callback, type, api, albumID) {
 //                li.appendChild(addToAlbum);
                 li.setAttribute('data-index', index);
 
-                chrome.browserAction.setBadgeText({text: index});
+
+                SongsCount = index;
+
+                if (ShowSongsOnBadge == 'true' && ShowSongDurationOnBadge == 'false') {
+                    chrome.browserAction.setBadgeText({text: index});
+                }
+
                 list.appendChild(li);
+            }
+
+            if(ShowSongsOnBadge == 'false' && ShowSongDurationOnBadge == 'true') {
+                chrome.browserAction.setBadgeText({text: SongCurrentDuration});
             }
 
             EmptyList.style.display = 'none';
@@ -174,14 +194,14 @@ BG.getAllAudio = function (callback, type, api, albumID) {
             chrome.browserAction.enable();
             BG.setFirstSong();
 
-            if(callback)
+            if (callback)
                 callback();
         } else {
             PlayerWrapperBG.style.display = 'none';
             EmptyList.style.display = 'block';
             chrome.browserAction.enable();
 
-            if(callback)
+            if (callback)
                 callback();
         }
     }
@@ -197,7 +217,7 @@ BG.getUsersList = function () {
     BG.clearElement(activeUser);
     BG.clearElement(allUsers);
 
-    for(var i in usersInfo) {
+    for (var i in usersInfo) {
         var user = usersInfo[i],
             name = div.cloneNode(false),
             userWrapper = div.cloneNode(false),
@@ -215,7 +235,7 @@ BG.getUsersList = function () {
         userWrapper.appendChild(photo);
         userWrapper.appendChild(name);
 
-        if(VKit.getActiveAccount() == user.id) {
+        if (VKit.getActiveAccount() == user.id) {
             var uw = userWrapper.cloneNode(true);
             activeUser.appendChild(userWrapper);
 
@@ -230,7 +250,7 @@ BG.getUsersList = function () {
 BG.clearElement = function (element) {
     var i = element.childElementCount;
 
-    while(--i >= 0)
+    while (--i >= 0)
         element.removeChild(element.firstChild);
 };
 
@@ -238,7 +258,7 @@ BG.setActiveSong = function (index) {
     var eIndex = index - 1,
         e = document.getElementById('player-wrapper').getElementsByTagName('li')[eIndex];
 
-    if(LastActive)
+    if (LastActive)
         LastActive.className = '';
 
     e.className = 'active';
@@ -268,12 +288,12 @@ BG.event.connect = function () {
  * Listen for data
  */
 BG.event.listenData = function () {
-    if(!DataListen) {
+    if (!DataListen) {
         chrome.runtime.onConnect.addListener(function (port) {
             DataListen = true;
             BG.event.connect();
 
-            if(port.name == 'content' || port.name == 'settings')
+            if (port.name == 'content' || port.name == 'settings')
                 ConnectStatus = false;
             else
                 ConnectStatus = true;
@@ -292,16 +312,16 @@ BG.event.listenData = function () {
  * @param {object} data
  */
 BG.event.send = function (data) {
-    if(ConnectStatus)
+    if (ConnectStatus)
         Port.postMessage(data);
 };
 
 BG.event.checkPlayed = function (data) {
-    if(MFPlayer.src == '') {
-        if(LastActiveIndex)
+    if (MFPlayer.src == '') {
+        if (LastActiveIndex)
             Core.removeActiveIndex(LastActiveIndex);
 
-        if(LastActive)
+        if (LastActive)
             LastActive.className = '';
 
         var element = document.getElementById('player-wrapper').getElementsByTagName('li')[0],
@@ -319,12 +339,12 @@ BG.event.checkPlayed = function (data) {
  * @param {object} data
  */
 BG.event.sendPlay = function (data) {
-    if(data == null)
+    if (data == null)
         BG.event.playByIndex(LastActiveIndex);
 };
 
 BG.event.checkFirstLoad = function (data) {
-    if(FirstLoad) {
+    if (FirstLoad) {
         BG.event.send({
             event: 'setFirstLoadToTrue',
             data: true
@@ -351,7 +371,7 @@ BG.event.unmute = function () {
 };
 
 BG.event.setToPause = function (data) {
-    if(MFPlayer.paused) {
+    if (MFPlayer.paused) {
         BG.event.setToPlay();
     } else {
         MFPlayer.pause();
@@ -365,16 +385,16 @@ BG.event.setToPause = function (data) {
 };
 
 BG.event.setToPlay = function (data) {
-    if(FirstLoad)
+    if (FirstLoad)
         BG.event.playByIndex(LastActiveIndex);
 
     MFPlayer.play();
-    if(!MFPlay.classList.contains('pause'))
+    if (!MFPlay.classList.contains('pause'))
         MFPlay.className += ' pause';
 
     BG.setActiveByIndex(LastActiveIndex);
 
-    if(LastActiveIndex == 1) {
+    if (LastActiveIndex == 1) {
         BG.event.send({
             event: 'sendSetFirstActive',
             data: ''
@@ -389,7 +409,7 @@ BG.event.setToPlay = function (data) {
 
 BG.event.playNext = function (data) {
     console.log(data);
-    if(data)
+    if (data)
         MFCore.playNext(data);
     else
         MFCore.playNext();
@@ -405,7 +425,7 @@ BG.event.playPrev = function (data) {
  * @param {number} data
  */
 BG.event.playByIndex = function (data) {
-    if(typeof(MFPlayer.ontimeupdate) != 'function')
+    if (typeof(MFPlayer.ontimeupdate) != 'function')
         MFCore.events();
 
     var song = Songs[data];
@@ -414,7 +434,7 @@ BG.event.playByIndex = function (data) {
     MFPlayer.src = song.url;
     MFPlayer.play();
 
-    if(!MFPlay.classList.contains('pause'))
+    if (!MFPlay.classList.contains('pause'))
         MFPlay.className += ' pause';
 
     BG.removeActiveIndex(LastActiveIndex);
@@ -464,7 +484,7 @@ BG.event.playByIndex = function (data) {
 BG.event.getSongDuration = function () {
     BG.event.send({
         event: 'setSongDuration',
-        data:  {
+        data: {
             dur: CurrentSong.realDuration,
             index: CurrentSong.index
         }
@@ -472,7 +492,7 @@ BG.event.getSongDuration = function () {
 };
 
 BG.event.setRepeatSong = function (data) {
-    if(RepeatSong) {
+    if (RepeatSong) {
         RepeatSong = false;
         RepeatSongEl.className = '';
 
@@ -497,7 +517,7 @@ BG.event.setRepeatSong = function (data) {
  * @param {number} data
  */
 BG.event.changeCurrentTime = function (data) {
-    if(MFPlayer.src != '') {
+    if (MFPlayer.src != '') {
         MFPlayer.pause();
         MFPlayer.currentTime = data;
         BG.event.setToPlay('true');
@@ -519,7 +539,7 @@ BG.event.changeVolume = function (data) {
  * First app load
  */
 BG.event.firstLoad = function () {
-    if(FirstLoad == false) {
+    if (FirstLoad == false) {
         BG.event.send({
             event: 'firstLoad',
             data: {
@@ -542,7 +562,7 @@ BG.event.sendFirstLoad = function (data) {
  * @param data
  */
 BG.event.updateList = function (data) {
-    if(AlbumID) {
+    if (AlbumID) {
         BG.getAllAudio(function () {
             MFCore.set(FirstSong.url, FirstSong.duration);
             MFPlayer.src = FirstSong.url;
@@ -605,7 +625,7 @@ BG.event.openPlayer = function (data) {
 };
 
 BG.event.loadAlbum = function (data) {
-    if(data.id == undefined)
+    if (data.id == undefined)
         AlbumID = data.id;
     else
         AlbumID = data.id;
@@ -623,14 +643,14 @@ BG.event.downloadSong = function (data) {
     link.dispatchEvent(me);
 };
 
-BG.event.setShuffleSongs = function(data) {
-    if(ShuffleSongs) {
+BG.event.setShuffleSongs = function (data) {
+    if (ShuffleSongs) {
         ShuffleSongs = false;
         ShuffleSongsEl.className = '';
 
         BG.event.send({
             event: 'setShuffleToDisable',
-            data:''
+            data: ''
         });
     } else {
         ShuffleSongs = true;
@@ -643,14 +663,36 @@ BG.event.setShuffleSongs = function(data) {
     }
 };
 
+BG.event.showSongsOnBadge = function (data) {
+    if (data == true) {
+        chrome.browserAction.setBadgeText({text: SongsCount});
+        ShowSongsOnBadge = 'true';
+        ShowSongDurationOnBadge = 'false';
+    } else {
+        chrome.browserAction.setBadgeText({text: ''});
+        ShowSongsOnBadge = 'false';
+    }
+};
+
+BG.event.showSongDuration = function (data) {
+    if (data == true) {
+        chrome.browserAction.setBadgeText({text: SongCurrentDuration});
+        ShowSongDurationOnBadge = 'true';
+        ShowSongsOnBadge = 'false';
+    } else {
+        chrome.browserAction.setBadgeText({text: ''});
+        ShowSongDurationOnBadge = 'false';
+    }
+};
+
 /**
  * Set first song on load
  */
 BG.setFirstSong = function () {
-    if(LastActiveIndex)
+    if (LastActiveIndex)
         BG.removeActiveIndex(LastActiveIndex);
 
-    if(LastActive)
+    if (LastActive)
         LastActive.className = '';
 
     var element = document.getElementById('player-wrapper').getElementsByTagName('li')[0],
@@ -689,7 +731,6 @@ BG.setSongInfo = function (artist, title, totalTime) {
     MFArtist.textContent = artist;
     MFTitle.textContent = title;
 };
-
 
 /**
  * Set desktop notification
@@ -735,7 +776,7 @@ BG.removeActiveIndex = function (index) {
     var i = index - 1,
         element = document.getElementById('player-wrapper').getElementsByTagName('li')[i] || undefined;
 
-    if(element)
+    if (element)
         element.className = '';
 };
 

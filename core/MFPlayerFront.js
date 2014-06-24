@@ -35,7 +35,7 @@ var MFCore = {};
  */
 MFCore.setElements = function() {
     PlayerWrapper = document.getElementById('player-bound');
-    MFPlayer = document.getElementById('mf-player');
+    MFPlayer = new Audio();
     MFBuffer = document.getElementById('mf-buffer');
     MFProgress = document.getElementById('mf-progress');
     MFSongProgress = document.getElementById('mf-song-progress');
@@ -105,7 +105,7 @@ MFCore.events = function() {
     MFPrev.addEventListener('click', MFCore.playPrev);
     MFNext.addEventListener('click', MFCore.playNext);
 
-    MFVolume.addEventListener('change', function(e) {
+    MFVolume.addEventListener('input', function(e) {
         MFCore.changeVolume(e);
     });
 };

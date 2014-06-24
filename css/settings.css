@@ -23,11 +23,7 @@
   margin: 0;
   outline: none;
   box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  -moz-appearance: none;
-  -ms-appearance: none;
-  -webkit-appearance: none;
-  appearance: none; }
+  -moz-box-sizing: border-box; }
 
 html {
   height: 100%; }
@@ -241,3 +237,11 @@ a {
 
 .simple-text {
   margin: 10px; }
+
+#common-settings .set-line {
+  border: solid #B9C4DA;
+  border-width: 1px 0;
+  margin-bottom: -1px;
+  padding: 15px; }
+  #common-settings .set-line input[type="checkbox"] {
+    margin: 0 10px 0 0; }
