@@ -4,6 +4,7 @@ var
     ModalContent,
     ModalTitle,
     AddUser,
+    AddGroup,
     AccountsBlock,
     ShowSongsNumber,
     ShowSongDuration,
@@ -151,8 +152,19 @@ Settings.clearElement = function (element) {
         element.removeChild(element.firstChild);
 };
 
-Settings.addUser = function () {
-    ModalTitle.textContent = chrome.i18n.getMessage('addUser');
+Settings.addUser = function (e) {
+    var elAttr = e.target.getAttribute('id'),
+        groupAdd = false;
+
+    if (elAttr == 'add-group') {
+        groupAdd = true;
+    }
+
+    if (elAttr == 'add-group') {
+        ModalTitle.textContent = chrome.i18n.getMessage('addGroup');
+    } else {
+        ModalTitle.textContent = chrome.i18n.getMessage('addUser');
+    }
 
     var input = document.createElement('input'),
         div = document.createElement('div'),
@@ -160,12 +172,22 @@ Settings.addUser = function () {
         result = div.cloneNode(false),
         error = div.cloneNode(false);
 
-    error.textContent = chrome.i18n.getMessage('userNotFound');
+    if (elAttr == 'add-group') {
+        error.textContent = chrome.i18n.getMessage('groupNotFound');
+    } else {
+        error.textContent = chrome.i18n.getMessage('userNotFound');
+    }
+
     error.className = 'not-found';
     result.className = 'results';
 
     input.setAttribute('type', 'text');
-    input.setAttribute('placeholder', chrome.i18n.getMessage('searchUserExample'))
+    if (elAttr == 'add-group') {
+        input.setAttribute('placeholder', chrome.i18n.getMessage('searchGroupExample'));
+    } else {
+        input.setAttribute('placeholder', chrome.i18n.getMessage('searchUserExample'));
+    }
+
     input.className = 'user-find';
 
     input.addEventListener('input', function (e) {
@@ -181,72 +203,145 @@ Settings.addUser = function () {
         if (e.value != '' && e.value != '0') {
             input.className += ' searching';
 
-            VKit.api('users.get', ['user_ids=' + e.value, 'fields=photo_100'], function (response) {
-                input.classList.remove('searching');
+            if (elAttr == 'add-group') {
 
-                var userInfo = JSON.parse(response);
+                VKit.api('groups.getById', ['group_id=' + e.value], function (response) {
+                    input.classList.remove('searching');
 
-                if (userInfo.error != undefined) {
-                    Settings.removeButtonsFromModal();
-                    Settings.clearElement(result);
-                    result.appendChild(error);
-                } else {
-                    Settings.removeButtonsFromModal();
-                    Settings.clearElement(result);
-                    info = userInfo.response[0];
+                    var groupInfo = JSON.parse(response);
 
-                    var avatar = document.createElement('img'),
-                        name = div.cloneNode(false),
-                        userWrapper = div.cloneNode(false),
-                        add = div.cloneNode(false),
-                        menuWrapper = div.cloneNode(false),
-                        button = document.createElement('button'),
-                        exist = div.cloneNode(false);
+                    if (groupInfo.error != undefined) {
+                        Settings.removeButtonsFromModal();
+                        Settings.clearElement(result);
+                        result.appendChild(error);
+                    } else {
+                        Settings.removeButtonsFromModal();
+                        Settings.clearElement(result);
 
-                    avatar.src = info.photo_100;
-                    name.textContent = info.first_name + ' ' + info.last_name;
-                    button.textContent = chrome.i18n.getMessage('add');
-                    exist.textContent = chrome.i18n.getMessage('alreadyInYourList');
+                        info = groupInfo.response[0];
+                        console.log(info);
+                        var avatar = document.createElement('img'),
+                            name = div.cloneNode(false),
+                            userWrapper = div.cloneNode(false),
+                            add = div.cloneNode(false),
+                            menuWrapper = div.cloneNode(false),
+                            button = document.createElement('button'),
+                            exist = div.cloneNode(false);
 
-                    name.className = 'user-name';
-                    avatar.className = 'user-photo';
-                    userWrapper.className = 'info';
-                    button.className = 'regular-button';
-                    menuWrapper.className = 'bottom-buttons';
-                    exist.className = 'already-exists';
+                        avatar.src = info.photo_medium;
+                        name.textContent = info.name;
+                        button.textContent = chrome.i18n.getMessage('add');
+                        exist.textContent = chrome.i18n.getMessage('alreadyInYourList');
 
-                    userWrapper.appendChild(avatar);
-                    userWrapper.appendChild(name);
+                        name.className = 'user-name';
+                        avatar.className = 'user-photo';
+                        userWrapper.className = 'info';
+                        button.className = 'regular-button';
+                        menuWrapper.className = 'bottom-buttons';
+                        exist.className = 'already-exists';
 
-                    menuWrapper.appendChild(button);
+                        userWrapper.appendChild(avatar);
+                        userWrapper.appendChild(name);
 
-                    if (VKit.getUserInfo(info.uid) != undefined)
-                        userWrapper.appendChild(exist);
-                    else {
-                        button.addEventListener('click', function () {
-                            VKit.saveUserInfo({
-                                id: info.uid,
-                                firstName: info.first_name,
-                                lastName: info.last_name,
-                                photo: info.photo_100,
-                                token: VKit.authInfo('token')
+                        menuWrapper.appendChild(button);
+
+                        var groupId = '-' + info.gid;
+
+                        if (VKit.getUserInfo(groupId) != undefined) {
+                            userWrapper.appendChild(exist);
+                        } else {
+                            button.addEventListener('click', function () {
+                                VKit.saveUserInfo({
+                                    id: groupId,
+                                    firstName: info.name,
+                                    lastName: '',
+                                    photo: info.photo_medium,
+                                    token: VKit.authInfo('token')
+                                });
+                                Settings.clearElement(AccountsBlock);
+                                Settings.loadAccounts();
+                                Settings.hideOverlay();
+
+                                Settings.event.send({
+                                    event: 'updateUsersList',
+                                    data: ''
+                                });
                             });
-                            Settings.clearElement(AccountsBlock);
-                            Settings.loadAccounts();
-                            Settings.hideOverlay();
 
-                            Settings.event.send({
-                                event: 'updateUsersList',
-                                data: ''
-                            });
-                        });
-
-                        ModalContent.appendChild(menuWrapper);
+                            ModalContent.appendChild(menuWrapper);
+                        }
                     }
 
                     result.appendChild(userWrapper);
-                }
-            });
+                });
+            } else {
+                VKit.api('users.get', ['user_ids=' + e.value, 'fields=photo_100'], function (response) {
+                    input.classList.remove('searching');
+
+                    var userInfo = JSON.parse(response);
+
+                    if (userInfo.error != undefined) {
+                        Settings.removeButtonsFromModal();
+                        Settings.clearElement(result);
+                        result.appendChild(error);
+                    } else {
+                        Settings.removeButtonsFromModal();
+                        Settings.clearElement(result);
+                        info = userInfo.response[0];
+
+                        var avatar = document.createElement('img'),
+                            name = div.cloneNode(false),
+                            userWrapper = div.cloneNode(false),
+                            add = div.cloneNode(false),
+                            menuWrapper = div.cloneNode(false),
+                            button = document.createElement('button'),
+                            exist = div.cloneNode(false);
+
+                        avatar.src = info.photo_100;
+                        name.textContent = info.first_name + ' ' + info.last_name;
+                        button.textContent = chrome.i18n.getMessage('add');
+                        exist.textContent = chrome.i18n.getMessage('alreadyInYourList');
+
+                        name.className = 'user-name';
+                        avatar.className = 'user-photo';
+                        userWrapper.className = 'info';
+                        button.className = 'regular-button';
+                        menuWrapper.className = 'bottom-buttons';
+                        exist.className = 'already-exists';
+
+                        userWrapper.appendChild(avatar);
+                        userWrapper.appendChild(name);
+
+                        menuWrapper.appendChild(button);
+
+                        if (VKit.getUserInfo(info.uid) != undefined)
+                            userWrapper.appendChild(exist);
+                        else {
+                            button.addEventListener('click', function () {
+                                VKit.saveUserInfo({
+                                    id: info.uid,
+                                    firstName: info.first_name,
+                                    lastName: info.last_name,
+                                    photo: info.photo_100,
+                                    token: VKit.authInfo('token')
+                                });
+                                Settings.clearElement(AccountsBlock);
+                                Settings.loadAccounts();
+                                Settings.hideOverlay();
+
+                                Settings.event.send({
+                                    event: 'updateUsersList',
+                                    data: ''
+                                });
+                            });
+
+                            ModalContent.appendChild(menuWrapper);
+                        }
+
+                        result.appendChild(userWrapper);
+                    }
+                });
+            }
         } else {
             Settings.clearElement(result);
         }
@@ -285,6 +380,7 @@ Settings.setElements = function () {
     ModalContent = document.getElementById('modal-content');
     ModalTitle = document.getElementById('modal-title');
     AddUser = document.getElementById('add-acc');
+    AddGroup = document.getElementById('add-group');
     AccountsBlock = document.getElementById('accounts-block');
     ShowSongsNumber = document.getElementById('show-songs-number');
     ShowSongDuration = document.getElementById('show-song-duration');
@@ -292,6 +388,7 @@ Settings.setElements = function () {
 
 Settings.setEvents = function () {
     AddUser.addEventListener('click', Settings.addUser);
+    AddGroup.addEventListener('click', Settings.addUser);
     Overlay.addEventListener('click', Settings.hideOverlay);
     ShowSongsNumber.addEventListener('change', Settings.songsNumberAction);
     ShowSongDuration.addEventListener('change', Settings.songsDurationAction);
@@ -319,7 +416,7 @@ Settings.songsDurationAction = function (e) {
 
     Settings.setLocalStorage('showSongDuration', el.checked);
     Settings.event.send({
-        event:'showSongDuration',
+        event: 'showSongDuration',
         data: el.checked
     });
 };
@@ -335,7 +432,6 @@ Settings.common = function () {
         ShowSongsNumber.checked = false;
     }
 
-    console.log(ShowSD);
     if (ShowSD == 'true') {
         ShowSongDuration.checked = true;
     } else {

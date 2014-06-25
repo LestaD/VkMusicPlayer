@@ -52,6 +52,10 @@
         "message": "Enter user ID for example: 12376771 or his address for example: smokeelow"
     },
 
+    "searchGroupExample": {
+        "message": "Enter group ID for example: zapolk"
+    },
+
     "userNotFound": {
         "message": "User not found"
     },
@@ -142,5 +146,13 @@
 
     "showSongDurationOnBadge": {
         "message": "Show song duration on badge"
+    },
+
+    "addGroup": {
+        "message": "Add group"
+    },
+
+    "groupNotFound": {
+        "message": "Group not found"
     }
 }

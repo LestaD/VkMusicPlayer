@@ -50,7 +50,11 @@
     },
 
     "searchUserExample": {
-        "message": "Введие ID пользователя например: 12376771 или его адресс например: smokeelow"
+        "message": "Введите ID пользователя например: 12376771 или его адресс например: smokeelow"
+    },
+
+    "searchGroupExample": {
+        "message": "Введите ID группы например: zapolk"
     },
 
     "userNotFound": {
@@ -143,5 +147,13 @@
 
     "showSongDurationOnBadge": {
         "message": "Показывать продолжительность песни на значке"
+    },
+
+    "addGroup": {
+        "message": "Добавить группу"
+    },
+
+    "groupNotFound": {
+        "message": "Группа не найдена"
     }
 }

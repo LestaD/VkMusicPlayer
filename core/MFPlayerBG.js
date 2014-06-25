@@ -115,7 +115,6 @@ MFCore.updateState = function () {
     SongCurrentDuration = ct;
 
     if (ShowSongDurationOnBadge == 'true') {
-        console.log(ct);
         chrome.browserAction.setBadgeText({text: SongCurrentDuration});
     }
 

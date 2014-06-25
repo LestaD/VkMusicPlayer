@@ -78,6 +78,7 @@ BG.getAllAudio = function (callback, type, api, albumID) {
 
     var userID = VKit.getActiveAccount();
 
+    console.log(userID);
     if (!api) {
         VKit.api('audio.get', ['owner_id=' + userID, 'need_user=0'], function (response) {
             renderAudioList(response);
@@ -184,7 +185,7 @@ BG.getAllAudio = function (callback, type, api, albumID) {
                 list.appendChild(li);
             }
 
-            if(ShowSongsOnBadge == 'false' && ShowSongDurationOnBadge == 'true') {
+            if (ShowSongsOnBadge == 'false' && ShowSongDurationOnBadge == 'true') {
                 chrome.browserAction.setBadgeText({text: SongCurrentDuration});
             }
 
