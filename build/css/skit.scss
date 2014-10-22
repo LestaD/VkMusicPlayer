@@ -1,0 +1,61 @@
+@mixin animation-one($time) {
+  -webkit-transition: all $time cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  -moz-transition: all $time cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  -o-transition: all $time cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  transition: all $time cubic-bezier(0.165, 0.840, 0.440, 1.000);
+
+  -webkit-transition-timing-function: cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  -moz-transition-timing-function: cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  -o-transition-timing-function: cubic-bezier(0.165, 0.840, 0.440, 1.000);
+  transition-timing-function: cubic-bezier(0.165, 0.840, 0.440, 1.000);
+}
+
+@mixin animation-two($time) {
+  -webkit-transition: all $time cubic-bezier(0.000, 0.000, 0.580, 1.000);
+  -moz-transition: all $time cubic-bezier(0.000, 0.000, 0.580, 1.000);
+  -o-transition: all $time cubic-bezier(0.000, 0.000, 0.580, 1.000);
+  transition: all $time cubic-bezier(0.000, 0.000, 0.580, 1.000);
+
+  -webkit-transition-timing-function: cubic-bezier(0.000, 0.000, 0.580, 1.000);
+  -moz-transition-timing-function: cubic-bezier(0.000, 0.000, 0.580, 1.000);
+  -o-transition-timing-function: cubic-bezier(0.000, 0.000, 0.580, 1.000);
+  transition-timing-function: cubic-bezier(0.000, 0.000, 0.580, 1.000);
+}
+
+@mixin box-sizing($val) {
+  box-sizing: $val;
+  -moz-box-sizing: $val;
+}
+
+@mixin appearance($val) {
+  -moz-appearance: $val;
+  -ms-appearance: $val;
+  -webkit-appearance: $val;
+  appearance: $val;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.text-overflow {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.hide-opacity {
+  opacity: 0 !important;
+}
+
+.show-opacity {
+  opacity: 1 !important;
+}

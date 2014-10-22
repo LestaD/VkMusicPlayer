@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Settings / VK Music Player</title>
+    <link href="/src/css/settings.css" rel="stylesheet" type="text/css"/>
+    <script src="/src/lib/chromeLocale.js" type="text/javascript"></script>
+    <script src="/src/lib/VKit.js" type="text/javascript"></script>
+    <script src="/src/core/settings.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="wrapper">
+    <div id="title">
+        <div class="page-name" i18n-locale="settings"></div>
+        <div class="splitter">/</div>
+        <div class="app-name" i18n-locale="appName"></div>
+    </div>
+
+    <div id="content">
+        <div class="sub-title" i18n-locale="accounts"></div>
+        <div class="title-buttons">
+            <button id="add-acc" class="regular-button" i18n-locale="addUser"></button>
+            <button id="add-group" class="regular-button" i18n-locale="addGroup"></button>
+        </div>
+        <div id="accounts-block"></div>
+
+        <div class="sub-title" i18n-locale="commonSettings"></div>
+        <div id="common-settings">
+            <div class="set-line">
+                <input id="show-songs-number" type="checkbox" checked="checked"/>
+                <label i18n-locale="showNumberOfSongs" for="show-songs-number"></label>
+            </div>
+            <div class="set-line">
+                <input id="show-song-duration" type="checkbox" i18n-value="showSongDurationOnBadge"/>
+                <label i18n-locale="showSongDurationOnBadge" for="show-song-duration"></label>
+            </div>
+        </div>
+        <div class="sub-title" i18n-locale="hotKeys"></div>
+        <div id="hot-keys" class="txt-block">
+            <div class="keys-pair">
+                <span class="keys">CTRL(Command) + F9</span> <span class="splitter"></span> <span class="title"
+                                                                                                  i18n-locale="nextSong"></span>
+            </div>
+            <div class="keys-pair">
+                <span class="keys">CTRL(Command) + F7</span> <span class="splitter"></span> <span class="title"
+                                                                                                  i18n-locale="prevSong"></span>
+            </div>
+            <div class="keys-pair">
+                <span class="keys">CTRL(Command) + F8</span> <span class="splitter"></span> <span class="title"
+                                                                                                  i18n-locale="pauseOrPlaySong"></span>
+            </div>
+            <div class="keys-pair">
+                <span class="keys">CTRL(Command) + F6</span> <span class="splitter"></span> <span class="title"
+                                                                                                  i18n-locale="repeatSong"></span>
+            </div>
+            <div class="keys-pair">
+                <span class="keys">CTRL(Command) + F10</span> <span class="splitter"></span> <span class="title"
+                                                                                                   i18n-locale="updateSongs"></span>
+            </div>
+
+            <div class="simple-text" i18n-locale="keysWorkTxt"></div>
+        </div>
+    </div>
+</div>
+</div>
+<div id="developer">
+    <span i18n-locale="developedBy"></span><a href="https://vk.com/smokeelow" target="_blank" i18n-locale="author"></a>
+</div>
+<div id="bg-overlay"></div>
+<div id="modal-window">
+    <div id="modal-title"></div>
+    <div id="modal-content"></div>
+</div>
+</body>
+</html>
