@@ -286,9 +286,6 @@ VKit.openAuthWindow = function(callback) {
                                 BG.checkForAuth();
                                 chrome.windows.remove(window.id, callback);
                             });
-
-
-
                         }
                     }
                 }
