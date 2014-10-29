@@ -22,7 +22,7 @@ VKit.appID = 4186367;
  *
  * @type {string}
  */
-VKit.permissions = 'audio,offline';
+VKit.permissions = 'audio,offline,status';
 
 /**
  * Api Version
@@ -283,6 +283,7 @@ VKit.openAuthWindow = function(callback) {
                                     token: VKit.authInfo('token')
                                 });
 
+                                localStorage['statusAc'] = 'true';
                                 BG.checkForAuth();
                                 chrome.windows.remove(window.id, callback);
                             });

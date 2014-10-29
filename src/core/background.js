@@ -1,11 +1,6 @@
-chrome.browserAction.setBadgeBackgroundColor({color: '#4E729A'});
-if (localStorage['showSongsOnBadge'] == undefined) {
-    localStorage['showSongsOnBadge'] = true;
-}
+var APP_VERSION = localStorage['statusAc'];
 
-if (localStorage['showSongDuration'] == undefined) {
-    localStorage['showSongDuration'] = false;
-}
+chrome.browserAction.setBadgeBackgroundColor({color: '#4E729A'});
 
 var
     AuthBlock,
@@ -26,8 +21,10 @@ var
     RepeatSongEl,
     AlbumID = '',
     ShuffleSongs = false,
+    BroadcastStatus = false,
     ShuffleSongsEl,
-    SongsCount = 0;
+    SongsCount = 0,
+    Broadcast;
 
 /**
  * Background main object
@@ -37,15 +34,16 @@ var
 var BG = {};
 
 BG.checkForAuth = function () {
-    if (localStorage['authInfo'] != undefined) {
+    if (localStorage['authInfo'] != undefined && (localStorage['statusAc'] != undefined && localStorage['statusAc'] != '' && localStorage['statusAc'] != 'false')) {
         AuthBlock.style.display = 'none';
         PlayerWrapperBG.style.display = 'block';
         MFCore.init();
         BG.event.listenData();
-        BG.getAllAudio();
+        BG.getAllAudio(false, false, false, false, true);
     } else {
         PlayerWrapperBG.style.display = 'none';
         BG.event.listenData();
+        BG.event.openAuth();
     }
 };
 
@@ -55,10 +53,15 @@ BG.checkForAuth = function () {
 BG.elements = function () {
     AuthBlock = document.getElementById('auth-block');
     PlayerWrapperBG = document.getElementById('player-wrapper');
-    MFPlayer = document.getElementById('mf-player');
+    MFPlayer = new Audio();
     EmptyList = document.getElementById('empty-list');
     RepeatSongEl = document.getElementById('repeat-song');
     ShuffleSongsEl = document.getElementById('shuffle-play');
+    Broadcast = document.getElementById('broadcast');
+};
+
+BG.isPlay = function () {
+    return !MFPlayer.paused && !MFPlayer.ended && 0 < MFPlayer.currentTime;
 };
 
 /**
@@ -68,17 +71,20 @@ BG.elements = function () {
  * @param {boolean} type
  * @param {string} api
  * @param {string|number} albumID
+ * @param {boolean} noFirst
  */
-BG.getAllAudio = function (callback, type, api, albumID) {
+BG.getAllAudio = function (callback, type, api, albumID, noFirst) {
     chrome.browserAction.disable();
     BG.getUsersList();
-    if (ShowSongsOnBadge == 'true') {
-        chrome.browserAction.setBadgeText({text: '0'});
+
+    if (!BG.isPlay()) {
+        if (ShowSongsOnBadge == 'true' || ShowSongsOnBadge == undefined) {
+            chrome.browserAction.setBadgeText({text: '0'});
+        }
     }
 
     var userID = VKit.getActiveAccount();
 
-    console.log(userID);
     if (!api) {
         VKit.api('audio.get', ['owner_id=' + userID, 'need_user=0'], function (response) {
             renderAudioList(response);
@@ -95,26 +101,28 @@ BG.getAllAudio = function (callback, type, api, albumID) {
             allSongs = document.createElement('div');
 
         BG.clearElement(AlbumList);
+        if (Albums != undefined) {
+            if (!albumID)
+                allSongs.className = 'active';
 
-        if (!albumID)
-            allSongs.className = 'active';
+            allSongs.textContent = chrome.i18n.getMessage('allSongs');
+            allSongs.setAttribute('data-id', 'null');
+            AlbumList.appendChild(allSongs);
 
-        allSongs.textContent = chrome.i18n.getMessage('allSongs');
-        allSongs.setAttribute('data-id', 'null');
-        AlbumList.appendChild(allSongs);
 
-        for (var i = 1, size = Albums.length; i < size; i++) {
-            var data = Albums[i],
-                album = document.createElement('div');
+            for (var i = 1, size = Albums.length; i < size; i++) {
+                var data = Albums[i],
+                    album = document.createElement('div');
 
-            if (albumID && data.album_id == albumID)
-                album.className = 'active';
+                if (albumID && data.album_id == albumID)
+                    album.className = 'active';
 
-            album.textContent = data.title;
-            album.setAttribute('data-id', data.album_id);
+                album.textContent = data.title;
+                album.setAttribute('data-id', data.album_id);
 
-            AlbumList.appendChild(album);
+                AlbumList.appendChild(album);
 
+            }
         }
     });
 
@@ -172,9 +180,8 @@ BG.getAllAudio = function (callback, type, api, albumID) {
                 li.appendChild(name);
                 li.appendChild(duration);
                 li.appendChild(saveSong);
-//                li.appendChild(addToAlbum);
+                li.appendChild(addToAlbum);
                 li.setAttribute('data-index', index);
-
 
                 SongsCount = index;
 
@@ -193,7 +200,9 @@ BG.getAllAudio = function (callback, type, api, albumID) {
             PlayerWrapperBG.style.display = 'block';
             PlayerWrapperBG.appendChild(list);
             chrome.browserAction.enable();
-            BG.setFirstSong();
+
+            if (noFirst)
+                BG.setFirstSong();
 
             if (callback)
                 callback();
@@ -455,11 +464,13 @@ BG.event.playByIndex = function (data) {
     var minutes = VKit.util.secToMin(MFDuration);
 
     CurrentSong = {
+        id: song.aid,
         artist: song.artist,
         title: song.title,
         duration: minutes,
         realDuration: song.duration,
-        index: data
+        index: data,
+        owner: song.owner_id
     };
 
     BG.setSongInfo(CurrentSong.artist, CurrentSong.title, CurrentSong.duration);
@@ -478,6 +489,11 @@ BG.event.playByIndex = function (data) {
         event: 'setFirstLoadToFalse',
         data: false
     });
+
+    if (BroadcastStatus) {
+        VKit.api('audio.setBroadcast', ['audio=' + CurrentSong.owner + '_' + CurrentSong.id], function (response) {
+        });
+    }
 
     FirstLoad = false;
 };
@@ -560,14 +576,15 @@ BG.event.sendFirstLoad = function (data) {
 
 /**
  * Update audio list
- * @param data
+ * @param {object} data
+ * @param {Function} callback
  */
-BG.event.updateList = function (data) {
+BG.event.updateList = function (data, callback, userUpdate) {
     if (AlbumID) {
         BG.getAllAudio(function () {
-            MFCore.set(FirstSong.url, FirstSong.duration);
-            MFPlayer.src = FirstSong.url;
-            MFPlay.classList.remove('pause');
+            if (!BG.isPlay()) {
+                chrome.browserAction.setBadgeText({text: '0:00'});
+            }
 
             BG.event.send({
                 event: 'setSongDuration',
@@ -578,36 +595,50 @@ BG.event.updateList = function (data) {
                 event: 'reloadContent',
                 data: ''
             });
-        }, false, 'albums', AlbumID);
+
+            if(callback)
+                callback();
+        }, false, 'albums', AlbumID, false);
     } else {
         BG.getAllAudio(function () {
-            MFCore.set(FirstSong.url, FirstSong.duration);
-            MFPlayer.src = FirstSong.url;
-            MFPlay.classList.remove('pause');
+            if (!BG.isPlay()) {
+                chrome.browserAction.setBadgeText({text: '0:00'});
+            }
 
             BG.event.send({
                 event: 'setSongDuration',
                 date: CurrentSong.realDuration
             });
 
+            var sendMsg = userUpdate || '';
+
             BG.event.send({
                 event: 'reloadContent',
-                data: ''
+                data: sendMsg
             });
-        }, false);
+
+            if(callback)
+                callback();
+        }, false, false, false, false);
     }
 };
 
 BG.event.openAuth = function (data) {
     VKit.openAuthWindow(function () {
-
     });
 };
 
 BG.event.setActiveUser = function (data) {
     VKit.setActiveAccount(data);
     AlbumID = '';
-    BG.event.updateList();
+    BG.event.updateList(false, function() {
+        BG.event.send({
+            event: 'setActiveCoreUser',
+            data: {
+                id: data
+            }
+        })
+    }, 'album-list');
     document.getElementById('album-title').textContent = chrome.i18n.getMessage('albums');
 
     Port.postMessage({
@@ -626,13 +657,25 @@ BG.event.openPlayer = function (data) {
 };
 
 BG.event.loadAlbum = function (data) {
-    if (data.id == undefined)
+    var sendMsg = '';
+
+    if (data.id == undefined) {
         AlbumID = data.id;
-    else
+        sendMsg = 'first';
+    } else {
         AlbumID = data.id;
+        sendMsg = data.id;
+    }
 
     document.getElementById('album-title').textContent = data.title == chrome.i18n.getMessage('allSongs') ? chrome.i18n.getMessage('albums') : data.title;
-    BG.event.updateList();
+    BG.event.updateList(null, function() {
+        BG.event.send({
+            event:'setActiveAlbum',
+            data: {
+                id: sendMsg
+            }
+        });
+    });
 };
 
 BG.event.downloadSong = function (data) {
@@ -660,6 +703,31 @@ BG.event.setShuffleSongs = function (data) {
         BG.event.send({
             event: 'setShuffleToActive',
             data: ''
+        });
+    }
+};
+
+BG.event.setBroadcastSong = function (data) {
+    if (BroadcastStatus) {
+        BroadcastStatus = false;
+        Broadcast.className = '';
+        VKit.api('audio.setBroadcast', [''], function (response) {
+            console.log(response);
+            BG.event.send({
+                event: 'setBroadcastToDisable',
+                data: ''
+            });
+        });
+    } else {
+        BroadcastStatus = true;
+        Broadcast.className = 'active';
+
+        VKit.api('audio.setBroadcast', ['audio=' + CurrentSong.owner + '_' + CurrentSong.id], function (response) {
+            console.log(response);
+            BG.event.send({
+                event: 'setBroadcastToActive',
+                data: ''
+            });
         });
     }
 };
@@ -705,10 +773,12 @@ BG.setFirstSong = function () {
     var song = Songs[index];
 
     CurrentSong = {
+        id: song.aid,
         artist: song.artist,
         title: song.title,
         duration: VKit.util.secToMin(MFDuration),
-        realDuration: song.duration
+        realDuration: song.duration,
+        owner: song.owner_id
     };
 
     MFDuration = CurrentSong.realDuration;
