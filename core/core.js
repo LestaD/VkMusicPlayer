@@ -15,7 +15,10 @@ var
     AlbumList,
     AlbumTitle,
     AudioList,
-    ShuffleSongs;
+    ShuffleSongs,
+    Broadcast,
+    isEvents = false,
+    isElements = false;
 
 /**
  * Main object
@@ -27,7 +30,7 @@ var Core = {};
 Core.audioEvent = function () {
     var songs = document.getElementById('player-wrapper').getElementsByTagName('li');
 
-    for(var i = 0, size = songs.length; i < size; i++) {
+    for (var i = 0, size = songs.length; i < size; i++) {
         var song = songs[i];
         song.getElementsByTagName('a')[0].addEventListener('click', Core.downloadSong);
 
@@ -51,15 +54,15 @@ Core.downloadSong = function (e) {
 };
 
 Core.play = function (e) {
-    if(LastActiveIndex)
+    if (LastActiveIndex)
         Core.removeActiveIndex(LastActiveIndex);
 
-    if(LastActive)
+    if (LastActive)
         LastActive.className = '';
 
     var element;
 
-    if(e.target.nodeName == 'LI')
+    if (e.target.nodeName == 'LI')
         element = e.target;
     else
         element = e.target.parentNode;
@@ -121,7 +124,7 @@ Core.event.listenData = function () {
         bgPort.onMessage.addListener(function (msg) {
             console.log(msg);
 
-            if(Core.event.hasOwnProperty(msg.event))
+            if (Core.event.hasOwnProperty(msg.event))
                 Core.event[msg.event](msg.data);
         });
     });
@@ -169,9 +172,9 @@ Core.event.sendPlay = function () {
 Core.event.playSong = function (e) {
     var element = e.target;
 
-    if(element.className != 'save-song' && element.className != 'add-song') {
+    if (element.className != 'save-song' && element.className != 'add-song') {
 
-        if(element.nodeName != 'LI')
+        if (element.nodeName != 'LI')
             element = element.parentNode;
 
         var index = element.getAttribute('data-index');
@@ -189,11 +192,11 @@ Core.event.playSong = function (e) {
 
 Core.event.play = function (data) {
     MFPlay.addEventListener('click', function () {
-        if(FirstLoad) {
+        if (FirstLoad) {
             Core.event.sendPlay();
             FirstLoad = false;
         } else {
-            if(MFPlay.classList.contains('pause')) {
+            if (MFPlay.classList.contains('pause')) {
                 Core.event.send({
                     event: 'setToPause',
                     data: ''
@@ -216,10 +219,10 @@ Core.event.getSongDuration = function () {
 };
 
 Core.event.setSongDuration = function (data) {
-    if(data) {
+    if (data) {
         MFDuration = data.dur;
 
-        if(data.index)
+        if (data.index)
             Core.scrollToSong(AudioList.getElementsByTagName('li')[data.index]);
     }
 };
@@ -238,7 +241,7 @@ Core.event.timeUpdate = function (data) {
 };
 
 Core.event.changePlayToPause = function (data) {
-    if(!MFPlay.classList.contains('pause'))
+    if (!MFPlay.classList.contains('pause'))
         MFPlay.className += ' pause';
 };
 
@@ -287,7 +290,7 @@ Core.event.setNewHighLightElement = function (data) {
 Core.event.updateList = function () {
     Core.setSizeToMain();
     Core.showOverlay();
-    Core.hideOpacity('wrapper');
+    Core.setBlur('audio-list');
     Core.event.send({
         event: 'updateList',
         data: ''
@@ -300,12 +303,40 @@ Core.event.updateList = function () {
  * @param data
  */
 Core.event.reloadContent = function (data) {
-    document.getElementById('main').removeChild(document.getElementById('wrapper'));
-    Core.loadBackgroundContent(true, 'wrapper', function () {
+    var updElements = {
+        from: 'player-wrapper',
+        el: 'audio-list'
+    };
+
+    if(data == 'album-list') {
+        updElements.from = [updElements.from,'regular-buttons'];
+        updElements.el = [updElements.el, 'albums'];
+    }
+
+    Core.loadBackgroundContent(true, updElements, function () {
         Core.hideOverlay();
-        Core.showOpacity('wrapper');
         Core.removeSizeFromMain();
     });
+};
+
+Core.event.setActiveCoreUser = function(data) {
+    var activeUser = AllUsers.querySelector('.active');
+    console.log(data);
+    if(activeUser.getAttribute('data-id') != data.id) {
+        var newActive = AllUsers.querySelector('div[data-id="'+data.id+'"]');
+        activeUser.classList.remove('active');
+        newActive.classList.add('active');
+    }
+};
+
+Core.event.setActiveAlbum = function (data) {
+    var activeAlbum = AlbumList.querySelector('.active');
+
+    if (activeAlbum.getAttribute('data-id') != data.id) {
+        var newActive = data.id == 'first' ?  AlbumList.querySelector('div:first-child') : AlbumList.querySelector('div[data-id="' + data.id + '"]');
+        activeAlbum.classList.remove('active');
+        newActive.classList.add('active');
+    }
 };
 
 Core.event.setRepeatSong = function () {
@@ -341,12 +372,31 @@ Core.event.onOpen = function () {
     Core.event.getSongDuration();
 };
 
-Core.event.setShuffleToActive = function(data) {
+Core.event.setShuffleToActive = function (data) {
     ShuffleSongs.className = 'active';
 };
 
-Core.event.setShuffleToDisable = function(data) {
+Core.event.setShuffleToDisable = function (data) {
     ShuffleSongs.className = '';
+};
+
+Core.event.setBroadcastToActive = function (data) {
+    Broadcast.className = 'active';
+};
+
+Core.event.setBroadcastToDisable = function (data) {
+    Broadcast.className = '';
+};
+
+Core.setBlur = function(elemID) {
+    var el = document.getElementById(elemID);
+
+    if(el != undefined)
+        el.classList.add('blur');
+};
+
+Core.removeBlur = function(elemID) {
+    document.getElementById(elemID).classList.remove('blur');
 };
 
 /**
@@ -386,7 +436,10 @@ Core.hideOverlay = function () {
  * @param {string} elementID
  */
 Core.showOpacity = function (elementID) {
-    document.getElementById(elementID).className = 'show-opacity';
+    var el = document.getElementById(elementID);
+
+    el.classList.remove('hide-opacity');
+    el.classList.add('show-opacity');
 };
 
 
@@ -396,7 +449,10 @@ Core.showOpacity = function (elementID) {
  * @param {string} elementID
  */
 Core.hideOpacity = function (elementID) {
-    document.getElementById(elementID).className = 'hide-opacity';
+    var el = document.getElementById(elementID);
+
+    el.classList.remove('show-opacity');
+    el.classList.add('hide-opacity');
 };
 
 /**
@@ -404,39 +460,61 @@ Core.hideOpacity = function (elementID) {
  */
 Core.auth = function () {
     Core.loadBackgroundContent();
+
 };
 
 /**
  * Load background page
  *
  * @param {object|boolean} port
- * @param {string} elementID
+ * @param {object} elementID
  * @param {function} callback
  */
 Core.loadBackgroundContent = function (port, elementID, callback) {
     chrome.runtime.getBackgroundPage(function (win) {
         var node;
 
-        if(elementID && elementID != '') {
-            document.body.removeChild(document.getElementById('main'));
-            node = document.importNode(win.document.getElementById('main'), true);
-            document.body.appendChild(node);
+        if (typeof elementID == 'object') {
+            if(elementID.from instanceof Array) {
+                for(var i = 0, size = elementID.from.length; i < size; i++) {
+                    var from = elementID.from[i],
+                        el = elementID.el[i];
+
+                    document.getElementById(from).removeChild(document.getElementById(el));
+                    node = document.importNode(win.document.getElementById(el), true);
+                    document.getElementById(from).appendChild(node);
+
+                    if(from == 'regular-buttons') {
+                        Core.setAlbumEvents();
+                    }
+                }
+            } else {
+                document.getElementById(elementID.from).removeChild(document.getElementById(elementID.el));
+                node = document.importNode(win.document.getElementById(elementID.el), true);
+                document.getElementById(elementID.from).appendChild(node);
+            }
         } else {
             node = document.importNode(win.document.getElementById('main'), true);
             document.body.appendChild(node);
         }
 
-        if(localStorage['authInfo'] != undefined) {
+        if (localStorage['authInfo'] != undefined) {
             Core.audioEvent();
 
-            if(win.LastActiveIndex)
+            if (win.LastActiveIndex)
                 LastActiveIndex = win.LastActiveIndex;
 
             MFCore.init();
-            Core.setElements();
-            Core.setEvents();
 
-            if(!port) {
+            if (!isElements && !isEvents) {
+                Core.setElements();
+                Core.setEvents();
+
+                isElements = true;
+                isEvents = true;
+            }
+
+            if (!port) {
                 Core.event.listenData();
                 Core.event.connect();
             } else {
@@ -454,9 +532,10 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
             authButton.addEventListener('click', Core.event.authorize);
         }
 
-        Core.showOpacity('wrapper');
+        if (!elementID)
+            Core.showOpacity('wrapper');
 
-        if(callback)
+        if (callback)
             callback();
     });
 };
@@ -469,10 +548,10 @@ Core.openSettings = function () {
 Core.scrollToSong = function (element) {
     var offset = element.offsetTop - element.clientHeight - AudioList.scrollTop;
 
-    if(offset > AudioList.clientHeight)
-        element.scrollIntoView(false);
+    if (offset > AudioList.clientHeight)
+        AudioList.scrollTop = element.offsetTop - AudioList.clientHeight - (element.clientHeight - element.clientHeight / 2) - 1;
     else if (offset < 0)
-        element.scrollIntoView(true);
+        AudioList.scrollTop = element.offsetTop - (element.clientHeight + element.clientHeight / 2) - 4;
 };
 
 /**
@@ -483,7 +562,7 @@ Core.scrollToSong = function (element) {
 Core.openAllUsers = function (e) {
     CurrentUser.getElementsByClassName('user')[0].classList.toggle('active');
 
-    if(AllUsers.classList.contains('opened')) {
+    if (AllUsers.classList.contains('opened')) {
         AllUsers.removeAttribute('style');
         AllUsers.className = '';
     } else {
@@ -501,7 +580,7 @@ Core.openAllUsers = function (e) {
 Core.openAlbums = function (e) {
     AlbumTitle.classList.toggle('active');
 
-    if(AlbumList.classList.contains('opened')) {
+    if (AlbumList.classList.contains('opened')) {
         AlbumList.removeAttribute('style');
         AlbumList.className = '';
     } else {
@@ -515,20 +594,21 @@ Core.openAlbums = function (e) {
  * Choose user playlist
  */
 Core.allUsersEvents = function () {
-    var users = AllUsers.getElementsByClassName('user'),
-        currUser = CurrentUser.getElementsByClassName('user')[0];
+    var users = AllUsers.getElementsByClassName('user');
 
-    for(var i = 0, size = users.length; i < size; i++) {
+    for (var i = 0, size = users.length; i < size; i++) {
         users[i].addEventListener('click', function (e) {
             Core.setSizeToMain();
             Core.showOverlay();
-            Core.hideOpacity('wrapper');
+            Core.setBlur('audio-list');
+            var cloneUsr = this.cloneNode(true);
 
-            currUser.classList.toggle('active');
-            AllUsers.removeAttribute('style');
-            AllUsers.className = '';
-            CurrentUser.removeChild(currUser);
-            CurrentUser.appendChild(this);
+            if(!cloneUsr.classList.contains('active')) {
+                cloneUsr.classList.add('active');
+            }
+
+            CurrentUser.removeChild(CurrentUser.getElementsByClassName('user')[0])
+            CurrentUser.appendChild(cloneUsr);
 
             Core.event.send({
                 event: 'setActiveUser',
@@ -541,22 +621,21 @@ Core.allUsersEvents = function () {
 Core.allAlbumsEvents = function () {
     var allAlbums = AlbumList.getElementsByTagName('div');
 
-    for(var i = 0, size = allAlbums.length; i < size; i++) {
+    for (var i = 0, size = allAlbums.length; i < size; i++) {
         allAlbums[i].addEventListener('click', function (e) {
             Core.setSizeToMain();
             Core.showOverlay();
-            Core.hideOpacity('wrapper');
 
-            this.classList.toggle('active');
             AlbumTitle.textContent = this.textContent == chrome.i18n.getMessage('allSongs') ? chrome.i18n.getMessage('albums') : this.textContent;
             var dID = this.getAttribute('data-id'),
                 rID;
 
-            if(dID == 'null')
+            if (dID == 'null')
                 rID = undefined;
             else
                 rID = dID;
 
+            Core.setBlur('audio-list');
             Core.event.send({
                 event: 'loadAlbum',
                 data: {
@@ -568,9 +647,16 @@ Core.allAlbumsEvents = function () {
     }
 };
 
-Core.shuffleSongs = function() {
+Core.shuffleSongs = function () {
     Core.event.send({
-        event:'setShuffleSongs',
+        event: 'setShuffleSongs',
+        data: ''
+    });
+};
+
+Core.broadcastSong = function () {
+    Core.event.send({
+        event: 'setBroadcastSong',
         data: ''
     });
 };
@@ -587,6 +673,13 @@ Core.setEvents = function () {
     Core.allAlbumsEvents();
     AlbumTitle.addEventListener('click', Core.openAlbums);
     ShuffleSongs.addEventListener('click', Core.shuffleSongs);
+    Broadcast.addEventListener('click', Core.broadcastSong);
+};
+
+Core.setAlbumEvents = function() {
+    Core.setElements();
+    Core.allAlbumsEvents();
+    AlbumTitle.addEventListener('click', Core.openAlbums);
 };
 
 /**
@@ -604,6 +697,7 @@ Core.setElements = function () {
     AlbumTitle = document.getElementById('album-title');
     AudioList = document.getElementById('audio-list');
     ShuffleSongs = document.getElementById('shuffle-play');
+    Broadcast = document.getElementById('broadcast');
 };
 
 
@@ -612,7 +706,7 @@ Core.setElements = function () {
  */
 Core.rightClick = function () {
     document.addEventListener('contextmenu', function (e) {
-        if(!RightClick) {
+        if (!RightClick) {
             e.preventDefault();
             return false;
         }

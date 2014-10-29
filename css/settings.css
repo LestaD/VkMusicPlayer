@@ -245,3 +245,6 @@ a {
   padding: 15px; }
   #common-settings .set-line input[type="checkbox"] {
     margin: 0 10px 0 0; }
+
+.app-ver {
+  margin: 10px 0 0; }

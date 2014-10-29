@@ -155,5 +155,9 @@
 
     "groupNotFound": {
         "message": "Группа не найдена"
+    },
+
+    "broadcastSong": {
+        "message": "Транслировать аудиозапись"
     }
 }

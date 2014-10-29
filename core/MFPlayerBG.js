@@ -1,3 +1,11 @@
+if (localStorage['showSongsOnBadge'] == undefined) {
+    localStorage['showSongsOnBadge'] = false;
+}
+
+if (localStorage['showSongDuration'] == undefined) {
+    localStorage['showSongDuration'] = true;
+}
+
 var
     progressLine = 0,
     progressTime = 0,

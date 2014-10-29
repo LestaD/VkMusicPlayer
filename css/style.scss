@@ -1,4 +1,5 @@
 @import "skit";
+@import "parts/font-awesome";
 
 * {
   padding: 0;
@@ -474,13 +475,17 @@ $cWidth: 420px;
   }
 }
 
+.blur {
+  -webkit-filter: blur(1px);
+}
+
 #bg-overlay {
   @include animation-one(250ms);
   @extend .fixed;
-  background: rgba(0, 0, 0, .4);
+  background: rgba(0, 0, 0, 0.4);
   display: none;
-  top: 0;
-  height: 100%;
+  top: 50px;
+  height: calc(100% - 50px);
   width: 100%;
   z-index: 9999;
 
@@ -489,15 +494,18 @@ $cWidth: 420px;
     background: #fff url(../images/preloader.GIF) 10px center no-repeat;
     background-size: 15px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.46);
-    margin-top: -55px;
+    border-radius: 2px;
+    margin:20% auto 0;
     line-height: 50px;
     text-align: center;
     height: 50px;
-    width: 100%;
+    width: 60%;
+  }
+}
 
-    &.show {
-      margin-top: 0;
-    }
+@-webkit-keyframes spin {
+  to {
+    transform: rotate(1turn);
   }
 }
 
@@ -523,9 +531,30 @@ $cWidth: 420px;
 
   .icon-buttons {
     float: right;
+    font-size: 20px;
+    height: 100%;
+    padding-top: 8px;
+    color:#507292;
 
     & > div {
+      @include animation-one(250ms);
+      cursor: pointer;
+      float: left;
+      opacity: 0.6;
 
+      &:last-child {
+        margin: 0 15px 0 15px;
+      }
+
+      -webkit-animation: fa-spin 2s linear infinite;
+      -webkit-animation-play-state: paused;
+      animation: fa-spin 2s linear infinite;
+      animation-play-state: paused;
+
+      &:hover {
+        opacity: 1;
+        -webkit-animation-play-state: running;
+      }
     }
   }
 }
@@ -659,7 +688,7 @@ $cWidth: 420px;
   @include animation-two(200ms);
   @extend .absolute;
   top: 12px;
-  right: 36px;
+  right: 32px;
   background: url(/images/audio_icons_2x.png) -49px -49px no-repeat;
   background-size: 257px 63px;
   cursor: pointer;
@@ -673,30 +702,25 @@ $cWidth: 420px;
   }
 }
 
-#update-list {
-  background: url(/images/update-icon.png) center center no-repeat;
-
-  &:hover {
-    opacity: 1;
-  }
-}
-
-#settings {
-  background: url(/images/settings-icon.png) center center no-repeat;
-  margin: 0 15px 0 10px;
-
-  &:hover {
-    opacity: 1;
-  }
-}
-
-#update-list, #settings {
-  @include animation-one(250ms);
-  background-size: 19px;
+#broadcast {
+  @include animation-two(200ms);
+  @extend .absolute;
+  top: 12px;
+  right: 11px;
+  background: url(/images/audio_icons_2x.png) -65px -49px no-repeat;
+  background-size: 257px 63px;
   cursor: pointer;
-  margin-top: 5px;
-  float: left;
+  text-indent: -9999px;
   opacity: 0.6;
-  height: 25px;
-  width: 25px;
+  height: 14px;
+  width: 14px;
+
+  &.active {
+    opacity: 1 !important;
+  }
+}
+
+#search-wrapper {
+  height:30px;
+  width:100%;
 }

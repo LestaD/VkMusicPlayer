@@ -19,7 +19,6 @@
             <div class="c-wrapper">
                 <div id="controls">
                     <div id="player-bound" class="layer">
-                        <audio id="mf-player"></audio>
                         <div id="mf-player-wireframe">
                             <div class="play-buttons">
                                 <div id="mf-play" class="buttons"></div>
@@ -50,15 +49,17 @@
                             </div>
                             <div id="repeat-song" title="" i18n-locale="repeatSong" i18n-title="repeatSong"></div>
                             <div id="shuffle-play" i18n-title="shuffle"></div>
+                            <div id="broadcast" i18n-title="broadcastSong"></div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div id="search-wrapper">SEARCH</div>
         </div>
         <div id="empty-list" i18n-locale="noSongs"></div>
     </div>
     <div id="app-nav-block" class="app-nav">
-        <div class="regular-buttons">
+        <div id="regular-buttons" class="regular-buttons">
             <button id="change-user" class="rb-1">
                 <div id="all-users"></div>
                 <div id="current-user"></div>
@@ -69,8 +70,8 @@
             </button>
         </div>
         <div class="icon-buttons">
-            <div id="update-list" i18n-title="update"></div>
-            <div id="settings" i18n-title="settings"></div>
+            <div id="update-list" class="fa fa-repeat" i18n-title="update"></div>
+            <div id="settings" class="fa fa-cog" i18n-title="settings"></div>
         </div>
     </div>
     <div id="bg-overlay">
