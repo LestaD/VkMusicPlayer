@@ -30,7 +30,8 @@ var
     liCache = document.createElement('li'),
     spanCache = document.createElement('span'),
     aCache = document.createElement('a'),
-    imgCache = document.createElement('img');
+    imgCache = document.createElement('img'),
+    LAST_EMPTY = false;
 
 /**
  * Background main object
@@ -208,8 +209,19 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
             if (noFirst)
                 BG.setFirstSong();
 
+            if(LAST_EMPTY) {
+                LAST_EMPTY = false;
+                BG.event.send({
+                    event: 'loadEmptyPage',
+                    data: ''
+                });
+            } else {
+                LAST_EMPTY = false;
+            }
+
             if(typeof obj == 'object') {
                 if(obj.hasOwnProperty('userChecked') && obj.userChecked == true) {
+
                     BG.event.send({
                         event: 'reloadContent',
                         data: 'album-list'
@@ -222,6 +234,7 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
         } else {
             PlayerWrapperBG.style.display = 'none';
             EmptyList.style.display = 'block';
+            LAST_EMPTY = true;
 
             BG.event.send({
                 event: 'loadEmptyPage',
@@ -649,9 +662,6 @@ BG.event.openAuth = function (data) {
 
 BG.event.setActiveUser = function (data) {
     VKit.setActiveAccount(data);
-    AlbumID = '';
-    //BG.event.updateList(false, function () {
-    //}, 'album-list');
 
     BG.getAllAudio(function () {
         if (!BG.isPlay()) {

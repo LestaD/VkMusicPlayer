@@ -393,9 +393,7 @@ Core.event.loadEmptyPage = function(data) {
 
     Core.loadBackgroundContent(false,false, function() {
         Core.hideOverlay();
-        Core.setAlbumEvents();
-        Core.openAllUsers();
-        Core.allUsersEvents();
+        Core.setAllUsersEvents();
     });
 };
 
@@ -427,7 +425,12 @@ Core.removeSizeFromMain = function () {
 };
 
 Core.showOverlay = function () {
-    Overlay.style.display = 'block';
+    if(document.getElementById('empty-list').style.display == 'block') {
+        Overlay.setAttribute('style','display:block;top:0;height:100%;');
+    } else {
+        Overlay.style.display = 'block';
+    }
+
     setTimeout(function () {
         OverlayTxt.className += ' show';
     }, 50);
@@ -437,7 +440,7 @@ Core.hideOverlay = function () {
     OverlayTxt.classList.remove('show');
 
     setTimeout(function () {
-        Overlay.style.display = 'none';
+        Overlay.setAttribute('style','display:none;');
     }, 50);
 };
 
@@ -690,6 +693,12 @@ Core.setAlbumEvents = function() {
     Core.setElements();
     Core.allAlbumsEvents();
     AlbumTitle.addEventListener('click', Core.openAlbums);
+};
+
+Core.setAllUsersEvents = function() {
+    Core.setAlbumEvents();
+    CurrentUser.addEventListener('click', Core.openAllUsers);
+    Core.allUsersEvents();
 };
 
 /**
