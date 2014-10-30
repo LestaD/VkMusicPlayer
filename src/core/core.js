@@ -321,7 +321,7 @@ Core.event.reloadContent = function (data) {
 
 Core.event.setActiveCoreUser = function(data) {
     var activeUser = AllUsers.querySelector('.active');
-    console.log(data);
+
     if(activeUser.getAttribute('data-id') != data.id) {
         var newActive = AllUsers.querySelector('div[data-id="'+data.id+'"]');
         activeUser.classList.remove('active');
@@ -386,6 +386,17 @@ Core.event.setBroadcastToActive = function (data) {
 
 Core.event.setBroadcastToDisable = function (data) {
     Broadcast.className = '';
+};
+
+Core.event.loadEmptyPage = function(data) {
+    document.body.removeChild(document.getElementById('main'));
+
+    Core.loadBackgroundContent(false,false, function() {
+        Core.hideOverlay();
+        Core.setAlbumEvents();
+        Core.openAllUsers();
+        Core.allUsersEvents();
+    });
 };
 
 Core.setBlur = function(elemID) {

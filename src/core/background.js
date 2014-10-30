@@ -24,7 +24,13 @@ var
     BroadcastStatus = false,
     ShuffleSongsEl,
     SongsCount = 0,
-    Broadcast;
+    Broadcast,
+    divCache = document.createElement('div'),
+    listCache = document.createElement('ul'),
+    liCache = document.createElement('li'),
+    spanCache = document.createElement('span'),
+    aCache = document.createElement('a'),
+    imgCache = document.createElement('img');
 
 /**
  * Background main object
@@ -73,7 +79,7 @@ BG.isPlay = function () {
  * @param {string|number} albumID
  * @param {boolean} noFirst
  */
-BG.getAllAudio = function (callback, type, api, albumID, noFirst) {
+BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
     chrome.browserAction.disable();
     BG.getUsersList();
 
@@ -98,7 +104,7 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst) {
     VKit.api('audio.getAlbums', ['owner_id=' + userID, 'count=100'], function (response) {
         var AlbumList = document.getElementById('album-list'),
             Albums = JSON.parse(response).response,
-            allSongs = document.createElement('div');
+            allSongs = divCache.cloneNode(false);
 
         BG.clearElement(AlbumList);
         if (Albums != undefined) {
@@ -112,7 +118,7 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst) {
 
             for (var i = 1, size = Albums.length; i < size; i++) {
                 var data = Albums[i],
-                    album = document.createElement('div');
+                    album = divCache.cloneNode(false);
 
                 if (albumID && data.album_id == albumID)
                     album.className = 'active';
@@ -135,9 +141,7 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst) {
         if (oldList)
             PlayerWrapperBG.removeChild(oldList);
 
-        var list = document.createElement('ul'),
-            liCache = document.createElement('li'),
-            spanCache = document.createElement('span');
+        var list = listCache.cloneNode(false);
 
         list.setAttribute('id', 'audio-list');
 
@@ -149,7 +153,7 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst) {
                     artist = spanCache.cloneNode(false),
                     duration = spanCache.cloneNode(false),
                     addToAlbum = spanCache.cloneNode(false),
-                    saveSong = document.createElement('a'),
+                    saveSong = aCache.cloneNode(false),
                     index = i.toString();
 
                 /**
@@ -204,11 +208,26 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst) {
             if (noFirst)
                 BG.setFirstSong();
 
+            if(typeof obj == 'object') {
+                if(obj.hasOwnProperty('userChecked') && obj.userChecked == true) {
+                    BG.event.send({
+                        event: 'reloadContent',
+                        data: 'album-list'
+                    });
+                }
+            }
+
             if (callback)
                 callback();
         } else {
             PlayerWrapperBG.style.display = 'none';
             EmptyList.style.display = 'block';
+
+            BG.event.send({
+                event: 'loadEmptyPage',
+                data: ''
+            });
+
             chrome.browserAction.enable();
 
             if (callback)
@@ -219,8 +238,8 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst) {
 
 BG.getUsersList = function () {
     var usersInfo = VKit.getUserInfo(),
-        img = document.createElement('img'),
-        div = document.createElement('div'),
+        img = imgCache.cloneNode(false),
+        div = divCache.cloneNode(false),
         activeUser = document.getElementById('current-user'),
         allUsers = document.getElementById('all-users');
 
@@ -596,7 +615,7 @@ BG.event.updateList = function (data, callback, userUpdate) {
                 data: ''
             });
 
-            if(callback)
+            if (callback)
                 callback();
         }, false, 'albums', AlbumID, false);
     } else {
@@ -617,7 +636,7 @@ BG.event.updateList = function (data, callback, userUpdate) {
                 data: sendMsg
             });
 
-            if(callback)
+            if (callback)
                 callback();
         }, false, false, false, false);
     }
@@ -631,14 +650,33 @@ BG.event.openAuth = function (data) {
 BG.event.setActiveUser = function (data) {
     VKit.setActiveAccount(data);
     AlbumID = '';
-    BG.event.updateList(false, function() {
+    //BG.event.updateList(false, function () {
+    //}, 'album-list');
+
+    BG.getAllAudio(function () {
+        if (!BG.isPlay()) {
+            chrome.browserAction.setBadgeText({text: '0:00'});
+        }
+
+        BG.event.send({
+            event: 'setSongDuration',
+            date: CurrentSong.realDuration
+        });
+
         BG.event.send({
             event: 'setActiveCoreUser',
             data: {
                 id: data
             }
-        })
-    }, 'album-list');
+        });
+
+        //var sendMsg = 'album-list' || '';
+
+        //BG.event.send({
+        //    event: 'reloadContent',
+        //    data: sendMsg
+        //});
+    }, false, false, false, false, {userChecked: true});
     document.getElementById('album-title').textContent = chrome.i18n.getMessage('albums');
 
     Port.postMessage({
@@ -668,9 +706,9 @@ BG.event.loadAlbum = function (data) {
     }
 
     document.getElementById('album-title').textContent = data.title == chrome.i18n.getMessage('allSongs') ? chrome.i18n.getMessage('albums') : data.title;
-    BG.event.updateList(null, function() {
+    BG.event.updateList(null, function () {
         BG.event.send({
-            event:'setActiveAlbum',
+            event: 'setActiveAlbum',
             data: {
                 id: sendMsg
             }
