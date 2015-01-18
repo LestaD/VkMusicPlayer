@@ -1,6 +1,6 @@
 var APP_VERSION = localStorage['statusAc'];
 
-chrome.browserAction.setBadgeBackgroundColor({color: '#4E729A'});
+chrome.browserAction.setBadgeBackgroundColor({color: '#45658b'});
 
 var
     AuthBlock,
@@ -33,12 +33,43 @@ var
     imgCache = document.createElement('img'),
     LAST_EMPTY = false;
 
+//track hot keys
+chrome.commands.onCommand.addListener(function(command) {
+    if(command == 'Play') {
+        BG.event.setToPause();
+    } else if(command == 'Next') {
+        BG.event.playNext(true);
+    } else if(command == 'Prev') {
+        BG.event.playPrev();
+    } else if(command == 'Update') {
+
+    }
+});
+
 /**
  * Background main object
  *
  * @type {object}
  */
 var BG = {};
+
+/**
+ * Chrome Browser Action Wrapper
+ * @type {{setIcon: {pause: Function, play: Function}, setTitle: Function}}
+ */
+BG.browserAction = {
+    setIcon: {
+        pause: function () {
+            chrome.browserAction.setIcon({path: "/images/pause-icon.png"});
+        },
+        play: function () {
+            chrome.browserAction.setIcon({path: "/images/play-icon.png"});
+        }
+    },
+    setTitle: function (title) {
+        chrome.browserAction.setTitle({title: title});
+    }
+};
 
 BG.checkForAuth = function () {
     if (localStorage['authInfo'] != undefined && (localStorage['statusAc'] != undefined && localStorage['statusAc'] != '' && localStorage['statusAc'] != 'false')) {
@@ -139,8 +170,9 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
         MFProgress.style.width = 0;
         var oldList = PlayerWrapperBG.getElementsByTagName('ul')[0] || undefined;
 
-        if (oldList)
+        if (oldList) {
             PlayerWrapperBG.removeChild(oldList);
+        }
 
         var list = listCache.cloneNode(false);
 
@@ -206,10 +238,11 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
             PlayerWrapperBG.appendChild(list);
             chrome.browserAction.enable();
 
-            if (noFirst)
+            if (noFirst) {
                 BG.setFirstSong();
+            }
 
-            if(LAST_EMPTY) {
+            if (LAST_EMPTY) {
                 LAST_EMPTY = false;
                 BG.event.send({
                     event: 'loadEmptyPage',
@@ -219,8 +252,8 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
                 LAST_EMPTY = false;
             }
 
-            if(typeof obj == 'object') {
-                if(obj.hasOwnProperty('userChecked') && obj.userChecked == true) {
+            if (typeof obj == 'object') {
+                if (obj.hasOwnProperty('userChecked') && obj.userChecked == true) {
 
                     BG.event.send({
                         event: 'reloadContent',
@@ -229,8 +262,9 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
                 }
             }
 
-            if (callback)
+            if (callback && typeof callback == 'function') {
                 callback();
+            }
         } else {
             PlayerWrapperBG.style.display = 'none';
             EmptyList.style.display = 'block';
@@ -243,8 +277,9 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
 
             chrome.browserAction.enable();
 
-            if (callback)
+            if (callback && typeof callback == 'function') {
                 callback();
+            }
         }
     }
 };
@@ -381,8 +416,9 @@ BG.event.checkPlayed = function (data) {
  * @param {object} data
  */
 BG.event.sendPlay = function (data) {
-    if (data == null)
+    if (data == null) {
         BG.event.playByIndex(LastActiveIndex);
+    }
 };
 
 BG.event.checkFirstLoad = function (data) {
@@ -419,6 +455,7 @@ BG.event.setToPause = function (data) {
         MFPlayer.pause();
         MFPlay.classList.remove('pause');
 
+        BG.browserAction.setIcon.play();
         BG.event.send({
             event: 'changePauseToPlay',
             data: ''
@@ -427,12 +464,15 @@ BG.event.setToPause = function (data) {
 };
 
 BG.event.setToPlay = function (data) {
-    if (FirstLoad)
+    if (FirstLoad) {
         BG.event.playByIndex(LastActiveIndex);
+    }
 
     MFPlayer.play();
-    if (!MFPlay.classList.contains('pause'))
+
+    if (!MFPlay.classList.contains('pause')) {
         MFPlay.className += ' pause';
+    }
 
     BG.setActiveByIndex(LastActiveIndex);
 
@@ -443,6 +483,7 @@ BG.event.setToPlay = function (data) {
         });
     }
 
+    BG.browserAction.setIcon.pause();
     BG.event.send({
         event: 'changePlayToPause',
         data: ''
@@ -450,14 +491,18 @@ BG.event.setToPlay = function (data) {
 };
 
 BG.event.playNext = function (data) {
-    console.log(data);
-    if (data)
+    chrome.browserAction.setBadgeText({text: '0:00'});
+
+    if (data) {
         MFCore.playNext(data);
-    else
+    } else {
         MFCore.playNext();
+    }
 };
 
 BG.event.playPrev = function (data) {
+    chrome.browserAction.setBadgeText({text: '0:00'});
+
     MFCore.playPrev();
 };
 
@@ -467,8 +512,11 @@ BG.event.playPrev = function (data) {
  * @param {number} data
  */
 BG.event.playByIndex = function (data) {
-    if (typeof(MFPlayer.ontimeupdate) != 'function')
+    chrome.browserAction.setBadgeText({text: '0:00'});
+
+    if (typeof(MFPlayer.ontimeupdate) != 'function') {
         MFCore.events();
+    }
 
     var song = Songs[data];
     MFDuration = song.duration;
@@ -476,8 +524,9 @@ BG.event.playByIndex = function (data) {
     MFPlayer.src = song.url;
     MFPlayer.play();
 
-    if (!MFPlay.classList.contains('pause'))
+    if (!MFPlay.classList.contains('pause')) {
         MFPlay.className += ' pause';
+    }
 
     BG.removeActiveIndex(LastActiveIndex);
     BG.setActiveByIndex(data);
@@ -505,7 +554,11 @@ BG.event.playByIndex = function (data) {
         owner: song.owner_id
     };
 
+    var songTitle = CurrentSong.artist + ' - ' + CurrentSong.title;
+
     BG.setSongInfo(CurrentSong.artist, CurrentSong.title, CurrentSong.duration);
+    BG.browserAction.setIcon.pause();
+    BG.browserAction.setTitle(songTitle);
 
     BG.event.send({
         event: 'changeSongInfo',
@@ -614,6 +667,8 @@ BG.event.sendFirstLoad = function (data) {
 BG.event.updateList = function (data, callback, userUpdate) {
     if (AlbumID) {
         BG.getAllAudio(function () {
+            console.log(BG.isPlay());
+
             if (!BG.isPlay()) {
                 chrome.browserAction.setBadgeText({text: '0:00'});
             }
@@ -628,8 +683,9 @@ BG.event.updateList = function (data, callback, userUpdate) {
                 data: ''
             });
 
-            if (callback)
+            if (callback && typeof callback == 'function') {
                 callback();
+            }
         }, false, 'albums', AlbumID, false);
     } else {
         BG.getAllAudio(function () {
@@ -649,8 +705,9 @@ BG.event.updateList = function (data, callback, userUpdate) {
                 data: sendMsg
             });
 
-            if (callback)
+            if (callback && typeof callback == 'function') {
                 callback();
+            }
         }, false, false, false, false);
     }
 };
@@ -687,6 +744,7 @@ BG.event.setActiveUser = function (data) {
         //    data: sendMsg
         //});
     }, false, false, false, false, {userChecked: true});
+
     document.getElementById('album-title').textContent = chrome.i18n.getMessage('albums');
 
     Port.postMessage({
@@ -862,7 +920,7 @@ BG.setNotification = function (options) {
             chrome.notifications.clear(id, function (cleared) {
 
             });
-        }, 2500);
+        }, 1000);
     });
 };
 

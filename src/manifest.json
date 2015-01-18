@@ -13,18 +13,12 @@
     "browser_action": {
         "name": "__MSG_appName__",
         "default_icon": {
-            "19": "app-icon.png",
-            "38": "app-icon.png"
+            "19": "/images/play-icon.png",
+            "38": "/images/play-icon.png"
         },
         "default_title": "__MSG_appName__",
         "default_popup": "/templates/window.html"
     },
-    "content_scripts": [
-        {
-            "matches": ["*://*/*"],
-            "js": ["/core/content.js"]
-        }
-    ],
     "permissions": [
         "tabs",
         "activeTab",
@@ -42,6 +36,40 @@
         "96": "app-icon.png",
         "128": "app-icon.png",
         "256": "app-icon.png"
+    },
+    "commands": {
+        "Play": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+F",
+                "mac": "MediaPlayPause"
+            },
+            "description": "__MSG_pauseOrPlaySong__",
+            "global": true
+        },
+        "Next": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+H",
+                "mac": "MediaNextTrack"
+            },
+            "description": "__MSG_nextSong__",
+            "global": true
+        },
+        "Prev": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+V",
+                "mac": "MediaPrevTrack"
+            },
+            "description": "__MSG_prevSong__",
+            "global": true
+        },
+        "Repeat": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+K",
+                "mac": "Command+Shift+K"
+            },
+            "description": "__MSG_repeatSong__",
+            "global": true
+        }
     },
     "manifest_version": 2
 }

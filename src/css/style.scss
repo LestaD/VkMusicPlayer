@@ -495,7 +495,7 @@ $cWidth: 420px;
     background-size: 15px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.46);
     border-radius: 2px;
-    margin:20% auto 0;
+    margin: 20% auto 0;
     line-height: 50px;
     text-align: center;
     height: 50px;
@@ -534,7 +534,7 @@ $cWidth: 420px;
     font-size: 20px;
     height: 100%;
     padding-top: 8px;
-    color:#507292;
+    color: #507292;
 
     & > div {
       @include animation-one(250ms);
@@ -721,6 +721,6 @@ $cWidth: 420px;
 }
 
 #search-wrapper {
-  height:30px;
-  width:100%;
+  height: 30px;
+  width: 100%;
 }

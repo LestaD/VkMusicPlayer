@@ -189,8 +189,9 @@ MFCore.events = function () {
 MFCore.playNext = function (force) {
     var fp = false;
 
-    if (typeof force == 'boolean')
+    if (typeof force == 'boolean') {
         fp = true;
+    }
 
     if (ShuffleSongs) {
         var random = Math.floor((Math.random() * Songs.length));

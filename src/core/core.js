@@ -174,8 +174,9 @@ Core.event.playSong = function (e) {
 
     if (element.className != 'save-song' && element.className != 'add-song') {
 
-        if (element.nodeName != 'LI')
+        if (element.nodeName != 'LI') {
             element = element.parentNode;
+        }
 
         var index = element.getAttribute('data-index');
 
@@ -222,8 +223,9 @@ Core.event.setSongDuration = function (data) {
     if (data) {
         MFDuration = data.dur;
 
-        if (data.index)
+        if (data.index) {
             Core.scrollToSong(AudioList.getElementsByTagName('li')[data.index]);
+        }
     }
 };
 
@@ -241,8 +243,9 @@ Core.event.timeUpdate = function (data) {
 };
 
 Core.event.changePlayToPause = function (data) {
-    if (!MFPlay.classList.contains('pause'))
+    if (!MFPlay.classList.contains('pause')) {
         MFPlay.className += ' pause';
+    }
 };
 
 /**
@@ -400,8 +403,9 @@ Core.event.loadEmptyPage = function(data) {
 Core.setBlur = function(elemID) {
     var el = document.getElementById(elemID);
 
-    if(el != undefined)
+    if(el != undefined) {
         el.classList.add('blur');
+    }
 };
 
 Core.removeBlur = function(elemID) {
@@ -643,10 +647,11 @@ Core.allAlbumsEvents = function () {
             var dID = this.getAttribute('data-id'),
                 rID;
 
-            if (dID == 'null')
+            if (dID == 'null') {
                 rID = undefined;
-            else
+            } else {
                 rID = dID;
+            }
 
             Core.setBlur('audio-list');
             Core.event.send({

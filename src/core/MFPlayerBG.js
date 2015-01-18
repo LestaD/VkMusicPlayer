@@ -83,8 +83,7 @@ MFCore.setElements = function () {
  * Update track timeline
  */
 MFCore.updateState = function () {
-    var
-        songTime = Math.round((parseFloat(MFProgress.style.width) / songProgressWidth) * MFDuration),
+    var songTime = Math.round((parseFloat(MFProgress.style.width) / songProgressWidth) * MFDuration),
         seconds = 0,
         minutes = 0;
 
@@ -104,8 +103,9 @@ MFCore.updateState = function () {
 
     progressBarWidth = ((MFPlayer.currentTime / MFDuration) * songProgressWidth);
 
-    if (seconds < 10)
+    if (seconds < 10) {
         seconds = '0' + seconds;
+    }
 
     var ct = minutes + ':' + seconds,
         pbWidth = progressBarWidth + 'px';
@@ -115,7 +115,9 @@ MFCore.updateState = function () {
     SongCurrentDuration = ct;
 
     if (ShowSongDurationOnBadge == 'true') {
-        chrome.browserAction.setBadgeText({text: SongCurrentDuration});
+        if (BG.isPlay() && SongCurrentDuration != '0:00') {
+            chrome.browserAction.setBadgeText({text: SongCurrentDuration});
+        }
     }
 
     BG.event.send({
