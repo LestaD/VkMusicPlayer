@@ -29,7 +29,7 @@ VKit.permissions = 'audio,offline,status';
  *
  * @type {number}
  */
-VKit.apiVer = 5.21;
+VKit.apiVer = 5.27;
 
 /**
  * Redirect URL after successful authentication

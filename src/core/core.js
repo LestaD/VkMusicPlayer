@@ -18,7 +18,10 @@ var
     ShuffleSongs,
     Broadcast,
     isEvents = false,
-    isElements = false;
+    isElements = false,
+    CONST = {
+        PAGE_RELOADED: false
+    };
 
 /**
  * Main object
@@ -54,18 +57,21 @@ Core.downloadSong = function (e) {
 };
 
 Core.play = function (e) {
-    if (LastActiveIndex)
+    if (LastActiveIndex) {
         Core.removeActiveIndex(LastActiveIndex);
+    }
 
-    if (LastActive)
+    if (LastActive) {
         LastActive.className = '';
+    }
 
     var element;
 
-    if (e.target.nodeName == 'LI')
+    if (e.target.nodeName == 'LI') {
         element = e.target;
-    else
+    } else {
         element = e.target.parentNode;
+    }
 
     var index = element.getAttribute('data-index');
 
@@ -122,10 +128,13 @@ Core.event.listenData = function () {
     chrome.runtime.onConnect.addListener(function (bgPort) {
         Core.event.onOpen();
         bgPort.onMessage.addListener(function (msg) {
-            console.log(msg);
+            if(msg.event != 'setProgressBarWidth' && msg.event != 'timeUpdate' && msg.event != 'setLoadProgress') {
+                console.log(msg);
+            }
 
-            if (Core.event.hasOwnProperty(msg.event))
+            if (Core.event.hasOwnProperty(msg.event)) {
                 Core.event[msg.event](msg.data);
+            }
         });
     });
 };
@@ -227,6 +236,17 @@ Core.event.setSongDuration = function (data) {
             Core.scrollToSong(AudioList.getElementsByTagName('li')[data.index]);
         }
     }
+};
+
+Core.event.setPageReloadInfo = function() {
+    Core.event.send({
+        event: 'setPageReloadInfo',
+        data: CONST.PAGE_RELOADED
+    });
+};
+
+Core.event.setPageReloadState = function(data) {
+    CONST.PAGE_RELOADED = data;
 };
 
 Core.event.changeSongInfo = function (data) {
@@ -373,6 +393,7 @@ Core.event.authorize = function () {
 Core.event.onOpen = function () {
     Core.event.checkFirstLoad();
     Core.event.getSongDuration();
+    Core.event.setPageReloadInfo();
 };
 
 Core.event.setShuffleToActive = function (data) {
@@ -518,10 +539,13 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
         if (localStorage['authInfo'] != undefined) {
             Core.audioEvent();
 
-            if (win.LastActiveIndex)
+            if (win.LastActiveIndex) {
                 LastActiveIndex = win.LastActiveIndex;
+            }
 
-            MFCore.init();
+            if(!CONST.PAGE_RELOADED) {
+                MFCore.init();
+            }
 
             if (!isElements && !isEvents) {
                 Core.setElements();
@@ -538,7 +562,9 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
                 Core.event.onOpen();
             }
 
-            Core.event.play();
+            if(!CONST.PAGE_RELOADED) {
+                Core.event.play();
+            }
         } else {
             var authButton = document.getElementById('vk-auth');
             document.getElementById('app-nav-block').style.display = 'none';

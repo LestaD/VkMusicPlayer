@@ -194,7 +194,12 @@ MFCore.playNext = function (force) {
         if (RepeatSong && !fp) {
             BG.event.playByIndex(LastActiveIndex);
         } else {
-            var next = parseInt(LastActiveIndex) + 1;
+
+            if (!BG.checkCurrentListState()) {
+                var next = 1;
+            } else {
+                var next = parseInt(LastActiveIndex) + 1;
+            }
 
             if ((next + 1) > Songs.length)
                 next = 1;
@@ -224,8 +229,17 @@ MFCore.playPrev = function () {
 
         BG.event.playByIndex(random);
     } else {
-        if (prev <= 0)
+
+        if (!BG.checkCurrentListState()) {
+            prev = -1;
+        }
+
+        if (prev <= 0) {
             prev = Songs.length - 1;
+        }
+
+
+        console.log(prev);
 
         BG.event.playByIndex(prev);
     }

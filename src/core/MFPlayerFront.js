@@ -33,7 +33,7 @@ var MFCore = {};
 /**
  * Init DOM elements
  */
-MFCore.setElements = function() {
+MFCore.setElements = function () {
     PlayerWrapper = document.getElementById('player-bound');
     MFPlayer = new Audio();
     MFBuffer = document.getElementById('mf-buffer');
@@ -58,7 +58,7 @@ MFCore.setElements = function() {
  * Change current time by mouse clicking
  * @param {event} e
  */
-MFCore.changeCurrentTime = function(e) {
+MFCore.changeCurrentTime = function (e) {
     progressLine = e.pageX - MFSongProgress.getBoundingClientRect().left;
     progressTime = (progressLine / songProgressWidth) * MFDuration;
 };
@@ -66,7 +66,7 @@ MFCore.changeCurrentTime = function(e) {
 /**
  * Start play
  */
-MFCore.startPlay = function() {
+MFCore.startPlay = function () {
     MFPlayer.play();
     MFPlay.className += ' pause';
 };
@@ -77,7 +77,7 @@ MFCore.startPlay = function() {
  * @param {string} url
  * @param {number} duration
  */
-MFCore.set = function(url, duration) {
+MFCore.set = function (url, duration) {
     MFDuration = duration;
     MFTimeAll.textContent = VKit.util.secToMin(duration);
 };
@@ -85,16 +85,16 @@ MFCore.set = function(url, duration) {
 /**
  * Player front-end events
  */
-MFCore.events = function() {
-    MFSongProgress.addEventListener('mousedown', function(e) {
+MFCore.events = function () {
+    MFSongProgress.addEventListener('mousedown', function (e) {
         progressBarClickState = true;
         MFCore.changeCurrentTime(e);
     });
-    MFSongProgress.addEventListener('mousemove', function(e) {
-        if(progressBarClickState)
+    MFSongProgress.addEventListener('mousemove', function (e) {
+        if (progressBarClickState)
             MFCore.changeCurrentTime(e);
     });
-    MFSongProgress.addEventListener('mouseup', function() {
+    MFSongProgress.addEventListener('mouseup', function () {
         progressBarClickState = false;
         Core.event.send({
             event: 'changeCurrentTime',
@@ -105,7 +105,7 @@ MFCore.events = function() {
     MFPrev.addEventListener('click', MFCore.playPrev);
     MFNext.addEventListener('click', MFCore.playNext);
 
-    MFVolume.addEventListener('input', function(e) {
+    MFVolume.addEventListener('input', function (e) {
         MFCore.changeVolume(e);
     });
 };
@@ -113,7 +113,7 @@ MFCore.events = function() {
 /**
  * Play next song
  */
-MFCore.playNext = function() {
+MFCore.playNext = function () {
     Core.event.send({
         event: 'playNext',
         data: true
@@ -123,7 +123,7 @@ MFCore.playNext = function() {
 /**
  * Play prev song
  */
-MFCore.playPrev = function() {
+MFCore.playPrev = function () {
     Core.event.send({
         event: 'playPrev',
         data: ''
@@ -135,7 +135,7 @@ MFCore.playPrev = function() {
  *
  * @param {event} e
  */
-MFCore.changeVolume = function(e) {
+MFCore.changeVolume = function (e) {
     var width = MFVolume.value + '%';
     MFVolumeLine.style.width = width;
     volume = MFVolume.value / MFVolume.max;
@@ -153,7 +153,7 @@ MFCore.changeVolume = function(e) {
 /**
  * Init Player
  */
-MFCore.init = function() {
+MFCore.init = function () {
     MFCore.setElements();
     MFCore.events();
 };

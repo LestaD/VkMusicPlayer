@@ -31,7 +31,10 @@ var
     spanCache = document.createElement('span'),
     aCache = document.createElement('a'),
     imgCache = document.createElement('img'),
-    LAST_EMPTY = false;
+    LAST_EMPTY = false,
+    CONST = {
+        PAGE_RELOADED: false
+    };
 
 //track hot keys
 chrome.commands.onCommand.addListener(function(command) {
@@ -112,7 +115,6 @@ BG.isPlay = function () {
  * @param {boolean} noFirst
  */
 BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
-    chrome.browserAction.disable();
     BG.getUsersList();
 
     if (!BG.isPlay()) {
@@ -139,6 +141,7 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
             allSongs = divCache.cloneNode(false);
 
         BG.clearElement(AlbumList);
+
         if (Albums != undefined) {
             if (!albumID)
                 allSongs.className = 'active';
@@ -152,14 +155,14 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
                 var data = Albums[i],
                     album = divCache.cloneNode(false);
 
-                if (albumID && data.album_id == albumID)
+                if (albumID && data.album_id == albumID) {
                     album.className = 'active';
+                }
 
                 album.textContent = data.title;
                 album.setAttribute('data-id', data.album_id);
 
                 AlbumList.appendChild(album);
-
             }
         }
     });
@@ -167,7 +170,7 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
     function renderAudioList(response) {
         Songs = JSON.parse(response).response || undefined;
 
-        MFProgress.style.width = 0;
+        //MFProgress.style.width = 0;
         var oldList = PlayerWrapperBG.getElementsByTagName('ul')[0] || undefined;
 
         if (oldList) {
@@ -236,11 +239,17 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
             EmptyList.style.display = 'none';
             PlayerWrapperBG.style.display = 'block';
             PlayerWrapperBG.appendChild(list);
-            chrome.browserAction.enable();
 
             if (noFirst) {
                 BG.setFirstSong();
             }
+
+            CONST.PAGE_RELOADED = true;
+
+            BG.event.send({
+                event:'setPageReloadState',
+                data: CONST.PAGE_RELOADED
+            });
 
             if (LAST_EMPTY) {
                 LAST_EMPTY = false;
@@ -270,12 +279,17 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
             EmptyList.style.display = 'block';
             LAST_EMPTY = true;
 
+            CONST.PAGE_RELOADED = true;
+
+            BG.event.send({
+                event:'setPageReloadState',
+                data: CONST.PAGE_RELOADED
+            });
+
             BG.event.send({
                 event: 'loadEmptyPage',
                 data: ''
             });
-
-            chrome.browserAction.enable();
 
             if (callback && typeof callback == 'function') {
                 callback();
@@ -332,15 +346,17 @@ BG.clearElement = function (element) {
 };
 
 BG.setActiveSong = function (index) {
-    var eIndex = index - 1,
-        e = document.getElementById('player-wrapper').getElementsByTagName('li')[eIndex];
+    if(CurrentSong.owner == VKit.getActiveAccount() && CurrentSong.albumID == AlbumID) {
+        var eIndex = index - 1,
+            e = document.getElementById('player-wrapper').getElementsByTagName('li')[eIndex];
 
-    if (LastActive)
-        LastActive.className = '';
+        if (LastActive)
+            LastActive.className = '';
 
-    e.className = 'active';
-    LastActive = e;
-    LastActiveIndex = eIndex;
+        e.className = 'active';
+        LastActive = e;
+        LastActiveIndex = eIndex;
+    }
 };
 
 /**
@@ -474,9 +490,9 @@ BG.event.setToPlay = function (data) {
         MFPlay.className += ' pause';
     }
 
-    BG.setActiveByIndex(LastActiveIndex);
+    if (LastActiveIndex == 1 && !CONST.PAGE_RELOADED) {
+        BG.setActiveByIndex(LastActiveIndex);
 
-    if (LastActiveIndex == 1) {
         BG.event.send({
             event: 'sendSetFirstActive',
             data: ''
@@ -551,7 +567,8 @@ BG.event.playByIndex = function (data) {
         duration: minutes,
         realDuration: song.duration,
         index: data,
-        owner: song.owner_id
+        owner: song.owner_id,
+        albumID: AlbumID
     };
 
     var songTitle = CurrentSong.artist + ' - ' + CurrentSong.title;
@@ -738,7 +755,7 @@ BG.event.setActiveUser = function (data) {
         });
 
         //var sendMsg = 'album-list' || '';
-
+        //
         //BG.event.send({
         //    event: 'reloadContent',
         //    data: sendMsg
@@ -860,6 +877,14 @@ BG.event.showSongDuration = function (data) {
     }
 };
 
+BG.event.setPageReloadInfo = function(data) {
+    CONST.PAGE_RELOADED = data;
+};
+
+BG.checkCurrentListState = function() {
+    return CurrentSong.albumID == AlbumID && CurrentSong.owner == VKit.getActiveAccount();
+};
+
 /**
  * Set first song on load
  */
@@ -884,7 +909,8 @@ BG.setFirstSong = function () {
         title: song.title,
         duration: VKit.util.secToMin(MFDuration),
         realDuration: song.duration,
-        owner: song.owner_id
+        owner: song.owner_id,
+        albumID: AlbumID
     };
 
     MFDuration = CurrentSong.realDuration;
