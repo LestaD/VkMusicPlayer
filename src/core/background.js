@@ -34,7 +34,8 @@ var
     LAST_EMPTY = false,
     CONST = {
         PAGE_RELOADED: false
-    };
+    },
+    CACHE = {};
 
 //track hot keys
 chrome.commands.onCommand.addListener(function(command) {
@@ -81,6 +82,7 @@ BG.checkForAuth = function () {
         MFCore.init();
         BG.event.listenData();
         BG.getAllAudio(false, false, false, false, true);
+        BG.setSearchType();
     } else {
         PlayerWrapperBG.style.display = 'none';
         BG.event.listenData();
@@ -99,8 +101,18 @@ BG.elements = function () {
     RepeatSongEl = document.getElementById('repeat-song');
     ShuffleSongsEl = document.getElementById('shuffle-play');
     Broadcast = document.getElementById('broadcast');
+    CACHE.SEARCH_TYPES_LIST = document.getElementById('types-list');
+    CACHE.SEARCH_DEFAULT_TYPE = document.getElementById('search-default-type');
+    CACHE.LYRICS_CHECKBOX = document.getElementById('lyrics');
+    CACHE.LYRICS_CHECKBOX_LABEL = document.querySelector('#lyrics-checkbox-wrapper label');
+    CACHE.LYRICS_CLICK_OVERLAY = document.querySelector('#lyrics-checkbox-wrapper .click-overlay');
 };
 
+/**
+ * Check if player in action
+ *
+ * @returns {boolean}
+ */
 BG.isPlay = function () {
     return !MFPlayer.paused && !MFPlayer.ended && 0 < MFPlayer.currentTime;
 };
@@ -113,6 +125,7 @@ BG.isPlay = function () {
  * @param {string} api
  * @param {string|number} albumID
  * @param {boolean} noFirst
+ * @param {object} obj
  */
 BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
     BG.getUsersList();
@@ -433,6 +446,7 @@ BG.event.checkPlayed = function (data) {
  */
 BG.event.sendPlay = function (data) {
     if (data == null) {
+        console.log(LastActiveIndex);
         BG.event.playByIndex(LastActiveIndex);
     }
 };
@@ -480,7 +494,10 @@ BG.event.setToPause = function (data) {
 };
 
 BG.event.setToPlay = function (data) {
+    console.log(FirstLoad);
+    console.log(LastActiveIndex);
     if (FirstLoad) {
+
         BG.event.playByIndex(LastActiveIndex);
     }
 
@@ -879,6 +896,36 @@ BG.event.showSongDuration = function (data) {
 
 BG.event.setPageReloadInfo = function(data) {
     CONST.PAGE_RELOADED = data;
+};
+
+BG.event.changeAudioSearchType = function(data) {
+    var el = CACHE.SEARCH_TYPES_LIST.querySelector('div[data-index="'+data.index+'"]');
+    CACHE.SEARCH_DEFAULT_TYPE.textContent = data.text;
+
+    CACHE.SEARCH_TYPES_LIST.querySelector('.active').classList.remove('active');
+    el.classList.add('active');
+    CACHE.SEARCH_TYPES_LIST.insertAdjacentElement('afterBegin', el);
+
+    BG.event.send({
+        event: 'setAudioSearchType',
+        data: data
+    });
+};
+
+BG.event.setAudioSearchLyricsCheckbox = function(data) {
+    CACHE.LYRICS_CHECKBOX.checked = data;
+
+    BG.event.send({
+        event: 'setAudioSearchLyricsCheckbox',
+        data: data
+    });
+};
+
+BG.setSearchType = function() {
+    var el = CACHE.SEARCH_TYPES_LIST.getElementsByTagName('div')[0];
+
+    CACHE.SEARCH_DEFAULT_TYPE.textContent = el.textContent;
+    el.className += ' active';
 };
 
 BG.checkCurrentListState = function() {

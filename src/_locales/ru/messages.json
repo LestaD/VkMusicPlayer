@@ -155,5 +155,13 @@
 
     "groupNotFound": {
         "message": "Группа не найдена"
+    },
+
+    "search": {
+        "message": "Поиск"
+    },
+
+    "onlyText": {
+        "message": "Только с текстом"
     }
 }

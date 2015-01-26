@@ -154,5 +154,21 @@
 
     "groupNotFound": {
         "message": "Group not found"
+    },
+
+    "search": {
+        "message": "Search"
+    },
+
+    "byPopular": {
+        "message": "By popularity"
+    },
+
+    "byDuration": {
+        "message": "By duration"
+    },
+
+    "onlyText": {
+        "message": "Only with text"
     }
 }

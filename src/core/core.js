@@ -21,6 +21,11 @@ var
     isElements = false,
     CONST = {
         PAGE_RELOADED: false
+    },
+    CACHE = {
+        PRELOADERS: {
+            AUDIO_LIST: '<div class="lines"><div class="element"></div><div class="element"></div><div class="element"></div><div class="element"></div><div class="element"></div></div>'
+        }
     };
 
 /**
@@ -128,7 +133,7 @@ Core.event.listenData = function () {
     chrome.runtime.onConnect.addListener(function (bgPort) {
         Core.event.onOpen();
         bgPort.onMessage.addListener(function (msg) {
-            if(msg.event != 'setProgressBarWidth' && msg.event != 'timeUpdate' && msg.event != 'setLoadProgress') {
+            if (msg.event != 'setProgressBarWidth' && msg.event != 'timeUpdate' && msg.event != 'setLoadProgress') {
                 console.log(msg);
             }
 
@@ -238,14 +243,14 @@ Core.event.setSongDuration = function (data) {
     }
 };
 
-Core.event.setPageReloadInfo = function() {
+Core.event.setPageReloadInfo = function () {
     Core.event.send({
         event: 'setPageReloadInfo',
         data: CONST.PAGE_RELOADED
     });
 };
 
-Core.event.setPageReloadState = function(data) {
+Core.event.setPageReloadState = function (data) {
     CONST.PAGE_RELOADED = data;
 };
 
@@ -331,8 +336,8 @@ Core.event.reloadContent = function (data) {
         el: 'audio-list'
     };
 
-    if(data == 'album-list') {
-        updElements.from = [updElements.from,'regular-buttons'];
+    if (data == 'album-list') {
+        updElements.from = [updElements.from, 'regular-buttons'];
         updElements.el = [updElements.el, 'albums'];
     }
 
@@ -342,11 +347,11 @@ Core.event.reloadContent = function (data) {
     });
 };
 
-Core.event.setActiveCoreUser = function(data) {
+Core.event.setActiveCoreUser = function (data) {
     var activeUser = AllUsers.querySelector('.active');
 
-    if(activeUser.getAttribute('data-id') != data.id) {
-        var newActive = AllUsers.querySelector('div[data-id="'+data.id+'"]');
+    if (activeUser.getAttribute('data-id') != data.id) {
+        var newActive = AllUsers.querySelector('div[data-id="' + data.id + '"]');
         activeUser.classList.remove('active');
         newActive.classList.add('active');
     }
@@ -356,7 +361,7 @@ Core.event.setActiveAlbum = function (data) {
     var activeAlbum = AlbumList.querySelector('.active');
 
     if (activeAlbum.getAttribute('data-id') != data.id) {
-        var newActive = data.id == 'first' ?  AlbumList.querySelector('div:first-child') : AlbumList.querySelector('div[data-id="' + data.id + '"]');
+        var newActive = data.id == 'first' ? AlbumList.querySelector('div:first-child') : AlbumList.querySelector('div[data-id="' + data.id + '"]');
         activeAlbum.classList.remove('active');
         newActive.classList.add('active');
     }
@@ -412,24 +417,41 @@ Core.event.setBroadcastToDisable = function (data) {
     Broadcast.className = '';
 };
 
-Core.event.loadEmptyPage = function(data) {
+Core.event.loadEmptyPage = function (data) {
     document.body.removeChild(document.getElementById('main'));
 
-    Core.loadBackgroundContent(false,false, function() {
+    Core.loadBackgroundContent(false, false, function () {
         Core.hideOverlay();
         Core.setAllUsersEvents();
     });
 };
 
-Core.setBlur = function(elemID) {
+Core.event.setAudioSearchType = function (data) {
+    var el = CACHE.SEARCH_TYPES_LIST.querySelector('div[data-index="' + data.index + '"]');
+
+    console.log(data.index);
+
+    CACHE.SEARCH_DEFAULT_TYPE.textContent = data.text;
+    CACHE.SEARCH_TYPES_LIST.querySelector('.active').classList.remove('active');
+    el.classList.add('active');
+
+    Core.hideSearchTypesList();
+    CACHE.SEARCH_TYPES_LIST.insertAdjacentElement('afterBegin', el);
+};
+
+Core.event.setAudioSearchLyricsCheckbox = function(data) {
+    CACHE.LYRICS_CHECKBOX.checked = data;
+};
+
+Core.setBlur = function (elemID) {
     var el = document.getElementById(elemID);
 
-    if(el != undefined) {
+    if (el != undefined) {
         el.classList.add('blur');
     }
 };
 
-Core.removeBlur = function(elemID) {
+Core.removeBlur = function (elemID) {
     document.getElementById(elemID).classList.remove('blur');
 };
 
@@ -450,8 +472,8 @@ Core.removeSizeFromMain = function () {
 };
 
 Core.showOverlay = function () {
-    if(document.getElementById('empty-list').style.display == 'block') {
-        Overlay.setAttribute('style','display:block;top:0;height:100%;');
+    if (document.getElementById('empty-list').style.display == 'block') {
+        Overlay.setAttribute('style', 'display:block;top:0;height:100%;');
     } else {
         Overlay.style.display = 'block';
     }
@@ -465,7 +487,7 @@ Core.hideOverlay = function () {
     OverlayTxt.classList.remove('show');
 
     setTimeout(function () {
-        Overlay.setAttribute('style','display:none;');
+        Overlay.setAttribute('style', 'display:none;');
     }, 50);
 };
 
@@ -513,8 +535,8 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
         var node;
 
         if (typeof elementID == 'object') {
-            if(elementID.from instanceof Array) {
-                for(var i = 0, size = elementID.from.length; i < size; i++) {
+            if (elementID.from instanceof Array) {
+                for (var i = 0, size = elementID.from.length; i < size; i++) {
                     var from = elementID.from[i],
                         el = elementID.el[i];
 
@@ -522,7 +544,7 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
                     node = document.importNode(win.document.getElementById(el), true);
                     document.getElementById(from).appendChild(node);
 
-                    if(from == 'regular-buttons') {
+                    if (from == 'regular-buttons') {
                         Core.setAlbumEvents();
                     }
                 }
@@ -543,7 +565,7 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
                 LastActiveIndex = win.LastActiveIndex;
             }
 
-            if(!CONST.PAGE_RELOADED) {
+            if (!CONST.PAGE_RELOADED) {
                 MFCore.init();
             }
 
@@ -562,7 +584,7 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
                 Core.event.onOpen();
             }
 
-            if(!CONST.PAGE_RELOADED) {
+            if (!CONST.PAGE_RELOADED) {
                 Core.event.play();
             }
         } else {
@@ -646,7 +668,7 @@ Core.allUsersEvents = function () {
             Core.setBlur('audio-list');
             var cloneUsr = this.cloneNode(true);
 
-            if(!cloneUsr.classList.contains('active')) {
+            if (!cloneUsr.classList.contains('active')) {
                 cloneUsr.classList.add('active');
             }
 
@@ -705,6 +727,45 @@ Core.broadcastSong = function () {
     });
 };
 
+Core.audioSearch = function () {
+
+};
+
+Core.searchTypesList = function (e) {
+    e.stopPropagation();
+
+    if (CACHE.SEARCH_DEFAULT_TYPE.classList.contains('show')) {
+        Core.hideSearchTypesList();
+    } else {
+        Core.openSearchTypesList();
+    }
+};
+
+Core.hideSearchTypesList = function () {
+    CACHE.SEARCH_TYPES_LIST.classList.remove('show');
+};
+
+Core.openSearchTypesList = function () {
+    CACHE.SEARCH_TYPES_LIST.classList.add('show');
+};
+
+Core.trackActiveElements = function (e) {
+    if (e.target != CACHE.SEARCH_TYPES_LIST && CACHE.SEARCH_TYPES_LIST.classList.contains('show')) {
+        console.log(e.target);
+        Core.hideSearchTypesList();
+    }
+};
+
+Core.changeAudioSearchType = function (e) {
+    Core.event.send({
+        event: 'changeAudioSearchType',
+        data: {
+            text: this.textContent,
+            index: this.getAttribute('data-index')
+        }
+    });
+};
+
 /**
  * Init events
  */
@@ -718,18 +779,42 @@ Core.setEvents = function () {
     AlbumTitle.addEventListener('click', Core.openAlbums);
     ShuffleSongs.addEventListener('click', Core.shuffleSongs);
     Broadcast.addEventListener('click', Core.broadcastSong);
+    Core.setAudioSearchConfigsEvents();
+    document.addEventListener('click', Core.trackActiveElements);
 };
 
-Core.setAlbumEvents = function() {
+Core.setAlbumEvents = function () {
     Core.setElements();
     Core.allAlbumsEvents();
     AlbumTitle.addEventListener('click', Core.openAlbums);
 };
 
-Core.setAllUsersEvents = function() {
+Core.setAllUsersEvents = function () {
     Core.setAlbumEvents();
     CurrentUser.addEventListener('click', Core.openAllUsers);
     Core.allUsersEvents();
+};
+
+Core.setAudioSearchConfigsEvents = function () {
+    CACHE.SEARCH.addEventListener('input', Core.audioSearch);
+    CACHE.AUDIO_SEARCH_TYPE.addEventListener('click', Core.searchTypesList);
+
+    var types = CACHE.SEARCH_TYPES_LIST.getElementsByTagName('div');
+
+    for (var i = 0, size = types.length; i < size; i++) {
+        var el = types[i];
+
+        el.addEventListener('click', Core.changeAudioSearchType);
+    }
+
+    CACHE.LYRICS_CLICK_OVERLAY.addEventListener('click', function (e) {
+        e.stopPropagation();
+
+        Core.event.send({
+            event: 'setAudioSearchLyricsCheckbox',
+            data: !CACHE.LYRICS_CHECKBOX.checked
+        });
+    });
 };
 
 /**
@@ -748,8 +833,14 @@ Core.setElements = function () {
     AudioList = document.getElementById('audio-list');
     ShuffleSongs = document.getElementById('shuffle-play');
     Broadcast = document.getElementById('broadcast');
+    CACHE.SEARCH = document.getElementById('search');
+    CACHE.AUDIO_SEARCH_TYPE = document.getElementById('audio-search-type');
+    CACHE.SEARCH_DEFAULT_TYPE = document.getElementById('search-default-type');
+    CACHE.SEARCH_TYPES_LIST = document.getElementById('types-list');
+    CACHE.LYRICS_CHECKBOX = document.getElementById('lyrics');
+    CACHE.LYRICS_CHECKBOX_LABEL = document.querySelector('#lyrics-checkbox-wrapper label');
+    CACHE.LYRICS_CLICK_OVERLAY = document.querySelector('#lyrics-checkbox-wrapper .click-overlay');
 };
-
 
 /**
  * Control right click
@@ -771,4 +862,7 @@ Core.init = function () {
     Core.rightClick();
 };
 
+/**
+ * Start point
+ */
 window.addEventListener('DOMContentLoaded', Core.init);

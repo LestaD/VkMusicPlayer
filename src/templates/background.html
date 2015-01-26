@@ -54,7 +54,27 @@
                     </div>
                 </div>
             </div>
-            <div id="search-wrapper">SEARCH</div>
+            <div id="search-wrapper">
+                <div class="search-input">
+                    <input type="text" id="search" value="" placeholder="" i18n-placeholder="search"/>
+                    <i id="empty-search" class="fa fa-times"></i>
+                </div>
+                <div class="search-configs">
+                    <div id="audio-search-type">
+                        <div id="search-default-type"></div>
+                        <div id="types-list">
+                            <div class="option" i18n-locale="byPopular" data-index="0"></div>
+                            <div class="option" i18n-locale="byDuration" data-index="1"></div>
+                        </div>
+                    </div>
+                    <div id="lyrics-checkbox-wrapper">
+                        <input type="checkbox" id="lyrics"/>
+                        <span class="checkbox"><span class="arrow"></span></span>
+                        <label for="lyrics" i18n-locale="onlyText"></label>
+                        <div class="click-overlay" i18n-title="onlyText"></div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div id="empty-list" i18n-locale="noSongs"></div>
     </div>
