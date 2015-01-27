@@ -60,21 +60,34 @@
                     <i id="empty-search" class="fa fa-times"></i>
                 </div>
                 <div class="search-configs">
-                    <div id="audio-search-type">
-                        <div id="search-default-type"></div>
-                        <div id="types-list">
-                            <div class="option" i18n-locale="byPopular" data-index="0"></div>
-                            <div class="option" i18n-locale="byDuration" data-index="1"></div>
+                    <div id="open-search-settings" i18n-locale="settings"></div>
+                    <div id="search-settings">
+                        <div id="song-search-type" class="search-select-type">
+                            <div id="song-search-default-type" class="select-default-value"></div>
+                            <div id="song-types-list" class="types-list">
+                                <div class="option" i18n-locale="byCompositor" i18n-title="byCompositor" data-index="0" data-value="1"></div>
+                                <div class="option" i18n-locale="bySongName" i18n-title="bySongName" data-index="1" data-value="0"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div id="lyrics-checkbox-wrapper">
-                        <input type="checkbox" id="lyrics"/>
-                        <span class="checkbox"><span class="arrow"></span></span>
-                        <label for="lyrics" i18n-locale="onlyText"></label>
-                        <div class="click-overlay" i18n-title="onlyText"></div>
+
+                        <div id="audio-search-type" class="search-select-type">
+                            <div id="search-default-type" class="select-default-value"></div>
+                            <div id="types-list" class="types-list">
+                                <div class="option" i18n-locale="byPopular" i18n-title="byPopular" data-index="0" data-value="2"></div>
+                                <div class="option" i18n-locale="byDuration" i18n-title="byDuration" data-index="1" data-value="1"></div>
+                            </div>
+                        </div>
+                        <div id="lyrics-checkbox-wrapper">
+                            <input type="checkbox" id="lyrics"/>
+                            <span class="checkbox"><span class="arrow"></span></span>
+                            <label for="lyrics" i18n-locale="onlyText"></label>
+                            <div class="click-overlay" i18n-title="onlyText"></div>
+                        </div>
                     </div>
                 </div>
             </div>
+            <div id="ajax-content-loader"><div class="lines"><div class="element"></div><div class="element"></div><div class="element"></div><div class="element"></div><div class="element"></div></div></div>
+            <div id="songs-list"></div>
         </div>
         <div id="empty-list" i18n-locale="noSongs"></div>
     </div>

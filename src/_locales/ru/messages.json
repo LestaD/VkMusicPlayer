@@ -163,5 +163,21 @@
 
     "onlyText": {
         "message": "Только с текстом"
+    },
+
+    "byCompositor": {
+        "message": "По исполнителям"
+    },
+
+    "bySongName": {
+        "message": "По композициям"
+    },
+
+    "nothingFound": {
+        "message": "Ничего не найдено"
+    },
+
+    "alreadyInList": {
+        "message": "Эта песня уже в ваших аудиозаписях"
     }
 }

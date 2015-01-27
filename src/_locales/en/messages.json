@@ -170,5 +170,21 @@
 
     "onlyText": {
         "message": "Only with text"
+    },
+
+    "byCompositor": {
+        "message": "By author"
+    },
+
+    "bySongName": {
+        "message": "By song name"
+    },
+
+    "nothingFound": {
+        "message": "Nothing found"
+    },
+
+    "alreadyInList": {
+        "message": "This song already in your audio list"
     }
 }

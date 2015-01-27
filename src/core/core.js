@@ -85,8 +85,7 @@ Core.play = function (e) {
 };
 
 Core.removeActiveIndex = function (index) {
-    var i = index - 1;
-    document.getElementById('player-wrapper').getElementsByTagName('li')[i].className = '';
+    document.querySelector('#songs-list li[data-aid="' + index + '"]').className = '';
 };
 
 /**
@@ -95,8 +94,7 @@ Core.removeActiveIndex = function (index) {
  * @param {number} index
  */
 Core.setActiveByIndex = function (index) {
-    var i = index - 1;
-    document.getElementById('player-wrapper').getElementsByTagName('li')[i].className = 'active';
+    document.querySelector('#songs-list li[data-aid="' + index + '"]').className = 'active';
 };
 
 /**
@@ -161,7 +159,7 @@ Core.event.checkFirstLoad = function () {
  * @param {object} data
  */
 Core.event.setFirstLoadToTrue = function (data) {
-    FirstLoad = data;
+    FirstLoad = true;
 };
 
 /**
@@ -170,7 +168,7 @@ Core.event.setFirstLoadToTrue = function (data) {
  * @param {object} data
  */
 Core.event.setFirstLoadToFalse = function (data) {
-    FirstLoad = data;
+    FirstLoad = false;
 };
 
 /**
@@ -192,15 +190,16 @@ Core.event.playSong = function (e) {
             element = element.parentNode;
         }
 
-        var index = element.getAttribute('data-index');
-
         MFTimeCurrent.textContent = '0:00';
         MFBuffer.style.width = 0;
         MFProgress.style.width = 0;
 
         Core.event.send({
             event: 'playByIndex',
-            data: index
+            data: {
+                index:element.getAttribute('data-index'),
+                aid: element.getAttribute('data-aid')
+            }
         });
     }
 };
@@ -306,10 +305,16 @@ Core.event.setLoadProgress = function (data) {
  * @param {{oldIndex: number, newIndex: number}} data
  */
 Core.event.setNewHighLightElement = function (data) {
-    Core.removeActiveIndex(data.oldIndex);
-    Core.setActiveByIndex(data.newIndex);
-    var index = data.newIndex - 1;
-    Core.scrollToSong(AudioList.getElementsByTagName('li')[index]);
+    var newEl = document.querySelector('#songs-list li[data-aid="'+data.newIndex+'"'),
+        oldEl = document.querySelector('#songs-list li[data-aid="'+data.oldIndex+'"');
+
+    if(oldEl) {
+        oldEl.className = '';
+    }
+
+    newEl.className = 'active';
+
+    Core.scrollToSong(newEl);
 };
 
 /**
@@ -333,7 +338,7 @@ Core.event.updateList = function () {
 Core.event.reloadContent = function (data) {
     var updElements = {
         from: 'player-wrapper',
-        el: 'audio-list'
+        el: 'songs-list'
     };
 
     if (data == 'album-list') {
@@ -341,9 +346,18 @@ Core.event.reloadContent = function (data) {
         updElements.el = [updElements.el, 'albums'];
     }
 
+    if (data.removeSearchAjax) {
+        CACHE.SEARCH_LOAD = true;
+    }
+
     Core.loadBackgroundContent(true, updElements, function () {
-        Core.hideOverlay();
-        Core.removeSizeFromMain();
+        if (data.removeSearchAjax) {
+            CACHE.SEARCH_LOAD = false;
+            Core.hideSearchAjax();
+        } else {
+            Core.hideOverlay();
+            Core.removeSizeFromMain();
+        }
     });
 };
 
@@ -427,21 +441,33 @@ Core.event.loadEmptyPage = function (data) {
 };
 
 Core.event.setAudioSearchType = function (data) {
-    var el = CACHE.SEARCH_TYPES_LIST.querySelector('div[data-index="' + data.index + '"]');
+    var mainEl = document.getElementById(data.searchTypeID),
+        el = mainEl.querySelector('.search-select-type div[data-index="' + data.index + '"]'),
+        searchDefValue = mainEl.querySelector('.select-default-value'),
+        typesList = mainEl.querySelector('.types-list');
 
-    console.log(data.index);
+    searchDefValue.textContent = data.text;
 
-    CACHE.SEARCH_DEFAULT_TYPE.textContent = data.text;
-    CACHE.SEARCH_TYPES_LIST.querySelector('.active').classList.remove('active');
+    typesList.querySelector('.active').classList.remove('active');
     el.classList.add('active');
 
-    Core.hideSearchTypesList();
-    CACHE.SEARCH_TYPES_LIST.insertAdjacentElement('afterBegin', el);
+    typesList.classList.remove('show');
+    typesList.insertAdjacentElement('afterBegin', el);
 };
 
-Core.event.setAudioSearchLyricsCheckbox = function(data) {
+Core.event.setAudioSearchLyricsCheckbox = function (data) {
     CACHE.LYRICS_CHECKBOX.checked = data;
 };
+
+Core.event.searchSongs = function () {
+    Core.event.send({
+        event: 'searchAudio',
+        data: {
+            q: CACHE.SEARCH.value
+        }
+    });
+};
+
 
 Core.setBlur = function (elemID) {
     var el = document.getElementById(elemID);
@@ -565,17 +591,19 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
                 LastActiveIndex = win.LastActiveIndex;
             }
 
-            if (!CONST.PAGE_RELOADED) {
+            if (!CONST.PAGE_RELOADED || !CACHE.SEARCH_LOAD) {
                 MFCore.init();
             }
 
             if (!isElements && !isEvents) {
-                Core.setElements();
+                Core.setElements.all();
                 Core.setEvents();
 
                 isElements = true;
                 isEvents = true;
             }
+
+            Core.setElements.search();
 
             if (!port) {
                 Core.event.listenData();
@@ -584,7 +612,7 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
                 Core.event.onOpen();
             }
 
-            if (!CONST.PAGE_RELOADED) {
+            if (!CONST.PAGE_RELOADED && !CACHE.SEARCH_LOAD) {
                 Core.event.play();
             }
         } else {
@@ -600,8 +628,9 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
         if (!elementID)
             Core.showOpacity('wrapper');
 
-        if (callback)
+        if (callback && typeof callback == 'function') {
             callback();
+        }
     });
 };
 
@@ -611,12 +640,13 @@ Core.openSettings = function () {
 };
 
 Core.scrollToSong = function (element) {
-    var offset = element.offsetTop - element.clientHeight - AudioList.scrollTop;
+    var songList = CACHE.SEARCH.value > 0 ? CACHE.SEARCH_LIST : AudioList,
+        offset = element.offsetTop - element.clientHeight - songList.scrollTop;
 
     if (offset > AudioList.clientHeight)
-        AudioList.scrollTop = element.offsetTop - AudioList.clientHeight - (element.clientHeight - element.clientHeight / 2) - 1;
+        songList.scrollTop = element.offsetTop - songList.clientHeight - (element.clientHeight - element.clientHeight / 2) - 1;
     else if (offset < 0)
-        AudioList.scrollTop = element.offsetTop - (element.clientHeight + element.clientHeight / 2) - 4;
+        songList.scrollTop = element.offsetTop - (element.clientHeight + element.clientHeight / 2) - 4;
 };
 
 /**
@@ -727,43 +757,141 @@ Core.broadcastSong = function () {
     });
 };
 
-Core.audioSearch = function () {
+/**
+ * Search input
+ *
+ * @param {Event} e
+ */
+Core.audioSearch = function (e) {
+    clearTimeout(CACHE.TYPING_TIMER);
 
+    if (CACHE.SEARCH.value.length > 0) {
+        CACHE.EMPTY_SEARCH.classList.add('show');
+
+        Core.showSearchAjax();
+
+        if (!CACHE.SEARCH_AJAX) {
+            CACHE.SEARCH_AJAX = true;
+        }
+
+        CACHE.TYPING_TIMER = setTimeout(function () {
+            Core.event.searchSongs();
+        }, CACHE.FINISH_TYPING_INTERVAL);
+    } else {
+        Core.showAudioList();
+        CACHE.SEARCH_AJAX = false;
+        CACHE.EMPTY_SEARCH.classList.remove('show');
+    }
 };
 
+/**
+ * Search settigns custom select elements
+ *
+ * @param {Event} e
+ */
 Core.searchTypesList = function (e) {
     e.stopPropagation();
 
-    if (CACHE.SEARCH_DEFAULT_TYPE.classList.contains('show')) {
-        Core.hideSearchTypesList();
+    var typesList = this.getElementsByClassName('types-list')[0];
+
+    if (this.classList.contains('show')) {
+        this.classList.remove('show');
+        typesList.classList.remove('show');
     } else {
-        Core.openSearchTypesList();
+        this.classList.add('show');
+        typesList.classList.add('show');
     }
-};
-
-Core.hideSearchTypesList = function () {
-    CACHE.SEARCH_TYPES_LIST.classList.remove('show');
-};
-
-Core.openSearchTypesList = function () {
-    CACHE.SEARCH_TYPES_LIST.classList.add('show');
 };
 
 Core.trackActiveElements = function (e) {
-    if (e.target != CACHE.SEARCH_TYPES_LIST && CACHE.SEARCH_TYPES_LIST.classList.contains('show')) {
-        console.log(e.target);
-        Core.hideSearchTypesList();
-    }
+
 };
 
+/**
+ * Search settings
+ *
+ * @param {Event} e
+ */
 Core.changeAudioSearchType = function (e) {
+    var searchTypeID = '',
+        node = this,
+        dataValue = this.getAttribute('data-value');
+
+    while (node.parentNode) {
+        node = node.parentNode;
+
+        if (node.classList.contains('search-select-type')) {
+            searchTypeID = node.getAttribute('id');
+            break;
+        }
+    }
+
     Core.event.send({
         event: 'changeAudioSearchType',
         data: {
             text: this.textContent,
-            index: this.getAttribute('data-index')
+            index: this.getAttribute('data-index'),
+            searchTypeID: searchTypeID,
+            dataValue: dataValue
         }
     });
+};
+
+/**
+ * Show last active audio list
+ */
+Core.showAudioList = function () {
+    CACHE.AJAX_CONTENT_LOADER.classList.remove('show');
+    AudioList.classList.remove('hide');
+
+    if (CACHE.SEARCH_SONGS_LIST) {
+        CACHE.SEARCH_SONGS_LIST.classList.add('hide');
+    }
+
+    CACHE.SONGS_LIST.classList.remove('hide');
+
+    CACHE.AJAX_CONTENT_LOADER_HEIGHT = false;
+};
+
+/**
+ * Show preloader indicator
+ */
+Core.showSearchAjax = function () {
+    if (!CACHE.AJAX_CONTENT_LOADER_HEIGHT) {
+        var alStyles = window.getComputedStyle(AudioList),
+            height = CACHE.SONGS_LIST.clientHeight + parseInt(alStyles['margin-bottom']) + parseInt(alStyles['padding-top']) + parseInt(alStyles['padding-bottom']);
+
+        CACHE.AJAX_CONTENT_LOADER.style.height = height + 'px';
+        CACHE.AJAX_CONTENT_LOADER_HEIGHT = true;
+    }
+
+    CACHE.SONGS_LIST.classList.add('hide');
+    AudioList.classList.add('hide');
+    CACHE.AJAX_CONTENT_LOADER.classList.add('show');
+};
+
+Core.hideSearchAjax = function () {
+    CACHE.AJAX_CONTENT_LOADER.classList.remove('show');
+    CACHE.AJAX_CONTENT_LOADER_HEIGHT = false;
+};
+
+/**
+ * Open search settings
+ */
+Core.openSearchSettings = function () {
+    if (this.classList.contains('opened')) {
+        CACHE.SEARCH_SETTINGS.classList.remove('show');
+        this.classList.remove('opened');
+    } else {
+        CACHE.SEARCH_SETTINGS.classList.add('show');
+        this.classList.add('opened');
+    }
+};
+
+Core.searchInputKeysEvents = function (e) {
+    if (e.keyCode == 13) {
+        Core.audioSearch();
+    }
 };
 
 /**
@@ -784,7 +912,7 @@ Core.setEvents = function () {
 };
 
 Core.setAlbumEvents = function () {
-    Core.setElements();
+    Core.setElements.all();
     Core.allAlbumsEvents();
     AlbumTitle.addEventListener('click', Core.openAlbums);
 };
@@ -796,15 +924,39 @@ Core.setAllUsersEvents = function () {
 };
 
 Core.setAudioSearchConfigsEvents = function () {
+    CACHE.TYPING_TIMER = null;
+    CACHE.FINISH_TYPING_INTERVAL = 500;
+
     CACHE.SEARCH.addEventListener('input', Core.audioSearch);
-    CACHE.AUDIO_SEARCH_TYPE.addEventListener('click', Core.searchTypesList);
+    CACHE.SEARCH.addEventListener('keypress', Core.searchInputKeysEvents);
+    CACHE.SEARCH_SETTINGS_BUTTON.addEventListener('click', Core.openSearchSettings);
 
-    var types = CACHE.SEARCH_TYPES_LIST.getElementsByTagName('div');
+    CACHE.EMPTY_SEARCH.addEventListener('click', function () {
+        CACHE.SEARCH.value = '';
+        this.classList.remove('show');
+        Core.showAudioList();
 
-    for (var i = 0, size = types.length; i < size; i++) {
-        var el = types[i];
+        Core.event.send({
+            event: 'clearSearchInput',
+            data: ''
+        });
+    });
 
-        el.addEventListener('click', Core.changeAudioSearchType);
+    for (var i = 0, size = CACHE.SEARCH_SELECT_TYPES.length; i < size; i++) {
+        var selectWrapper = CACHE.SEARCH_SELECT_TYPES[i];
+
+        selectWrapper.addEventListener('click', Core.searchTypesList);
+    }
+
+    var typesList = document.getElementsByClassName('types-list');
+
+    for (var i = 0, size = typesList.length; i < size; i++) {
+        var list = typesList[i],
+            elements = list.getElementsByClassName('option');
+
+        for (var j = 0, optSize = elements.length; j < optSize; j++) {
+            elements[j].addEventListener('click', Core.changeAudioSearchType);
+        }
     }
 
     CACHE.LYRICS_CLICK_OVERLAY.addEventListener('click', function (e) {
@@ -820,26 +972,36 @@ Core.setAudioSearchConfigsEvents = function () {
 /**
  * Init DOM elements
  */
-Core.setElements = function () {
-    UpdateList = document.getElementById('update-list');
-    Overlay = document.getElementById('bg-overlay');
-    OverlayTxt = document.getElementById('overlay-txt');
-    Settings = document.getElementById('settings');
-    CurrentUser = document.getElementById('current-user');
-    AllUsers = document.getElementById('all-users');
-    RepeatSong = document.getElementById('repeat-song');
-    AlbumList = document.getElementById('album-list');
-    AlbumTitle = document.getElementById('album-title');
-    AudioList = document.getElementById('audio-list');
-    ShuffleSongs = document.getElementById('shuffle-play');
-    Broadcast = document.getElementById('broadcast');
-    CACHE.SEARCH = document.getElementById('search');
-    CACHE.AUDIO_SEARCH_TYPE = document.getElementById('audio-search-type');
-    CACHE.SEARCH_DEFAULT_TYPE = document.getElementById('search-default-type');
-    CACHE.SEARCH_TYPES_LIST = document.getElementById('types-list');
-    CACHE.LYRICS_CHECKBOX = document.getElementById('lyrics');
-    CACHE.LYRICS_CHECKBOX_LABEL = document.querySelector('#lyrics-checkbox-wrapper label');
-    CACHE.LYRICS_CLICK_OVERLAY = document.querySelector('#lyrics-checkbox-wrapper .click-overlay');
+Core.setElements = {
+    all: function () {
+        UpdateList = document.getElementById('update-list');
+        Overlay = document.getElementById('bg-overlay');
+        OverlayTxt = document.getElementById('overlay-txt');
+        Settings = document.getElementById('settings');
+        CurrentUser = document.getElementById('current-user');
+        AlbumList = document.getElementById('album-list');
+        AllUsers = document.getElementById('all-users');
+        RepeatSong = document.getElementById('repeat-song');
+        AlbumTitle = document.getElementById('album-title');
+        ShuffleSongs = document.getElementById('shuffle-play');
+        Broadcast = document.getElementById('broadcast');
+        this.search();
+    },
+    search: function () {
+        AudioList = document.getElementById('audio-list');
+        CACHE.PLAYER_WRAPPER = document.getElementById('player-wrapper');
+        CACHE.SONGS_LIST = document.getElementById('songs-list');
+        CACHE.SEARCH_SONGS_LIST = document.getElementById('search-list');
+        CACHE.SEARCH_SETTINGS_BUTTON = document.getElementById('open-search-settings');
+        CACHE.SEARCH_SETTINGS = document.getElementById('search-settings');
+        CACHE.SEARCH = document.getElementById('search');
+        CACHE.EMPTY_SEARCH = document.getElementById('empty-search');
+        CACHE.SEARCH_SELECT_TYPES = document.getElementsByClassName('search-select-type');
+        CACHE.LYRICS_CHECKBOX = document.getElementById('lyrics');
+        CACHE.LYRICS_CHECKBOX_LABEL = document.querySelector('#lyrics-checkbox-wrapper label');
+        CACHE.LYRICS_CLICK_OVERLAY = document.querySelector('#lyrics-checkbox-wrapper .click-overlay');
+        CACHE.AJAX_CONTENT_LOADER = document.getElementById('ajax-content-loader');
+    }
 };
 
 /**
