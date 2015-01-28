@@ -22,7 +22,7 @@ VKit.appID = 4186367;
  *
  * @type {string}
  */
-VKit.permissions = 'audio,offline,status';
+VKit.permissions = 'audio,offline,status,wall';
 
 /**
  * Api Version
@@ -85,6 +85,8 @@ VKit.util = {
      */
     getUrlParam: function(url, param) {
         var regexp = new RegExp(param + '=([\\w-]{0,})');
+        console.log(url);
+        console.log(param);
         return url.match(regexp)[1];
     },
 
@@ -258,9 +260,11 @@ VKit.openAuthWindow = function(callback) {
     }, function(window) {
         chrome.tabs.query({windowId: window.id, windowType: 'popup'}, function(tabs) {
             chrome.tabs.onUpdated.addListener(function(tabID, tabState, tab) {
+                console.log(tabs);
+                console.log(tab);
                 if(tabs[0].id == tab.id) {
                     if(tab.url !== undefined && tabState.status == 'complete') {
-                        if(tab.url.indexOf('access_token')) {
+                        if(tab.url.indexOf('access_token') > -1) {
                             var id = VKit.util.getUrlParam(tab.url, 'user_id');
 
                             VKit.saveAuthInfo({
@@ -269,8 +273,6 @@ VKit.openAuthWindow = function(callback) {
                                 expires: VKit.util.getUrlParam(tab.url, 'expires_in')
                             });
                             VKit.setActiveAccount(id);
-
-                            chrome.browserAction.disable();
 
                             VKit.api('users.get', ['userd_ids=' + VKit.authInfo('userID'), 'fields=photo_100'], function(response) {
                                 var userInfo = JSON.parse(response).response[0];

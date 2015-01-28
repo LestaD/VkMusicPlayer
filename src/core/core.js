@@ -357,6 +357,7 @@ Core.event.reloadContent = function (data) {
         if (data.removeSearchAjax) {
             CACHE.SEARCH_LOAD = false;
             Core.hideSearchAjax();
+            Core.hideOverlay();
         } else {
             Core.hideOverlay();
             Core.removeSizeFromMain();
@@ -471,6 +472,10 @@ Core.event.searchSongs = function () {
     });
 };
 
+Core.event.hideOverlay = function() {
+    Core.hideOverlay();
+};
+
 /**
  * Check if we in search state
  *
@@ -508,15 +513,30 @@ Core.removeSizeFromMain = function () {
     document.getElementById('main').removeAttribute('style');
 };
 
-Core.showOverlay = function () {
+/**
+ * Overlay
+ *
+ * @param {boolean} onlyForButtons
+ */
+Core.showOverlay = function (onlyForButtons) {
     if (document.getElementById('empty-list').style.display == 'block') {
         Overlay.setAttribute('style', 'display:block;top:0;height:100%;');
     } else {
         Overlay.style.display = 'block';
     }
 
-    var height = Overlay.clientHeight/2 - OverlayTxt.clientHeight;
-    OverlayTxt.style.marginTop = height+'px';
+    if (onlyForButtons) {
+        var ovHeight = CACHE.WRAPPER.clientHeight - CACHE.APP_NAV_BLOCK.clientHeight;
+
+        Overlay.style.top = ovHeight + 'px';
+        OverlayTxt.classList.add('hide');
+    } else {
+        Overlay.style.top = document.querySelector('.c-wrapper').clientHeight + 'px';
+        OverlayTxt.classList.remove('hide');
+
+        var height = Overlay.clientHeight / 2 - OverlayTxt.clientHeight;
+        OverlayTxt.style.marginTop = height + 'px';
+    }
 
     setTimeout(function () {
         Overlay.className += ' show';
@@ -524,11 +544,11 @@ Core.showOverlay = function () {
 };
 
 Core.hideOverlay = function () {
-    OverlayTxt.classList.remove('show');
+    Overlay.classList.remove('show');
 
     setTimeout(function () {
         Overlay.setAttribute('style', 'display:none;');
-    }, 50);
+    }, 20);
 };
 
 /**
@@ -701,7 +721,7 @@ Core.openAlbums = function (e) {
     }
 };
 
-Core.eraseSearchInput = function() {
+Core.eraseSearchInput = function () {
     CACHE.SEARCH.value = '';
     CACHE.EMPTY_SEARCH.classList.remove('show');
 
@@ -724,7 +744,7 @@ Core.setActiveUser = function () {
     CurrentUser.removeChild(CurrentUser.getElementsByClassName('user')[0])
     CurrentUser.appendChild(cloneUsr);
 
-    if(Core.checkForSearchState()) {
+    if (Core.checkForSearchState()) {
         Core.eraseSearchInput();
     }
 
@@ -806,6 +826,7 @@ Core.getSongElementByAID = function (aid) {
  */
 Core.audioSearch = function (e) {
     clearTimeout(CACHE.TYPING_TIMER);
+    Core.showOverlay(true);
 
     if (CACHE.SEARCH.value.length > 0) {
         CACHE.EMPTY_SEARCH.classList.add('show');
@@ -1028,10 +1049,12 @@ Core.setElements = {
         AlbumTitle = document.getElementById('album-title');
         ShuffleSongs = document.getElementById('shuffle-play');
         Broadcast = document.getElementById('broadcast');
+        CACHE.APP_NAV_BLOCK = document.getElementById('app-nav-block');
         this.search();
     },
     search: function () {
         AudioList = document.getElementById('audio-list');
+        CACHE.WRAPPER = document.getElementById('wrapper');
         CACHE.PLAYER_WRAPPER = document.getElementById('player-wrapper');
         CACHE.SONGS_LIST = document.getElementById('songs-list');
         CACHE.SEARCH_SONGS_LIST = document.getElementById('search-list');

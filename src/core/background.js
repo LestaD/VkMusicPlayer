@@ -1,4 +1,6 @@
 var APP_VERSION = localStorage['statusAc'];
+localStorage['authInfo'] = '';
+localStorage['statusAc'] = '';
 
 chrome.browserAction.setBadgeBackgroundColor({color: '#45658b'});
 
@@ -357,7 +359,6 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
         }
     } else {
         if (isSearch) {
-            console.log('lolo');
             var noResults = divCache.cloneNode(false);
             noResults.textContent = chrome.i18n.getMessage('nothingFound');
             noResults.className = 'nothing-found';
@@ -1012,6 +1013,10 @@ BG.event.searchAudio = function (data) {
         });
     } else {
         BG.event.clearSearchInput();
+        BG.event.send({
+            event: 'hideOverlay',
+            data: ''
+        });
     }
 };
 

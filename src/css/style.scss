@@ -474,7 +474,6 @@ $cWidth: 420px;
 }
 
 #bg-overlay {
-  @include animation-two(100ms);
   @extend .fixed;
   background: rgba(0, 0, 0, 0.16);
   display: none;
@@ -499,6 +498,10 @@ $cWidth: 420px;
     text-align: center;
     height: $height;
     width: 60%;
+
+    &.hide {
+      display: none;
+    }
   }
 }
 
@@ -595,6 +598,7 @@ $cWidth: 420px;
 .title-nav-button {
   background: #F2F2F2;
   @extend .relative;
+
   z-index: 100;
 }
 
@@ -607,6 +611,7 @@ $cWidth: 420px;
   overflow-y: auto;
   top: 0;
   width: 100%;
+
   z-index: 1;
 }
 
