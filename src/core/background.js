@@ -6,7 +6,7 @@ var
     AuthBlock,
     PlayerWrapperBG,
     MFPlayer,
-    Songs,
+    Songs = {},
     LastActive,
     LastActiveIndex,
     Port,
@@ -189,6 +189,15 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
 };
 
 /**
+ * Check if we in search state
+ *
+ * @returns {boolean}
+ */
+BG.checkForSearchState = function() {
+    return CACHE.SEARCH.value.length > 0;
+};
+
+/**
  * Render audio list
  *
  * @param {Object} response
@@ -198,10 +207,13 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
  * @param {Function} callback
  */
 BG.renderAudioList = function (response, type, noFirst, obj, callback) {
-    Songs = JSON.parse(response).response || undefined;
-    var isSearch = obj && obj.searchRender,
+    var isSearch = BG.checkForSearchState(),
         oldList,
         searchEl = document.getElementById('search-list');
+
+    CACHE.SONGS_STATE = isSearch ? 'search' : 'audio';
+
+    Songs[CACHE.SONGS_STATE] = JSON.parse(response).response || undefined;
 
     if (isSearch) {
         oldList = document.getElementById('search-list') || undefined;
@@ -223,8 +235,8 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
 
     list.setAttribute('id', listID);
 
-    if (Songs && Songs[0] != 0 && !type) {
-        for (var i = 1, size = Songs.length; i < size; i++) {
+    if (Songs[CACHE.SONGS_STATE] && Songs[CACHE.SONGS_STATE][0] != 0 && !type) {
+        for (var i = 1, size = Songs[CACHE.SONGS_STATE].length; i < size; i++) {
             var li = liCache.cloneNode(false),
                 name = spanCache.cloneNode(false),
                 splitter = spanCache.cloneNode(false),
@@ -241,11 +253,13 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
              *
              * @type {{aid: number, artist: string, duration: number, genre: number, lyrics_id: number, owner_id: number, title: string, url: string}}
              */
-            var audio = Songs[i];
+            var audio = Songs[CACHE.SONGS_STATE][i];
 
             //set content
             name.textContent = audio.title;
+            name.title = audio.title;
             artist.textContent = audio.artist;
+            artist.title = audio.artist;
             duration.textContent = VKit.util.secToMin(audio.duration);
 
             //set class
@@ -254,7 +268,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             artist.className = 'artist';
             duration.className = 'duration';
             actions.className = 'actions';
-            userSong.className = 'fa fa-user check-circle';
+            userSong.className = 'fa fa-check-circle song-in-list';
             addTo.className = 'fa fa-plus add-to';
             saveSong.className = 'fa fa-floppy-o save-song';
 
@@ -263,7 +277,9 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             }
 
             saveSong.href = audio.url;
-            saveSong.setAttribute('download', audio.artist + ' - ' + audio.title);
+            var songName = audio.artist + ' - ' + audio.title;
+            saveSong.title = chrome.i18n.getMessage('download')+ ' ' + songName;
+            saveSong.setAttribute('download', songName);
 
             actions.appendChild(addTo);
             actions.appendChild(saveSong);
@@ -496,7 +512,7 @@ BG.event.checkPlayed = function (data) {
 
         LastActive = element;
 
-        MFCore.set(Songs[index].url, Songs[index].duration);
+        MFCore.set(Songs[CACHE.SONGS_STATE][index].url, Songs[CACHE.SONGS_STATE][index].duration);
     }
 };
 
@@ -608,7 +624,9 @@ BG.event.playByIndex = function (data) {
         MFCore.events();
     }
 
-    var song = Songs[data.index];
+    CACHE.SONGS_STATE = BG.checkForSearchState() ? 'search' : 'audio';
+
+    var song = Songs[CACHE.SONGS_STATE][data.index];
     MFDuration = song.duration;
 
     MFPlayer.src = song.url;
@@ -678,7 +696,7 @@ BG.event.getSongDuration = function () {
         event: 'setSongDuration',
         data: {
             dur: CurrentSong.realDuration,
-            index: CurrentSong.index
+            index: CurrentSong.id
         }
     });
 };
@@ -803,8 +821,7 @@ BG.event.updateList = function (data, callback, userUpdate) {
 };
 
 BG.event.openAuth = function (data) {
-    VKit.openAuthWindow(function () {
-    });
+    VKit.openAuthWindow(function () {});
 };
 
 BG.event.setActiveUser = function (data) {
@@ -857,6 +874,7 @@ BG.event.loadAlbum = function (data) {
     }
 
     document.getElementById('album-title').textContent = data.title == chrome.i18n.getMessage('allSongs') ? chrome.i18n.getMessage('albums') : data.title;
+
     BG.event.updateList(null, function () {
         BG.event.send({
             event: 'setActiveAlbum',
@@ -993,8 +1011,7 @@ BG.event.searchAudio = function (data) {
             });
         });
     } else {
-        CACHE.SEARCH.value = data.q;
-        CACHE.EMPTY_SEARCH.classList.remove('show');
+        BG.event.clearSearchInput();
     }
 };
 
@@ -1036,7 +1053,7 @@ BG.setFirstSong = function () {
     LastActive = element;
     LastActiveIndex = 1;
 
-    var song = Songs[index];
+    var song = Songs[CACHE.SONGS_STATE][index];
 
     CurrentSong = {
         id: song.aid,

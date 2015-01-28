@@ -131,34 +131,12 @@ $cWidth: 420px;
         float: left;
       }
 
-      .save-song, .add-song {
-        @include animation-one(250ms);
-        @extend .absolute;
-        display: none;
-        background-size: 15px;
-        opacity: 0.6;
-        right: 50px;
-        top: 9px;
-        height: 15px;
-        width: 15px;
-
-        &:hover {
-          opacity: 1;
-        }
-      }
-
-      .save-song {
-        background-image: url(/images/save-icon.png);
-        right: 10px;
-      }
-
-      .add-song {
-        background-image: url(/images/add-icon.png);
-        right: 35px;
-      }
-
       .artist {
+        @extend .relative;
         @extend .text-overflow;
+        height: 15px;
+        line-height: 17px;
+        top: 7px;
         font-weight: bold;
         max-width: 125px;
       }
@@ -173,7 +151,11 @@ $cWidth: 420px;
       }
 
       .title {
+        @extend .relative;
         @extend .text-overflow;
+        height: 15px;
+        line-height: 17px;
+        top: 7px;
         max-width: 150px;
       }
 
@@ -183,10 +165,16 @@ $cWidth: 420px;
         font-size: 10px;
       }
 
+      .actions {
+        @extend .absolute;
+        right: 0;
+        display: none;
+      }
+
       &:hover {
         background: #edf1f5;
 
-        .save-song, .add-song {
+        .actions {
           display: block;
         }
 
@@ -486,7 +474,7 @@ $cWidth: 420px;
 }
 
 #bg-overlay {
-  @include animation-one(250ms);
+  @include animation-two(100ms);
   @extend .fixed;
   background: rgba(0, 0, 0, 0.16);
   display: none;
@@ -494,15 +482,19 @@ $cWidth: 420px;
   height: calc(100% - 50px);
   width: 100%;
   z-index: 9999;
+  opacity: 0;
+
+  &.show {
+    opacity: 1;
+  }
 
   .overlay-txt {
-    @include animation-one(350ms);
     $height: 50px;
     background: #fff url(../images/preloader.GIF) 10px center no-repeat;
     background-size: 15px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.46);
     border-radius: 2px;
-    margin: calc(50% - 50px) auto 0;
+    margin: 0 auto;
     line-height: $height;
     text-align: center;
     height: $height;
@@ -609,9 +601,8 @@ $cWidth: 420px;
 .popup-slide-nav {
   @include animation-one(350ms);
   @extend .absolute;
-  background: #F2F2F2;
+  background: rgba(242, 242, 242, 0.88);
   border: 1px solid #DAE1E8;
-  box-shadow: 0 0 0px #000;
   max-height: 175px;
   overflow-y: auto;
   top: 0;
@@ -788,7 +779,7 @@ $cWidth: 420px;
     cursor: pointer;
     text-transform: lowercase;
     top: 0;
-    padding-left:3px;
+    padding-left: 3px;
     display: inline-block;
   }
 
@@ -796,11 +787,11 @@ $cWidth: 420px;
     @extend .text-overflow;
     @include animation-two(100ms);
     background-color: #6383a8;
-    color:#fff;
+    color: #fff;
     cursor: pointer;
     text-align: center;
-    width:100%;
-    height:30px;
+    width: 100%;
+    height: 30px;
     line-height: 30px;
 
     &:hover, &.opened {
@@ -814,11 +805,11 @@ $cWidth: 420px;
     border: 1px solid #96AABE;
     box-shadow: 0 1px 2px rgba(109, 140, 176, 0.45);
     display: none;
-    width:140px;
-    right:0;
+    width: 140px;
+    right: 0;
 
     &.show {
-      display:block;
+      display: block;
     }
   }
 }
@@ -826,6 +817,22 @@ $cWidth: 420px;
 #songs-list {
   &.hide {
     display: none;
+  }
+
+  li {
+    .artist {
+      &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+    }
+
+    .title {
+      &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+      }
+    }
   }
 }
 
@@ -839,6 +846,15 @@ $cWidth: 420px;
   &.hide {
     display: none;
   }
+}
+
+.nothing-found {
+  color: #ABABAB;
+  width: 100%;
+  text-align: center;
+  height: 260px;
+  line-height: 260px;
+  font-size: 14px;
 }
 
 .search-select-type {
@@ -867,9 +883,9 @@ $cWidth: 420px;
     border-radius: 2px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
     display: none;
-    top:1px;
+    top: 1px;
     left: 1px;
-    width:99%;
+    width: 99%;
     z-index: 10;
 
     &.show {
@@ -906,7 +922,7 @@ $cWidth: 420px;
   color: #41658c;
   padding: 0 3px;
   text-align: center;
-  width:100%;
+  width: 100%;
   height: 30px;
   line-height: 30px;
 
@@ -918,8 +934,8 @@ $cWidth: 420px;
     background: transparent;
     cursor: pointer;
     position: absolute;
-    top:0;
-    width:100%;
+    top: 0;
+    width: 100%;
     height: 30px;
   }
 }

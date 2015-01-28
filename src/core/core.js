@@ -40,16 +40,22 @@ Core.audioEvent = function () {
 
     for (var i = 0, size = songs.length; i < size; i++) {
         var song = songs[i];
-        song.getElementsByTagName('a')[0].addEventListener('click', Core.downloadSong);
+        // song.getElementsByTagName('a')[0].addEventListener('click', Core.downloadSong);
+        song.getElementsByClassName('artist')[0].addEventListener('click', Core.fillSearch);
 
         song.addEventListener('click', Core.event.playSong);
     }
 };
 
+Core.fillSearch = function () {
+    CACHE.SEARCH.value = this.textContent;
+    Core.audioSearch();
+};
+
 Core.downloadSong = function (e) {
     e.preventDefault();
 
-    var index = e.target.parentNode.getAttribute('data-index');
+    var index = this.parentNode.getAttribute('data-index');
 
     Core.event.send({
         event: 'downloadSong',
@@ -182,14 +188,7 @@ Core.event.sendPlay = function () {
 };
 
 Core.event.playSong = function (e) {
-    var element = e.target;
-
-    if (element.className != 'save-song' && element.className != 'add-song') {
-
-        if (element.nodeName != 'LI') {
-            element = element.parentNode;
-        }
-
+    if (e.target.nodeName == 'LI') {
         MFTimeCurrent.textContent = '0:00';
         MFBuffer.style.width = 0;
         MFProgress.style.width = 0;
@@ -197,8 +196,8 @@ Core.event.playSong = function (e) {
         Core.event.send({
             event: 'playByIndex',
             data: {
-                index:element.getAttribute('data-index'),
-                aid: element.getAttribute('data-aid')
+                index: this.getAttribute('data-index'),
+                aid: this.getAttribute('data-aid')
             }
         });
     }
@@ -237,7 +236,11 @@ Core.event.setSongDuration = function (data) {
         MFDuration = data.dur;
 
         if (data.index) {
-            Core.scrollToSong(AudioList.getElementsByTagName('li')[data.index]);
+            var el = Core.getSongElementByAID(data.index);
+
+            if (el) {
+                Core.scrollToSong(el);
+            }
         }
     }
 };
@@ -305,10 +308,10 @@ Core.event.setLoadProgress = function (data) {
  * @param {{oldIndex: number, newIndex: number}} data
  */
 Core.event.setNewHighLightElement = function (data) {
-    var newEl = document.querySelector('#songs-list li[data-aid="'+data.newIndex+'"'),
-        oldEl = document.querySelector('#songs-list li[data-aid="'+data.oldIndex+'"');
+    var newEl = Core.getSongElementByAID(data.newIndex),
+        oldEl = Core.getSongElementByAID(data.oldIndex);
 
-    if(oldEl) {
+    if (oldEl) {
         oldEl.className = '';
     }
 
@@ -468,6 +471,14 @@ Core.event.searchSongs = function () {
     });
 };
 
+/**
+ * Check if we in search state
+ *
+ * @returns {boolean}
+ */
+Core.checkForSearchState = function () {
+    return CACHE.SEARCH.value.length > 0;
+};
 
 Core.setBlur = function (elemID) {
     var el = document.getElementById(elemID);
@@ -504,9 +515,12 @@ Core.showOverlay = function () {
         Overlay.style.display = 'block';
     }
 
+    var height = Overlay.clientHeight/2 - OverlayTxt.clientHeight;
+    OverlayTxt.style.marginTop = height+'px';
+
     setTimeout(function () {
-        OverlayTxt.className += ' show';
-    }, 50);
+        Overlay.className += ' show';
+    }, 20);
 };
 
 Core.hideOverlay = function () {
@@ -609,7 +623,9 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
                 Core.event.listenData();
                 Core.event.connect();
             } else {
-                Core.event.onOpen();
+                if (!CACHE.SEARCH_LOAD) {
+                    Core.event.onOpen();
+                }
             }
 
             if (!CONST.PAGE_RELOADED && !CACHE.SEARCH_LOAD) {
@@ -640,10 +656,10 @@ Core.openSettings = function () {
 };
 
 Core.scrollToSong = function (element) {
-    var songList = CACHE.SEARCH.value > 0 ? CACHE.SEARCH_LIST : AudioList,
+    var songList = CACHE.SEARCH.value.length > 0 ? CACHE.SEARCH_SONGS_LIST : AudioList,
         offset = element.offsetTop - element.clientHeight - songList.scrollTop;
 
-    if (offset > AudioList.clientHeight)
+    if (offset > songList.clientHeight)
         songList.scrollTop = element.offsetTop - songList.clientHeight - (element.clientHeight - element.clientHeight / 2) - 1;
     else if (offset < 0)
         songList.scrollTop = element.offsetTop - (element.clientHeight + element.clientHeight / 2) - 4;
@@ -685,6 +701,39 @@ Core.openAlbums = function (e) {
     }
 };
 
+Core.eraseSearchInput = function() {
+    CACHE.SEARCH.value = '';
+    CACHE.EMPTY_SEARCH.classList.remove('show');
+
+    Core.event.send({
+        event: 'clearSearchInput',
+        data: ''
+    });
+};
+
+Core.setActiveUser = function () {
+    Core.setSizeToMain();
+    Core.showOverlay();
+    Core.setBlur('audio-list');
+    var cloneUsr = this.cloneNode(true);
+
+    if (!cloneUsr.classList.contains('active')) {
+        cloneUsr.classList.add('active');
+    }
+
+    CurrentUser.removeChild(CurrentUser.getElementsByClassName('user')[0])
+    CurrentUser.appendChild(cloneUsr);
+
+    if(Core.checkForSearchState()) {
+        Core.eraseSearchInput();
+    }
+
+    Core.event.send({
+        event: 'setActiveUser',
+        data: this.getAttribute('data-id')
+    });
+};
+
 /**
  * Choose user playlist
  */
@@ -692,24 +741,7 @@ Core.allUsersEvents = function () {
     var users = AllUsers.getElementsByClassName('user');
 
     for (var i = 0, size = users.length; i < size; i++) {
-        users[i].addEventListener('click', function (e) {
-            Core.setSizeToMain();
-            Core.showOverlay();
-            Core.setBlur('audio-list');
-            var cloneUsr = this.cloneNode(true);
-
-            if (!cloneUsr.classList.contains('active')) {
-                cloneUsr.classList.add('active');
-            }
-
-            CurrentUser.removeChild(CurrentUser.getElementsByClassName('user')[0])
-            CurrentUser.appendChild(cloneUsr);
-
-            Core.event.send({
-                event: 'setActiveUser',
-                data: this.getAttribute('data-id')
-            });
-        });
+        users[i].addEventListener('click', Core.setActiveUser);
     }
 };
 
@@ -758,6 +790,16 @@ Core.broadcastSong = function () {
 };
 
 /**
+ * Get <li> element by Audio ID
+ *
+ * @param {Number} aid
+ * @returns {HTMLElement}
+ */
+Core.getSongElementByAID = function (aid) {
+    return document.querySelector('#songs-list li[data-aid="' + aid + '"]');
+};
+
+/**
  * Search input
  *
  * @param {Event} e
@@ -781,6 +823,7 @@ Core.audioSearch = function (e) {
         Core.showAudioList();
         CACHE.SEARCH_AJAX = false;
         CACHE.EMPTY_SEARCH.classList.remove('show');
+        Core.event.searchSongs();
     }
 };
 
@@ -925,7 +968,7 @@ Core.setAllUsersEvents = function () {
 
 Core.setAudioSearchConfigsEvents = function () {
     CACHE.TYPING_TIMER = null;
-    CACHE.FINISH_TYPING_INTERVAL = 500;
+    CACHE.FINISH_TYPING_INTERVAL = 400;
 
     CACHE.SEARCH.addEventListener('input', Core.audioSearch);
     CACHE.SEARCH.addEventListener('keypress', Core.searchInputKeysEvents);
