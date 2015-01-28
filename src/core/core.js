@@ -137,6 +137,10 @@ Core.event.listenData = function () {
     chrome.runtime.onConnect.addListener(function (bgPort) {
         Core.event.onOpen();
         bgPort.onMessage.addListener(function (msg) {
+            //if (msg.event != 'setProgressBarWidth' && msg.event != 'timeUpdate' && msg.event != 'setLoadProgress') {
+            //    console.log(msg);
+            //}
+
             if (msg.event != 'setProgressBarWidth' && msg.event != 'timeUpdate' && msg.event != 'setLoadProgress') {
                 console.log(msg);
             }

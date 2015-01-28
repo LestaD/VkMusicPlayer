@@ -1,6 +1,6 @@
 var APP_VERSION = localStorage['statusAc'];
-localStorage['authInfo'] = '';
-localStorage['statusAc'] = '';
+//localStorage['authInfo'] = '';
+//localStorage['statusAc'] = '';
 
 chrome.browserAction.setBadgeBackgroundColor({color: '#45658b'});
 
@@ -42,7 +42,11 @@ var
 //track hot keys
 chrome.commands.onCommand.addListener(function (command) {
     if (command == 'Play') {
-        BG.event.setToPause();
+        if (FirstLoad) {
+            BG.event.sendPlay();
+        } else {
+            BG.event.setToPause();
+        }
     } else if (command == 'Next') {
         BG.event.playNext(true);
     } else if (command == 'Prev') {
@@ -195,7 +199,7 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
  *
  * @returns {boolean}
  */
-BG.checkForSearchState = function() {
+BG.checkForSearchState = function () {
     return CACHE.SEARCH.value.length > 0;
 };
 
@@ -280,7 +284,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
 
             saveSong.href = audio.url;
             var songName = audio.artist + ' - ' + audio.title;
-            saveSong.title = chrome.i18n.getMessage('download')+ ' ' + songName;
+            saveSong.title = chrome.i18n.getMessage('download') + ' ' + songName;
             saveSong.setAttribute('download', songName);
 
             actions.appendChild(addTo);
@@ -482,7 +486,6 @@ BG.event.listenData = function () {
             else
                 ConnectStatus = true;
 
-            console.log(port);
             port.onMessage.addListener(function (msg) {
                 console.log(msg);
                 BG.event[msg.event](msg.data);
@@ -616,9 +619,13 @@ BG.event.playPrev = function (data) {
 /**
  * Play song by index
  *
- * @param {number} data
+ * @param {{index: number, aid: number}} data
  */
 BG.event.playByIndex = function (data) {
+    MFCore.nullSongCurrentDuration();
+    MFPlayer.pause();
+    MFProgress.style.width = 0;
+
     chrome.browserAction.setBadgeText({text: '0:00'});
 
     if (typeof(MFPlayer.ontimeupdate) != 'function') {
@@ -628,28 +635,36 @@ BG.event.playByIndex = function (data) {
     CACHE.SONGS_STATE = BG.checkForSearchState() ? 'search' : 'audio';
 
     var song = Songs[CACHE.SONGS_STATE][data.index];
-    MFDuration = song.duration;
 
+    if(data.aid == undefined) {
+        data.aid = song.aid;
+    }
+
+    MFDuration = song.duration;
     MFPlayer.src = song.url;
     MFPlayer.play();
+
 
     if (!MFPlay.classList.contains('pause')) {
         MFPlay.className += ' pause';
     }
 
-    BG.removeActiveIndex(LastActiveIndex);
+    BG.removeActiveIndex(LastActiveIndex.aid);
     BG.setActiveByIndex(data.aid);
     BG.setLastActive(data.aid);
 
     BG.event.send({
         event: 'setNewHighLightElement',
         data: {
-            oldIndex: LastActiveIndex,
+            oldIndex: LastActiveIndex.aid,
             newIndex: data.aid
         }
     });
 
-    LastActiveIndex = data.aid;
+    LastActiveIndex = {
+        index: data.index,
+        aid: data.aid
+    };
 
     var minutes = VKit.util.secToMin(MFDuration);
 
@@ -686,7 +701,8 @@ BG.event.playByIndex = function (data) {
     });
 
     if (BroadcastStatus) {
-        VKit.api('audio.setBroadcast', ['audio=' + CurrentSong.owner + '_' + CurrentSong.id], function (response) {});
+        VKit.api('audio.setBroadcast', ['audio=' + CurrentSong.owner + '_' + CurrentSong.id], function (response) {
+        });
     }
 
     FirstLoad = false;
@@ -822,7 +838,8 @@ BG.event.updateList = function (data, callback, userUpdate) {
 };
 
 BG.event.openAuth = function (data) {
-    VKit.openAuthWindow(function () {});
+    VKit.openAuthWindow(function () {
+    });
 };
 
 BG.event.setActiveUser = function (data) {
@@ -1056,9 +1073,13 @@ BG.setFirstSong = function () {
         index = element.getAttribute('data-index');
 
     LastActive = element;
-    LastActiveIndex = 1;
 
     var song = Songs[CACHE.SONGS_STATE][index];
+
+    LastActiveIndex = {
+        index: index,
+        aid: song.aid
+    };
 
     CurrentSong = {
         id: song.aid,

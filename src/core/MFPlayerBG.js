@@ -115,7 +115,7 @@ MFCore.updateState = function () {
     SongCurrentDuration = ct;
 
     if (ShowSongDurationOnBadge == 'true') {
-        if (BG.isPlay() && SongCurrentDuration != '0:00') {
+        if (BG.isPlay()) {
             chrome.browserAction.setBadgeText({text: SongCurrentDuration});
         }
     }
@@ -189,22 +189,22 @@ MFCore.playNext = function (force) {
     if (ShuffleSongs) {
         var random = Math.floor((Math.random() * Songs.length));
 
-        BG.event.playByIndex(random);
+        BG.event.playByIndex({index: random});
     } else {
         if (RepeatSong && !fp) {
-            BG.event.playByIndex(LastActiveIndex);
+            BG.event.playByIndex(LastActiveIndex.index);
         } else {
 
             if (!BG.checkCurrentListState()) {
                 var next = 1;
             } else {
-                var next = parseInt(LastActiveIndex) + 1;
+                var next = parseInt(LastActiveIndex.index) + 1;
             }
 
-            if ((next + 1) > Songs.length)
+            if ((next + 1) > Songs[CACHE.SONGS_STATE].length)
                 next = 1;
 
-            BG.event.playByIndex(next);
+            BG.event.playByIndex({index: next});
         }
     }
 
@@ -222,12 +222,12 @@ MFCore.playNext = function (force) {
  * Play prev song in list
  */
 MFCore.playPrev = function () {
-    var prev = parseInt(LastActiveIndex) - 1;
+    var prev = parseInt(LastActiveIndex.index) - 1;
 
     if (ShuffleSongs) {
         var random = Math.floor((Math.random() * Songs.length));
 
-        BG.event.playByIndex(random);
+        BG.event.playByIndex({index: random});
     } else {
 
         if (!BG.checkCurrentListState()) {
@@ -235,13 +235,10 @@ MFCore.playPrev = function () {
         }
 
         if (prev <= 0) {
-            prev = Songs.length - 1;
+            prev = Songs[CACHE.SONGS_STATE].length - 1;
         }
 
-
-        console.log(prev);
-
-        BG.event.playByIndex(prev);
+        BG.event.playByIndex({index: prev});
     }
 
     if (!ConnectStatus) {
@@ -252,6 +249,14 @@ MFCore.playPrev = function () {
             iconUrl: '/app-icon.png'
         });
     }
+};
+
+MFCore.nullSongCurrentDuration = function () {
+    SongCurrentDuration = '0:00';
+};
+
+MFCore.getSongCurrentDuration = function () {
+    return SongCurrentDuration;
 };
 
 /**

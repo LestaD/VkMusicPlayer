@@ -22,7 +22,7 @@ VKit.appID = 4186367;
  *
  * @type {string}
  */
-VKit.permissions = 'audio,offline,status,wall';
+VKit.permissions = 'audio,offline,status';
 
 /**
  * Api Version
@@ -260,8 +260,6 @@ VKit.openAuthWindow = function(callback) {
     }, function(window) {
         chrome.tabs.query({windowId: window.id, windowType: 'popup'}, function(tabs) {
             chrome.tabs.onUpdated.addListener(function(tabID, tabState, tab) {
-                console.log(tabs);
-                console.log(tab);
                 if(tabs[0].id == tab.id) {
                     if(tab.url !== undefined && tabState.status == 'complete') {
                         if(tab.url.indexOf('access_token') > -1) {
