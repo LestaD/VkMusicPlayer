@@ -194,8 +194,7 @@ MFCore.playNext = function (force) {
         if (RepeatSong && !fp) {
             BG.event.playByIndex(LastActiveIndex.index);
         } else {
-
-            if (!BG.checkCurrentListState()) {
+            if (!BG.checkCurrentListState() || (LastActiveIndex.index == 1 && MFPlayer.paused && MFPlayer.currentTime == 0)) {
                 var next = 1;
             } else {
                 var next = parseInt(LastActiveIndex.index) + 1;

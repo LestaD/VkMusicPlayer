@@ -644,7 +644,6 @@ BG.event.playByIndex = function (data) {
     MFPlayer.src = song.url;
     MFPlayer.play();
 
-
     if (!MFPlay.classList.contains('pause')) {
         MFPlay.className += ' pause';
     }
