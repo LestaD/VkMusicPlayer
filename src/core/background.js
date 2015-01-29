@@ -293,7 +293,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             }
 
             saveSong.href = audio.url;
-            var songName = audio.artist + ' - ' + audio.title;
+            var songName = audio.artist + ' - ' + audio.title+'.mp3';
             saveSong.title = chrome.i18n.getMessage('download') + ' ' + songName;
             saveSong.setAttribute('download', songName);
 
