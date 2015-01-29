@@ -161,6 +161,14 @@
         "message": "Поиск"
     },
 
+    "byPopular": {
+        "message": "По популярности"
+    },
+
+    "byDuration": {
+        "message": "По длительности"
+    },
+
     "onlyText": {
         "message": "Только с текстом"
     },
