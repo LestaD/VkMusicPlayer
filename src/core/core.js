@@ -685,9 +685,7 @@ Core.openSettings = function () {
     chrome.tabs.query({currentWindow: true}, function (tabs) {
         for (var i = 0, size = tabs.length; i <= size; i++) {
             if (i == tabs.length) {
-                chrome.tabs.create({
-                    url: chrome.extension.getURL('/templates/settings.html')
-                });
+                window.open(chrome.extension.getURL('/templates/settings.html'));
             } else if (tabs[i].url == chrome.extension.getURL('/templates/settings.html')) {
                 chrome.tabs.highlight({
                     windowId: chrome.windows.WINDOW_ID_CURRENT,
