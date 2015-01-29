@@ -192,14 +192,14 @@ MFCore.playNext = function (force) {
         fp = true;
 
     if (ShuffleSongs) {
-        var random = Math.floor((Math.random() * Songs.length));
+        var random = Math.floor((Math.random() * Songs[CACHE.SONGS_STATE].length));
 
         BG.event.playByIndex({index: random});
     } else {
         if (RepeatSong && !fp) {
             BG.event.playByIndex(LastActiveIndex.index);
         } else {
-            if (MFCore.isFirstSongPlayed()) {
+            if (MFCore.isFirstSongPlayed() || CACHE.PREV_SONGS_STATE != CACHE.SONGS_STATE) {
                 var next = 1;
             } else {
                 var next = parseInt(LastActiveIndex.index) + 1;
@@ -229,12 +229,11 @@ MFCore.playPrev = function () {
     var prev = parseInt(LastActiveIndex.index) - 1;
 
     if (ShuffleSongs) {
-        var random = Math.floor((Math.random() * Songs.length));
+        var random = Math.floor((Math.random() * Songs[CACHE.SONGS_STATE].length));
 
         BG.event.playByIndex({index: random});
     } else {
-
-        if (!BG.checkCurrentListState()) {
+        if (!BG.checkCurrentListState() || CACHE.PREV_SONGS_STATE != CACHE.SONGS_STATE) {
             prev = -1;
         }
 

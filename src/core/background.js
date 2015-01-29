@@ -249,7 +249,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
         oldList,
         searchEl = document.getElementById('search-list');
 
-    CACHE.SONGS_STATE = isSearch ? 'search' : 'audio';
+    BG.setStates(isSearch ? 'search' : 'audio');
 
     Songs[CACHE.SONGS_STATE] = JSON.parse(response).response || undefined;
 
@@ -642,7 +642,6 @@ BG.event.playNext = function (data) {
 
 BG.event.playPrev = function (data) {
     BG.browserAction.showBadgeInfo();
-
     MFCore.playPrev();
 };
 
@@ -662,7 +661,7 @@ BG.event.playByIndex = function (data) {
         MFCore.events();
     }
 
-    CACHE.SONGS_STATE = BG.checkForSearchState() ? 'search' : 'audio';
+    BG.setStates(BG.checkForSearchState() ? 'search' : 'audio');
 
     var song = Songs[CACHE.SONGS_STATE][data.index];
 
@@ -1074,6 +1073,7 @@ BG.event.clearSearchInput = function (data) {
     CACHE.EMPTY_SEARCH.classList.remove('show');
     document.getElementById('search-list').classList.add('hide');
     document.getElementById('audio-list').classList.remove('hide');
+    BG.setStates('audio');
 };
 
 BG.event.isFirstSongPlayed = function () {
@@ -1081,6 +1081,11 @@ BG.event.isFirstSongPlayed = function () {
         event: 'isFirstSongPlayed',
         data: MFCore.isFirstSongPlayed()
     });
+};
+
+BG.setStates = function(val) {
+    CACHE.PREV_SONGS_STATE = CACHE.SONGS_STATE != undefined ? CACHE.SONGS_STATE : 'audio';
+    CACHE.SONGS_STATE = val;
 };
 
 BG.setSearchType = function () {
