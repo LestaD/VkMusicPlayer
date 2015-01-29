@@ -573,6 +573,7 @@ BG.event.setToPause = function (data) {
         MFPlay.classList.remove('pause');
 
         BG.browserAction.setIcon.play();
+
         BG.event.send({
             event: 'changePauseToPlay',
             data: ''

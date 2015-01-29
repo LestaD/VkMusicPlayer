@@ -476,7 +476,7 @@ Core.event.searchSongs = function () {
     });
 };
 
-Core.event.hideOverlay = function() {
+Core.event.hideOverlay = function () {
     Core.hideOverlay();
 };
 
@@ -675,8 +675,23 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
 };
 
 Core.openSettings = function () {
-    chrome.tabs.create({url: chrome.runtime.getURL('/templates/settings.html')});
-    window.close();
+    chrome.tabs.query({currentWindow: true}, function (tabs) {
+        console.log(tabs);
+        for (var i = 0, size = tabs.length; i <= size; i++) {
+            if (i == tabs.length) {
+                chrome.tabs.create({
+                    url: chrome.extension.getURL('/templates/settings.html')
+                });
+            } else if (tabs[i].url == chrome.extension.getURL('/templates/settings.html')) {
+                chrome.tabs.highlight({
+                    windowId: chrome.windows.WINDOW_ID_CURRENT,
+                    tabs: tabs[i].index
+                }, function (response) {
+                });
+                break;
+            }
+        }
+    });
 };
 
 Core.scrollToSong = function (element) {
