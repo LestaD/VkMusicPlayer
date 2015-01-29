@@ -40,32 +40,32 @@
     "commands": {
         "Play": {
             "suggested_key": {
-                "default": "Ctrl+Shift+F",
-                "mac": "MediaPlayPause"
+                "default": "Ctrl+2",
+                "mac": "Command+2"
             },
             "description": "__MSG_pauseOrPlaySong__",
             "global": true
         },
         "Next": {
             "suggested_key": {
-                "default": "Ctrl+Shift+H",
-                "mac": "MediaNextTrack"
+                "default": "Ctrl+3",
+                "mac": "Command+3"
             },
             "description": "__MSG_nextSong__",
             "global": true
         },
         "Prev": {
             "suggested_key": {
-                "default": "Ctrl+Shift+V",
-                "mac": "MediaPrevTrack"
+                "default": "Ctrl+1",
+                "mac": "Command+1"
             },
             "description": "__MSG_prevSong__",
             "global": true
         },
         "Repeat": {
             "suggested_key": {
-                "default": "Ctrl+Shift+K",
-                "mac": "Command+Shift+K"
+                "default": "Ctrl+4",
+                "mac": "Command+4"
             },
             "description": "__MSG_repeatSong__",
             "global": true

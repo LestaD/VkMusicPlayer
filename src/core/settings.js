@@ -1,3 +1,5 @@
+VKit.trackUser();
+
 var
     Overlay,
     ModalWindow,

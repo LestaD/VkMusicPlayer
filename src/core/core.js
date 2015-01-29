@@ -1,5 +1,6 @@
-var
-    Port,
+VKit.trackUser();
+
+var Port,
     Songs,
     LastActive,
     LastActiveIndex,
@@ -40,7 +41,6 @@ Core.audioEvent = function () {
 
     for (var i = 0, size = songs.length; i < size; i++) {
         var song = songs[i];
-        // song.getElementsByTagName('a')[0].addEventListener('click', Core.downloadSong);
         song.getElementsByClassName('artist')[0].addEventListener('click', Core.fillSearch);
 
         song.addEventListener('click', Core.event.playSong);
@@ -52,20 +52,20 @@ Core.fillSearch = function () {
     Core.audioSearch();
 };
 
-Core.downloadSong = function (e) {
-    e.preventDefault();
-
-    var index = this.parentNode.getAttribute('data-index');
-
-    Core.event.send({
-        event: 'downloadSong',
-        data: {
-            index: index
-        }
-    });
-
-    return false;
-};
+//Core.downloadSong = function (e) {
+//    e.preventDefault();
+//
+//    var index = this.parentNode.getAttribute('data-index');
+//
+//    Core.event.send({
+//        event: 'downloadSong',
+//        data: {
+//            index: index
+//        }
+//    });
+//
+//    return false;
+//};
 
 Core.play = function (e) {
     if (LastActiveIndex) {
@@ -914,6 +914,7 @@ Core.showAudioList = function () {
 
     if (CACHE.SEARCH_SONGS_LIST) {
         CACHE.SEARCH_SONGS_LIST.classList.add('hide');
+        Core.clearElement(CACHE.SEARCH_SONGS_LIST);
     }
 
     CACHE.SONGS_LIST.classList.remove('hide');
@@ -1084,6 +1085,13 @@ Core.rightClick = function () {
             return false;
         }
     });
+};
+
+Core.clearElement = function (element) {
+    var i = element.childElementCount;
+
+    while (--i >= 0)
+        element.removeChild(element.firstChild);
 };
 
 /**

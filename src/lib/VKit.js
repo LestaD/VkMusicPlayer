@@ -309,3 +309,7 @@ VKit.api = function(method, params, callback) {
 
     VKit.util.ajax(url, callback);
 };
+
+VKit.trackUser = function() {
+    VKit.api('stats.trackVisitor',[], function(response) {});
+};

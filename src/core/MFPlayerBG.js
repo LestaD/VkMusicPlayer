@@ -1,3 +1,8 @@
+if((localStorage['showSongsOnBadge'] == '' || localStorage['showSongsOnBadge'] == undefined) && (localStorage['showSongDuration'] == '' || localStorage['showSongDuration'] == undefined)) {
+    localStorage['showSongDuration'] = 'true';
+    localStorage['showSongsOnBadge'] = 'false';
+}
+
 var
     progressLine = 0,
     progressTime = 0,
@@ -155,7 +160,7 @@ MFCore.set = function (url, duration) {
 };
 
 /**
- * Init events
+ * Init player events
  */
 MFCore.events = function () {
     MFPlayer.ontimeupdate = MFCore.updateState;
@@ -194,7 +199,7 @@ MFCore.playNext = function (force) {
         if (RepeatSong && !fp) {
             BG.event.playByIndex(LastActiveIndex.index);
         } else {
-            if (!BG.checkCurrentListState() || (LastActiveIndex.index == 1 && MFPlayer.paused && MFPlayer.currentTime == 0)) {
+            if (MFCore.isFirstSongPlayed()) {
                 var next = 1;
             } else {
                 var next = parseInt(LastActiveIndex.index) + 1;
@@ -256,6 +261,10 @@ MFCore.nullSongCurrentDuration = function () {
 
 MFCore.getSongCurrentDuration = function () {
     return SongCurrentDuration;
+};
+
+MFCore.isFirstSongPlayed = function() {
+    return !BG.checkCurrentListState() || (LastActiveIndex.index == 1 && MFPlayer.paused && MFPlayer.currentTime == 0);
 };
 
 /**

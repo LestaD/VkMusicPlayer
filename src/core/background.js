@@ -42,7 +42,7 @@ var
 //track hot keys
 chrome.commands.onCommand.addListener(function (command) {
     if (command == 'Play') {
-        if (FirstLoad) {
+        if (FirstLoad || MFCore.isFirstSongPlayed()) {
             BG.event.sendPlay();
         } else {
             BG.event.setToPause();
@@ -51,8 +51,8 @@ chrome.commands.onCommand.addListener(function (command) {
         BG.event.playNext(true);
     } else if (command == 'Prev') {
         BG.event.playPrev();
-    } else if (command == 'Update') {
-
+    } else if (command == 'Repeat') {
+        BG.event.setRepeatSong();
     }
 });
 
@@ -65,7 +65,8 @@ var BG = {};
 
 /**
  * Chrome Browser Action Wrapper
- * @type {{setIcon: {pause: Function, play: Function}, setTitle: Function}}
+ *
+ * @type {{setIcon: {pause: Function, play: Function}, setTitle: Function, showBadgeInfo: Function}}
  */
 BG.browserAction = {
     setIcon: {
@@ -79,6 +80,17 @@ BG.browserAction = {
     },
     setTitle: function (title) {
         chrome.browserAction.setTitle({title: title});
+    },
+    showBadgeInfo: function () {
+        if (ShowSongsOnBadge == 'true' && ShowSongDurationOnBadge == 'false') {
+            chrome.browserAction.setBadgeText({text: SongsCount.toString()});
+        } else if (ShowSongDurationOnBadge == 'true' && ShowSongsOnBadge == 'false') {
+            if (SongCurrentDuration == '0:00') {
+                chrome.browserAction.setBadgeText({text: '0:00'});
+            } else {
+                chrome.browserAction.setBadgeText({text: SongCurrentDuration});
+            }
+        }
     }
 };
 
@@ -144,9 +156,7 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
     BG.getUsersList();
 
     if (!BG.isPlay()) {
-        if (ShowSongsOnBadge == 'true' || ShowSongsOnBadge == undefined) {
-            chrome.browserAction.setBadgeText({text: '0'});
-        }
+        BG.browserAction.showBadgeInfo();
     }
 
     var userID = VKit.getActiveAccount();
@@ -310,14 +320,13 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             if (!isSearch) {
                 SongsCount = index;
 
-                if (ShowSongsOnBadge == 'true' && ShowSongDurationOnBadge == 'false') {
-                    chrome.browserAction.setBadgeText({text: index});
-                }
+                BG.browserAction.showBadgeInfo();
             }
 
             list.appendChild(li);
         }
 
+        BG.browserAction.showBadgeInfo();
         if (ShowSongsOnBadge == 'false' && ShowSongDurationOnBadge == 'true') {
             chrome.browserAction.setBadgeText({text: SongCurrentDuration});
         }
@@ -327,7 +336,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             PlayerWrapperBG.style.display = 'block';
         }
 
-        CACHE.SONGS_LIST.appendChild(list);
+        CACHE.SONGS_LIST.insertAdjacentElement('afterBegin', list);
 
         if (!isSearch) {
             if (noFirst) {
@@ -601,7 +610,7 @@ BG.event.setToPlay = function (data) {
 };
 
 BG.event.playNext = function (data) {
-    chrome.browserAction.setBadgeText({text: '0:00'});
+    BG.browserAction.showBadgeInfo();
 
     if (data) {
         MFCore.playNext(data);
@@ -611,7 +620,7 @@ BG.event.playNext = function (data) {
 };
 
 BG.event.playPrev = function (data) {
-    chrome.browserAction.setBadgeText({text: '0:00'});
+    BG.browserAction.showBadgeInfo();
 
     MFCore.playPrev();
 };
@@ -626,7 +635,7 @@ BG.event.playByIndex = function (data) {
     MFPlayer.pause();
     MFProgress.style.width = 0;
 
-    chrome.browserAction.setBadgeText({text: '0:00'});
+    BG.browserAction.showBadgeInfo();
 
     if (typeof(MFPlayer.ontimeupdate) != 'function') {
         MFCore.events();
@@ -636,7 +645,7 @@ BG.event.playByIndex = function (data) {
 
     var song = Songs[CACHE.SONGS_STATE][data.index];
 
-    if(data.aid == undefined) {
+    if (data.aid == undefined) {
         data.aid = song.aid;
     }
 
@@ -791,17 +800,6 @@ BG.event.sendFirstLoad = function (data) {
 BG.event.updateList = function (data, callback, userUpdate) {
     if (AlbumID) {
         BG.getAllAudio(function () {
-            console.log(BG.isPlay());
-
-            if (!BG.isPlay()) {
-                chrome.browserAction.setBadgeText({text: '0:00'});
-            }
-
-            BG.event.send({
-                event: 'setSongDuration',
-                date: CurrentSong.realDuration
-            });
-
             BG.event.send({
                 event: 'reloadContent',
                 data: ''
@@ -813,10 +811,6 @@ BG.event.updateList = function (data, callback, userUpdate) {
         }, false, 'albums', AlbumID, false);
     } else {
         BG.getAllAudio(function () {
-            if (!BG.isPlay()) {
-                chrome.browserAction.setBadgeText({text: '0:00'});
-            }
-
             BG.event.send({
                 event: 'setSongDuration',
                 date: CurrentSong.realDuration
@@ -846,13 +840,13 @@ BG.event.setActiveUser = function (data) {
 
     BG.getAllAudio(function () {
         if (!BG.isPlay()) {
-            chrome.browserAction.setBadgeText({text: '0:00'});
+            BG.browserAction.showBadgeInfo();
         }
 
-        BG.event.send({
-            event: 'setSongDuration',
-            date: CurrentSong.realDuration
-        });
+        //BG.event.send({
+        //    event: 'setSongDuration',
+        //    data: CurrentSong.realDuration
+        //});
 
         BG.event.send({
             event: 'setActiveCoreUser',
@@ -1029,6 +1023,7 @@ BG.event.searchAudio = function (data) {
         });
     } else {
         BG.event.clearSearchInput();
+        BG.clearElement(CACHE.SEARCH_SONGS_LIST);
         BG.event.send({
             event: 'hideOverlay',
             data: ''
