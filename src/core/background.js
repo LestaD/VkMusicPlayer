@@ -293,7 +293,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             }
 
             saveSong.href = audio.url;
-            var songName = audio.artist + ' - ' + audio.title+'.mp3';
+            var songName = audio.artist + ' - ' + audio.title + '.mp3';
             saveSong.title = chrome.i18n.getMessage('download') + ' ' + songName;
             saveSong.setAttribute('download', songName);
 
@@ -535,9 +535,7 @@ BG.event.checkPlayed = function (data) {
  * @param {object} data
  */
 BG.event.sendPlay = function (data) {
-    if (data == null) {
-        BG.event.playByIndex(LastActiveIndex);
-    }
+    BG.event.playByIndex(LastActiveIndex);
 };
 
 BG.event.checkFirstLoad = function (data) {
@@ -1023,7 +1021,8 @@ BG.event.searchAudio = function (data) {
         });
     } else {
         BG.event.clearSearchInput();
-        BG.clearElement(CACHE.SEARCH_SONGS_LIST);
+        BG.clearElement(document.getElementById('search-list'));
+
         BG.event.send({
             event: 'hideOverlay',
             data: ''
