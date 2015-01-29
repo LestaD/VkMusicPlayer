@@ -700,12 +700,13 @@ Core.openSettings = function () {
 
 Core.scrollToSong = function (element) {
     var songList = CACHE.SEARCH.value.length > 0 ? CACHE.SEARCH_SONGS_LIST : AudioList,
-        offset = element.offsetTop - element.clientHeight - songList.scrollTop;
+        offset = element.offsetTop - element.clientHeight - songList.scrollTop - CACHE.SEARCH_WRAPPER.clientHeight;
 
-    if (offset > songList.clientHeight)
-        songList.scrollTop = element.offsetTop - songList.clientHeight - (element.clientHeight - element.clientHeight / 2) - 1;
-    else if (offset < 0)
-        songList.scrollTop = element.offsetTop - (element.clientHeight + element.clientHeight / 2) - 4;
+    if (offset > songList.clientHeight) {
+        songList.scrollTop = element.offsetTop - songList.clientHeight - CACHE.SEARCH_WRAPPER.clientHeight - (element.clientHeight - element.clientHeight / 2) - 1;
+    } else if (offset < 0) {
+        songList.scrollTop = element.offsetTop - CACHE.SEARCH_WRAPPER.clientHeight - (element.clientHeight + element.clientHeight / 2) - 7;
+    }
 };
 
 /**
@@ -1073,6 +1074,7 @@ Core.setElements = {
         AlbumTitle = document.getElementById('album-title');
         ShuffleSongs = document.getElementById('shuffle-play');
         Broadcast = document.getElementById('broadcast');
+        CACHE.SEARCH_WRAPPER = document.getElementById('search-wrapper');
         CACHE.APP_NAV_BLOCK = document.getElementById('app-nav-block');
         this.search();
     },
