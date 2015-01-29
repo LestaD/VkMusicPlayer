@@ -676,7 +676,6 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
 
 Core.openSettings = function () {
     chrome.tabs.query({currentWindow: true}, function (tabs) {
-        console.log(tabs);
         for (var i = 0, size = tabs.length; i <= size; i++) {
             if (i == tabs.length) {
                 chrome.tabs.create({
