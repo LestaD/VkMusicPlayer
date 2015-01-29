@@ -45,6 +45,17 @@ chrome.commands.onCommand.addListener(function (command) {
         if (!CONST.PAGE_RELOADED && FirstLoad && MFCore.isFirstSongPlayed()) {
             BG.event.sendPlay();
         } else {
+            if(MFCore.isFirstSongPlayed()) {
+                if (!ConnectStatus) {
+                    BG.setNotification({
+                        type: 'basic',
+                        title: CurrentSong.title,
+                        message: CurrentSong.artist + ' - ' + CurrentSong.title + ' ' + CurrentSong.duration,
+                        iconUrl: '/app-icon.png'
+                    });
+                }
+            }
+
             BG.event.setToPause();
         }
     } else if (command == 'Next') {
