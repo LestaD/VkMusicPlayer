@@ -207,24 +207,31 @@ Core.event.playSong = function (e) {
     }
 };
 
+Core.event.isFirstSongPlayed = function (data) {
+    if (!CONST.PAGE_RELOADED && FirstLoad && data) {
+        Core.event.sendPlay();
+        FirstLoad = false;
+    } else {
+        if (MFPlay.classList.contains('pause')) {
+            Core.event.send({
+                event: 'setToPause',
+                data: ''
+            });
+        } else {
+            Core.event.send({
+                event: 'setToPlay',
+                data: ''
+            });
+        }
+    }
+};
+
 Core.event.play = function (data) {
     MFPlay.addEventListener('click', function () {
-        if (FirstLoad) {
-            Core.event.sendPlay();
-            FirstLoad = false;
-        } else {
-            if (MFPlay.classList.contains('pause')) {
-                Core.event.send({
-                    event: 'setToPause',
-                    data: ''
-                });
-            } else {
-                Core.event.send({
-                    event: 'setToPlay',
-                    data: ''
-                });
-            }
-        }
+        Core.event.send({
+            event: 'isFirstSongPlayed',
+            data: ''
+        });
     });
 };
 

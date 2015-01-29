@@ -42,7 +42,7 @@ var
 //track hot keys
 chrome.commands.onCommand.addListener(function (command) {
     if (command == 'Play') {
-        if (FirstLoad || MFCore.isFirstSongPlayed()) {
+        if (!CONST.PAGE_RELOADED && FirstLoad && MFCore.isFirstSongPlayed()) {
             BG.event.sendPlay();
         } else {
             BG.event.setToPause();
@@ -69,13 +69,28 @@ var BG = {};
  * @type {{setIcon: {pause: Function, play: Function}, setTitle: Function, showBadgeInfo: Function}}
  */
 BG.browserAction = {
+    disable: function () {
+        chrome.browserAction.setPopup({popup: ''});
+    },
+    enable: function () {
+        chrome.browserAction.setPopup({popup: '/templates/window.html'});
+    },
     setIcon: {
         pause: function () {
             chrome.browserAction.setIcon({path: "/images/pause-icon.png"});
         },
-
         play: function () {
             chrome.browserAction.setIcon({path: "/images/play-icon.png"});
+        },
+        update: function () {
+            chrome.browserAction.setIcon({path: "/images/update_icon.png"});
+        },
+        autoIcon:function() {
+            if(BG.isPlay()) {
+                BG.browserAction.setIcon.pause();
+            } else {
+                BG.browserAction.setIcon.play();
+            }
         }
     },
     setTitle: function (title) {
@@ -100,7 +115,14 @@ BG.checkForAuth = function () {
         PlayerWrapperBG.style.display = 'block';
         MFCore.init();
         BG.event.listenData();
-        BG.getAllAudio(false, false, false, false, true, {});
+        BG.browserAction.disable();
+        BG.browserAction.setIcon.update();
+
+        BG.getAllAudio(function() {
+            BG.browserAction.enable();
+            BG.browserAction.setIcon.autoIcon();
+
+        }, false, false, false, true, {});
         BG.setSearchType();
     } else {
         PlayerWrapperBG.style.display = 'none';
@@ -797,8 +819,14 @@ BG.event.sendFirstLoad = function (data) {
  * @param {Function} callback
  */
 BG.event.updateList = function (data, callback, userUpdate) {
+    BG.browserAction.disable();
+    BG.browserAction.setIcon.update();
+
     if (AlbumID) {
         BG.getAllAudio(function () {
+            BG.browserAction.enable();
+            BG.browserAction.setIcon.autoIcon();
+
             BG.event.send({
                 event: 'reloadContent',
                 data: ''
@@ -816,6 +844,9 @@ BG.event.updateList = function (data, callback, userUpdate) {
             });
 
             var sendMsg = userUpdate || '';
+
+            BG.browserAction.enable();
+            BG.browserAction.setIcon.autoIcon();
 
             BG.event.send({
                 event: 'reloadContent',
@@ -837,15 +868,16 @@ BG.event.openAuth = function (data) {
 BG.event.setActiveUser = function (data) {
     VKit.setActiveAccount(data);
 
+    BG.browserAction.disable();
+    BG.browserAction.setIcon.update();
+
     BG.getAllAudio(function () {
         if (!BG.isPlay()) {
             BG.browserAction.showBadgeInfo();
         }
 
-        //BG.event.send({
-        //    event: 'setSongDuration',
-        //    data: CurrentSong.realDuration
-        //});
+        BG.browserAction.enable();
+        BG.browserAction.setIcon.autoIcon();
 
         BG.event.send({
             event: 'setActiveCoreUser',
@@ -1010,8 +1042,14 @@ BG.event.searchAudio = function (data) {
         CACHE.SEARCH.value = data.q;
         CACHE.EMPTY_SEARCH.classList.add('show');
 
+        BG.browserAction.disable();
+        BG.browserAction.setIcon.update();
+
         VKit.api('audio.search', ['q=' + data.q, 'auto_complete=1', 'lyrics=' + lyrics, 'performer_only=' + performer_only, 'sort=' + sort, 'search_own=1', 'offset=0', 'count=300'], function (response) {
             BG.renderAudioList(response, false, false, {searchRender: true}, function () {
+                BG.browserAction.enable();
+                BG.browserAction.setIcon.autoIcon();
+
                 BG.event.send({
                     event: 'reloadContent',
                     data: {
@@ -1036,6 +1074,13 @@ BG.event.clearSearchInput = function (data) {
     CACHE.EMPTY_SEARCH.classList.remove('show');
     document.getElementById('search-list').classList.add('hide');
     document.getElementById('audio-list').classList.remove('hide');
+};
+
+BG.event.isFirstSongPlayed = function () {
+    BG.event.send({
+        event: 'isFirstSongPlayed',
+        data: MFCore.isFirstSongPlayed()
+    });
 };
 
 BG.setSearchType = function () {
