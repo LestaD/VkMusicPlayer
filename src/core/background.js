@@ -37,7 +37,9 @@ var
     CONST = {
         PAGE_RELOADED: false
     },
-    CACHE = {};
+    CACHE = {
+        SONGS_STATE_CHANGE: false
+    };
 
 //track hot keys
 chrome.commands.onCommand.addListener(function (command) {
@@ -45,18 +47,29 @@ chrome.commands.onCommand.addListener(function (command) {
         if (!CONST.PAGE_RELOADED && FirstLoad && MFCore.isFirstSongPlayed()) {
             BG.event.sendPlay();
         } else {
-            if(MFCore.isFirstSongPlayed()) {
+            if(Songs[CACHE.SONGS_STATE] != undefined) {
+                if (MFCore.isFirstSongPlayed()) {
+                    if (!ConnectStatus) {
+                        BG.setNotification({
+                            type: 'basic',
+                            title: CurrentSong.title +' '+ CurrentSong.duration,
+                            message: CurrentSong.artist,
+                            iconUrl: '/app-icon.png'
+                        });
+                    }
+                }
+
+                BG.event.setToPause();
+            } else {
                 if (!ConnectStatus) {
                     BG.setNotification({
                         type: 'basic',
-                        title: CurrentSong.title,
-                        message: CurrentSong.artist + ' - ' + CurrentSong.title + ' ' + CurrentSong.duration,
-                        iconUrl: '/app-icon.png'
+                        title: chrome.i18n.getMessage('songNotFound'),
+                        message: chrome.i18n.getMessage('noSongs'),
+                        iconUrl: '/images/sad-face.png'
                     });
                 }
             }
-
-            BG.event.setToPause();
         }
     } else if (command == 'Next') {
         BG.event.playNext(true);
@@ -96,8 +109,8 @@ BG.browserAction = {
         update: function () {
             chrome.browserAction.setIcon({path: "/images/update_icon.png"});
         },
-        autoIcon:function() {
-            if(BG.isPlay()) {
+        autoIcon: function () {
+            if (BG.isPlay()) {
                 BG.browserAction.setIcon.pause();
             } else {
                 BG.browserAction.setIcon.play();
@@ -129,7 +142,7 @@ BG.checkForAuth = function () {
         BG.browserAction.disable();
         BG.browserAction.setIcon.update();
 
-        BG.getAllAudio(function() {
+        BG.getAllAudio(function () {
             BG.browserAction.enable();
             BG.browserAction.setIcon.autoIcon();
 
@@ -662,89 +675,98 @@ BG.event.playPrev = function (data) {
  * @param {{index: number, aid: number}} data
  */
 BG.event.playByIndex = function (data) {
-    MFCore.nullSongCurrentDuration();
-    MFPlayer.pause();
-    MFProgress.style.width = 0;
+    if(Songs[CACHE.SONGS_STATE] != undefined) {
+        MFCore.nullSongCurrentDuration();
+        MFPlayer.pause();
+        MFProgress.style.width = 0;
 
-    BG.browserAction.showBadgeInfo();
+        BG.browserAction.showBadgeInfo();
 
-    if (typeof(MFPlayer.ontimeupdate) != 'function') {
-        MFCore.events();
-    }
-
-    BG.setStates(BG.checkForSearchState() ? 'search' : 'audio');
-
-    var song = Songs[CACHE.SONGS_STATE][data.index];
-
-    if (data.aid == undefined) {
-        data.aid = song.aid;
-    }
-
-    MFDuration = song.duration;
-    MFPlayer.src = song.url;
-    MFPlayer.play();
-
-    if (!MFPlay.classList.contains('pause')) {
-        MFPlay.className += ' pause';
-    }
-
-    BG.removeActiveIndex(LastActiveIndex.aid);
-    BG.setActiveByIndex(data.aid);
-    BG.setLastActive(data.aid);
-
-    BG.event.send({
-        event: 'setNewHighLightElement',
-        data: {
-            oldIndex: LastActiveIndex.aid,
-            newIndex: data.aid
+        if (typeof(MFPlayer.ontimeupdate) != 'function') {
+            MFCore.events();
         }
-    });
 
-    LastActiveIndex = {
-        index: data.index,
-        aid: data.aid
-    };
+        var song = Songs[CACHE.SONGS_STATE][data.index];
 
-    var minutes = VKit.util.secToMin(MFDuration);
+        if (data.aid == undefined) {
+            data.aid = song.aid;
+        }
 
-    CurrentSong = {
-        id: song.aid,
-        artist: song.artist,
-        title: song.title,
-        duration: minutes,
-        realDuration: song.duration,
-        index: data.index,
-        owner: song.owner_id,
-        albumID: AlbumID
-    };
+        MFDuration = song.duration;
+        MFPlayer.src = song.url;
+        MFPlayer.play();
 
-    var songTitle = CurrentSong.artist + ' - ' + CurrentSong.title;
+        if (!MFPlay.classList.contains('pause')) {
+            MFPlay.className += ' pause';
+        }
 
-    BG.setSongInfo(CurrentSong.artist, CurrentSong.title, CurrentSong.duration);
-    BG.browserAction.setIcon.pause();
-    BG.browserAction.setTitle(songTitle);
+        BG.removeActiveIndex(LastActiveIndex.aid);
+        BG.setActiveByIndex(data.aid);
+        BG.setLastActive(data.aid);
 
-    BG.event.send({
-        event: 'changeSongInfo',
-        data: CurrentSong
-    });
-
-    BG.event.send({
-        event: 'changePlayToPause',
-        data: ''
-    });
-
-    BG.event.send({
-        event: 'setFirstLoadToFalse',
-        data: false
-    });
-
-    if (BroadcastStatus) {
-        VKit.api('audio.setBroadcast', ['audio=' + CurrentSong.owner + '_' + CurrentSong.id], function (response) {
+        BG.event.send({
+            event: 'setNewHighLightElement',
+            data: {
+                oldIndex: LastActiveIndex.aid,
+                newIndex: data.aid
+            }
         });
-    }
 
-    FirstLoad = false;
+        LastActiveIndex = {
+            index: data.index,
+            aid: data.aid
+        };
+
+        var minutes = VKit.util.secToMin(MFDuration);
+
+        CurrentSong = {
+            id: song.aid,
+            artist: song.artist,
+            title: song.title,
+            duration: minutes,
+            realDuration: song.duration,
+            index: data.index,
+            owner: song.owner_id,
+            albumID: AlbumID
+        };
+
+        var songTitle = CurrentSong.artist + ' - ' + CurrentSong.title;
+
+        BG.setSongInfo(CurrentSong.artist, CurrentSong.title, CurrentSong.duration);
+        BG.browserAction.setIcon.pause();
+        BG.browserAction.setTitle(songTitle);
+
+        BG.event.send({
+            event: 'changeSongInfo',
+            data: CurrentSong
+        });
+
+        BG.event.send({
+            event: 'changePlayToPause',
+            data: ''
+        });
+
+        BG.event.send({
+            event: 'setFirstLoadToFalse',
+            data: false
+        });
+
+        if (BroadcastStatus) {
+            VKit.api('audio.setBroadcast', ['audio=' + CurrentSong.owner + '_' + CurrentSong.id], function (response) {
+            });
+        }
+
+        FirstLoad = false;
+    } else {
+        if (!ConnectStatus) {
+            BG.setNotification({
+                type: 'basic',
+                title: chrome.i18n.getMessage('songNotFound'),
+                message: chrome.i18n.getMessage('noSongs'),
+                iconUrl: '/images/sad-face.png'
+            });
+        }
+    }
 };
 
 BG.event.getSongDuration = function () {
@@ -1094,9 +1116,18 @@ BG.event.isFirstSongPlayed = function () {
     });
 };
 
-BG.setStates = function(val) {
+BG.setSongsStateChange = function(val) {
+    CACHE.SONGS_STATE_CHANGE = val;
+};
+
+BG.getSongsStateChange = function() {
+    return CACHE.SONGS_STATE_CHANGE;
+};
+
+BG.setStates = function (val) {
     CACHE.PREV_SONGS_STATE = CACHE.SONGS_STATE != undefined ? CACHE.SONGS_STATE : 'audio';
     CACHE.SONGS_STATE = val;
+    BG.setSongsStateChange(true);
 };
 
 BG.setSearchType = function () {
@@ -1179,7 +1210,7 @@ BG.setNotification = function (options) {
             chrome.notifications.clear(id, function (cleared) {
 
             });
-        }, 1000);
+        }, 1500);
     });
 };
 

@@ -187,5 +187,9 @@
 
     "alreadyInList": {
         "message": "Эта песня уже в ваших аудиозаписях"
+    },
+
+    "songNotFound": {
+        "message": "Песня не найдена"
     }
 }

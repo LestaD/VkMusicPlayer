@@ -1,4 +1,4 @@
-if((localStorage['showSongsOnBadge'] == '' || localStorage['showSongsOnBadge'] == undefined) && (localStorage['showSongDuration'] == '' || localStorage['showSongDuration'] == undefined)) {
+if ((localStorage['showSongsOnBadge'] == '' || localStorage['showSongsOnBadge'] == undefined) && (localStorage['showSongDuration'] == '' || localStorage['showSongDuration'] == undefined)) {
     localStorage['showSongDuration'] = 'true';
     localStorage['showSongsOnBadge'] = 'false';
 }
@@ -186,39 +186,52 @@ MFCore.events = function () {
  * Play next song in list
  */
 MFCore.playNext = function (force) {
-    var fp = false;
+    if (Songs[CACHE.SONGS_STATE] != undefined) {
+        var fp = false,
+            next = 0;
 
-    if (typeof force == 'boolean')
-        fp = true;
+        if (typeof force == 'boolean')
+            fp = true;
 
-    if (ShuffleSongs) {
-        var random = Math.floor((Math.random() * Songs[CACHE.SONGS_STATE].length));
+        if (ShuffleSongs) {
+            var random = Math.floor((Math.random() * Songs[CACHE.SONGS_STATE].length));
 
-        BG.event.playByIndex({index: random});
-    } else {
-        if (RepeatSong && !fp) {
-            BG.event.playByIndex(LastActiveIndex.index);
+            BG.event.playByIndex({index: random});
         } else {
-            if (MFCore.isFirstSongPlayed() || CACHE.PREV_SONGS_STATE != CACHE.SONGS_STATE) {
-                var next = 1;
+            if (RepeatSong && !fp) {
+                BG.event.playByIndex(LastActiveIndex.index);
             } else {
-                var next = parseInt(LastActiveIndex.index) + 1;
+                if (MFCore.isFirstSongPlayed() || BG.getSongsStateChange()) {
+                    next = 1;
+                    BG.setSongsStateChange(false);
+                } else {
+                    next = parseInt(LastActiveIndex.index) + 1;
+                }
+
+                if ((next + 1) > Songs[CACHE.SONGS_STATE].length)
+                    next = 1;
+
+                BG.event.playByIndex({index: next});
             }
-
-            if ((next + 1) > Songs[CACHE.SONGS_STATE].length)
-                next = 1;
-
-            BG.event.playByIndex({index: next});
         }
-    }
 
-    if (!ConnectStatus) {
-        BG.setNotification({
-            type: 'basic',
-            title: CurrentSong.title,
-            message: CurrentSong.artist + ' - ' + CurrentSong.title + ' ' + CurrentSong.duration,
-            iconUrl: '/app-icon.png'
-        });
+        if (!ConnectStatus) {
+            BG.setNotification({
+                type: 'basic',
+                title: CurrentSong.title.trim() + ' ' + CurrentSong.duration,
+                message: CurrentSong.artist,
+                iconUrl: '/app-icon.png'
+            });
+        }
+    } else {
+        if (!ConnectStatus) {
+            BG.setNotification({
+                type: 'basic',
+                title: chrome.i18n.getMessage('songNotFound'),
+                message: chrome.i18n.getMessage('noSongs'),
+                iconUrl: '/images/sad-face.png'
+            });
+        }
     }
 };
 
@@ -226,31 +239,43 @@ MFCore.playNext = function (force) {
  * Play prev song in list
  */
 MFCore.playPrev = function () {
-    var prev = parseInt(LastActiveIndex.index) - 1;
+    if (Songs[CACHE.SONGS_STATE] != undefined) {
+        var prev = parseInt(LastActiveIndex.index) - 1;
 
-    if (ShuffleSongs) {
-        var random = Math.floor((Math.random() * Songs[CACHE.SONGS_STATE].length));
+        if (ShuffleSongs) {
+            var random = Math.floor((Math.random() * Songs[CACHE.SONGS_STATE].length));
 
-        BG.event.playByIndex({index: random});
+            BG.event.playByIndex({index: random});
+        } else {
+            if (MFCore.isFirstSongPlayed() || BG.getSongsStateChange()) {
+                prev = -1;
+                BG.setSongsStateChange(false);
+            }
+
+            if (prev <= 0) {
+                prev = Songs[CACHE.SONGS_STATE].length - 1;
+            }
+
+            BG.event.playByIndex({index: prev});
+        }
+
+        if (!ConnectStatus) {
+            BG.setNotification({
+                type: 'basic',
+                title: CurrentSong.title + ' ' + CurrentSong.duration,
+                message: CurrentSong.artist,
+                iconUrl: '/app-icon.png'
+            });
+        }
     } else {
-        if (!BG.checkCurrentListState() || CACHE.PREV_SONGS_STATE != CACHE.SONGS_STATE) {
-            prev = -1;
+        if (!ConnectStatus) {
+            BG.setNotification({
+                type: 'basic',
+                title: chrome.i18n.getMessage('songNotFound'),
+                message: chrome.i18n.getMessage('noSongs'),
+                iconUrl: '/images/sad-face.png'
+            });
         }
-
-        if (prev <= 0) {
-            prev = Songs[CACHE.SONGS_STATE].length - 1;
-        }
-
-        BG.event.playByIndex({index: prev});
-    }
-
-    if (!ConnectStatus) {
-        BG.setNotification({
-            type: 'basic',
-            title: CurrentSong.title,
-            message: CurrentSong.artist + ' - ' + CurrentSong.title + ' ' + CurrentSong.duration,
-            iconUrl: '/app-icon.png'
-        });
     }
 };
 
@@ -262,8 +287,8 @@ MFCore.getSongCurrentDuration = function () {
     return SongCurrentDuration;
 };
 
-MFCore.isFirstSongPlayed = function() {
-    return !BG.checkCurrentListState() || (LastActiveIndex.index == 1 && MFPlayer.paused && MFPlayer.currentTime == 0);
+MFCore.isFirstSongPlayed = function () {
+    return LastActiveIndex.index == 1 && MFPlayer.paused && MFPlayer.currentTime == 0;
 };
 
 /**
