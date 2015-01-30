@@ -667,6 +667,10 @@ $cWidth: 420px;
   line-height: 150px;
   height: 200px;
   width: 420px;
+
+  &.show {
+    display: block;
+  }
 }
 
 #repeat-song {

@@ -371,8 +371,9 @@ Core.event.reloadContent = function (data) {
             Core.hideOverlay();
         } else {
             Core.hideOverlay();
-            Core.removeSizeFromMain();
         }
+
+        Core.removeSizeFromMain();
     });
 };
 
@@ -447,11 +448,12 @@ Core.event.setBroadcastToDisable = function (data) {
 };
 
 Core.event.loadEmptyPage = function (data) {
-    document.body.removeChild(document.getElementById('main'));
+    //document.body.removeChild(document.getElementById('main'));
 
     Core.loadBackgroundContent(false, false, function () {
-        Core.hideOverlay();
         Core.setAllUsersEvents();
+        Core.setEvents();
+        Core.hideOverlay();
     });
 };
 

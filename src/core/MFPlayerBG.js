@@ -203,6 +203,13 @@ MFCore.playNext = function (force) {
             } else {
                 if (MFCore.isFirstSongPlayed() || BG.getSongsStateChange()) {
                     next = 1;
+
+                    if(LastActiveIndex == undefined) {
+                        LastActiveIndex = {
+                            index: 1
+                        };
+                    }
+
                     BG.setSongsStateChange(false);
                 } else {
                     next = parseInt(LastActiveIndex.index) + 1;
@@ -240,6 +247,13 @@ MFCore.playNext = function (force) {
  */
 MFCore.playPrev = function () {
     if (Songs[CACHE.SONGS_STATE] != undefined) {
+
+        if(LastActiveIndex == undefined) {
+            LastActiveIndex = {
+                index: 1
+            };
+        }
+
         var prev = parseInt(LastActiveIndex.index) - 1;
 
         if (ShuffleSongs) {
@@ -249,6 +263,7 @@ MFCore.playPrev = function () {
         } else {
             if (MFCore.isFirstSongPlayed() || BG.getSongsStateChange()) {
                 prev = -1;
+
                 BG.setSongsStateChange(false);
             }
 
@@ -288,7 +303,7 @@ MFCore.getSongCurrentDuration = function () {
 };
 
 MFCore.isFirstSongPlayed = function () {
-    return LastActiveIndex.index == 1 && MFPlayer.paused && MFPlayer.currentTime == 0;
+    return LastActiveIndex && LastActiveIndex.index == 1 && MFPlayer.paused && MFPlayer.currentTime == 0;
 };
 
 /**

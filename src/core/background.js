@@ -384,11 +384,11 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
 
         CACHE.SONGS_LIST.insertAdjacentElement('afterBegin', list);
 
-        if (!isSearch) {
-            if (noFirst) {
-                BG.setFirstSong();
-            }
+        if (noFirst) {
+            BG.setFirstSong();
+        }
 
+        if (!isSearch) {
             CONST.PAGE_RELOADED = true;
 
             BG.event.send({
@@ -397,14 +397,12 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             });
 
             if (LAST_EMPTY) {
-                LAST_EMPTY = false;
-                BG.event.send({
-                    event: 'loadEmptyPage',
-                    data: ''
-                });
+                EmptyList.classList.add('show');
             } else {
-                LAST_EMPTY = false;
+                EmptyList.classList.remove('show');
             }
+
+            LAST_EMPTY = false;
 
             if (typeof obj == 'object') {
                 if (obj.hasOwnProperty('userChecked') && obj.userChecked == true) {
@@ -424,8 +422,9 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
 
             list.appendChild(noResults);
             CACHE.SONGS_LIST.appendChild(list);
+            EmptyList.style.display = 'none';
         } else {
-            PlayerWrapperBG.style.display = 'none';
+            console.log('xexe');
             EmptyList.style.display = 'block';
             LAST_EMPTY = true;
 
@@ -434,11 +433,6 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             BG.event.send({
                 event: 'setPageReloadState',
                 data: CONST.PAGE_RELOADED
-            });
-
-            BG.event.send({
-                event: 'loadEmptyPage',
-                data: ''
             });
         }
     }
@@ -628,30 +622,16 @@ BG.event.setToPause = function (data) {
 };
 
 BG.event.setToPlay = function (data) {
-    if (FirstLoad) {
-        BG.event.playByIndex(LastActiveIndex);
+    if(LastActiveIndex != undefined) {
+        BG.setToPlay();
+    } else if(LastActiveIndex == undefined && Songs[CACHE.SONGS_STATE] != undefined) {
+        LastActiveIndex = {
+            index: 1
+        };
+        FirstLoad = true;
+        BG.setSongsStateChange(false);
+        BG.setToPlay();
     }
-
-    MFPlayer.play();
-
-    if (!MFPlay.classList.contains('pause')) {
-        MFPlay.className += ' pause';
-    }
-
-    if (LastActiveIndex == 1 && !CONST.PAGE_RELOADED) {
-        BG.setActiveByIndex(LastActiveIndex);
-
-        BG.event.send({
-            event: 'sendSetFirstActive',
-            data: ''
-        });
-    }
-
-    BG.browserAction.setIcon.pause();
-    BG.event.send({
-        event: 'changePlayToPause',
-        data: ''
-    });
 };
 
 BG.event.playNext = function (data) {
@@ -700,17 +680,21 @@ BG.event.playByIndex = function (data) {
             MFPlay.className += ' pause';
         }
 
-        BG.removeActiveIndex(LastActiveIndex.aid);
+        if(LastActiveIndex != undefined) {
+            BG.removeActiveIndex(LastActiveIndex.aid);
+
+            BG.event.send({
+                event: 'setNewHighLightElement',
+                data: {
+                    oldIndex: LastActiveIndex.aid,
+                    newIndex: data.aid
+                }
+            });
+        }
+
         BG.setActiveByIndex(data.aid);
         BG.setLastActive(data.aid);
 
-        BG.event.send({
-            event: 'setNewHighLightElement',
-            data: {
-                oldIndex: LastActiveIndex.aid,
-                newIndex: data.aid
-            }
-        });
 
         LastActiveIndex = {
             index: data.index,
@@ -917,6 +901,13 @@ BG.event.setActiveUser = function (data) {
                 id: data
             }
         });
+
+        BG.event.send({
+            event: 'reloadContent',
+            data: {
+                removeSearchAjax: true
+            }
+        });
     }, false, false, false, false, {userChecked: true});
 
     document.getElementById('album-title').textContent = chrome.i18n.getMessage('albums');
@@ -1113,6 +1104,33 @@ BG.event.isFirstSongPlayed = function () {
     BG.event.send({
         event: 'isFirstSongPlayed',
         data: MFCore.isFirstSongPlayed()
+    });
+};
+
+BG.setToPlay = function() {
+    if (FirstLoad) {
+        BG.event.playByIndex(LastActiveIndex);
+    }
+
+    MFPlayer.play();
+
+    if (!MFPlay.classList.contains('pause')) {
+        MFPlay.className += ' pause';
+    }
+
+    if (LastActiveIndex == 1 && !CONST.PAGE_RELOADED) {
+        BG.setActiveByIndex(LastActiveIndex);
+
+        BG.event.send({
+            event: 'sendSetFirstActive',
+            data: ''
+        });
+    }
+
+    BG.browserAction.setIcon.pause();
+    BG.event.send({
+        event: 'changePlayToPause',
+        data: ''
     });
 };
 
