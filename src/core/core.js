@@ -337,7 +337,9 @@ Core.event.setNewHighLightElement = function (data) {
 Core.event.updateList = function () {
     Core.setSizeToMain();
     Core.showOverlay();
-    Core.setBlur('audio-list');
+    Core.setBlur('songs-list');
+    Core.eraseSearchInput();
+
     Core.event.send({
         event: 'updateList',
         data: ''
@@ -760,7 +762,7 @@ Core.eraseSearchInput = function () {
 Core.setActiveUser = function () {
     Core.setSizeToMain();
     Core.showOverlay();
-    Core.setBlur('audio-list');
+    Core.setBlur('songs-list');
     var cloneUsr = this.cloneNode(true);
 
     if (!cloneUsr.classList.contains('active')) {
@@ -809,7 +811,7 @@ Core.allAlbumsEvents = function () {
                 rID = dID;
             }
 
-            Core.setBlur('audio-list');
+            Core.setBlur('songs-list');
             Core.event.send({
                 event: 'loadAlbum',
                 data: {

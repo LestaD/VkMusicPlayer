@@ -52,7 +52,7 @@ chrome.commands.onCommand.addListener(function (command) {
                     if (!ConnectStatus) {
                         BG.setNotification({
                             type: 'basic',
-                            title: CurrentSong.title + ' ' + CurrentSong.realDuration,
+                            title: CurrentSong.title.trim() + ' ' + CurrentSong.realDuration,
                             message: CurrentSong.artist,
                             iconUrl: '/app-icon.png'
                         });
@@ -400,6 +400,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                 EmptyList.classList.add('show');
             } else {
                 EmptyList.classList.remove('show');
+                BG.getSongsStateChange(false);
             }
 
             LAST_EMPTY = false;
@@ -489,7 +490,7 @@ BG.clearElement = function (element) {
 };
 
 BG.setActiveSong = function (index) {
-    if (CurrentSong.owner == VKit.getActiveAccount() && CurrentSong.albumID == AlbumID) {
+    if (CurrentSong.owner_id == VKit.getActiveAccount() && CurrentSong.albumID == AlbumID) {
         var eIndex = index - 1,
             e = document.getElementById('player-wrapper').getElementsByTagName('li')[eIndex];
 
@@ -681,8 +682,6 @@ BG.event.playByIndex = function (data) {
             data.aid = song.aid;
         }
 
-        console.log(song);
-
         MFDuration = song.duration;
         MFPlayer.src = song.url;
         MFPlayer.play();
@@ -722,7 +721,7 @@ BG.event.playByIndex = function (data) {
             duration: song.duration,
             realDuration: VKit.util.secToMin(MFDuration),
             index: data.index,
-            owner: song.owner_id,
+            owner_id: song.owner_id,
             albumID: AlbumID,
             url: song.url
         };
@@ -749,7 +748,7 @@ BG.event.playByIndex = function (data) {
         });
 
         if (BroadcastStatus) {
-            VKit.api('audio.setBroadcast', ['audio=' + CurrentSong.owner + '_' + CurrentSong.id], function (response) {
+            VKit.api('audio.setBroadcast', ['audio=' + CurrentSong.owner_id + '_' + CurrentSong.id], function (response) {
             });
         }
 
@@ -850,6 +849,8 @@ BG.event.sendFirstLoad = function (data) {
 BG.event.updateList = function (data, callback, userUpdate) {
     BG.browserAction.disable();
     BG.browserAction.setIcon.update();
+    BG.event.clearSearchInput();
+    BG.clearElement(document.getElementById('search-list'));
 
     if (AlbumID) {
         BG.getAllAudio(function () {
@@ -1006,7 +1007,7 @@ BG.event.setBroadcastSong = function (data) {
         BroadcastStatus = true;
         Broadcast.className = 'active';
 
-        VKit.api('audio.setBroadcast', ['audio=' + CurrentSong.owner + '_' + CurrentSong.id], function (response) {
+        VKit.api('audio.setBroadcast', ['audio=' + CurrentSong.owner_id + '_' + CurrentSong.id], function (response) {
             BG.event.send({
                 event: 'setBroadcastToActive',
                 data: ''
@@ -1158,6 +1159,7 @@ BG.getSongsStateChange = function () {
 BG.setStates = function (val) {
     CACHE.PREV_SONGS_STATE = CACHE.SONGS_STATE != undefined ? CACHE.SONGS_STATE : 'audio';
     CACHE.SONGS_STATE = val;
+
     BG.setSongsStateChange(true);
 };
 
@@ -1173,7 +1175,7 @@ BG.setSearchType = function () {
 };
 
 BG.checkCurrentListState = function () {
-    return CurrentSong.albumID == AlbumID && CurrentSong.owner == VKit.getActiveAccount();
+    return CurrentSong.albumID == AlbumID && CurrentSong.owner_id == VKit.getActiveAccount();
 };
 
 /**
@@ -1198,6 +1200,8 @@ BG.setFirstSong = function () {
         aid: song.aid
     };
 
+    console.log(song);
+
     CurrentSong = {
         aid: song.aid,
         id: song.aid,
@@ -1206,7 +1210,7 @@ BG.setFirstSong = function () {
         duration: song.duration,
         realDuration: VKit.util.secToMin(MFDuration),
         index: index,
-        owner: song.owner_id,
+        owner_id: song.owner_id,
         albumID: AlbumID,
         url: song.url
     };

@@ -202,18 +202,23 @@ MFCore.playNext = function (force) {
                 BG.event.playByIndex(LastActiveIndex.index);
             } else {
                 if (MFCore.isFirstSongPlayed() || BG.getSongsStateChange()) {
-                    next = 1;
+                    if (!MFCore.isFirstSongPlayed() && BG.checkCurrentListState() && CACHE.SONGS_STATE == CACHE.PREV_SONGS_STATE) {
+                        next = parseInt(LastActiveIndex.index) + 1;
+                    } else {
+                        next = 1;
 
-                    if(LastActiveIndex == undefined) {
-                        LastActiveIndex = {
-                            index: 1
-                        };
+                        if (LastActiveIndex == undefined) {
+                            LastActiveIndex = {
+                                index: 1
+                            };
+                        }
                     }
 
                     BG.setSongsStateChange(false);
                 } else {
                     next = parseInt(LastActiveIndex.index) + 1;
                 }
+
 
                 if ((next + 1) > Songs[CACHE.SONGS_STATE].length)
                     next = 1;
@@ -248,7 +253,7 @@ MFCore.playNext = function (force) {
 MFCore.playPrev = function () {
     if (Songs[CACHE.SONGS_STATE] != undefined) {
 
-        if(LastActiveIndex == undefined) {
+        if (LastActiveIndex == undefined) {
             LastActiveIndex = {
                 index: 1
             };
@@ -264,6 +269,7 @@ MFCore.playPrev = function () {
             if (MFCore.isFirstSongPlayed() || BG.getSongsStateChange()) {
                 prev = -1;
 
+
                 BG.setSongsStateChange(false);
             }
 
@@ -277,7 +283,7 @@ MFCore.playPrev = function () {
         if (!ConnectStatus) {
             BG.setNotification({
                 type: 'basic',
-                title: CurrentSong.title + ' ' + CurrentSong.realDuration,
+                title: CurrentSong.title.trim() + ' ' + CurrentSong.realDuration,
                 message: CurrentSong.artist,
                 iconUrl: '/app-icon.png'
             });
