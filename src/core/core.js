@@ -268,8 +268,8 @@ Core.event.setPageReloadState = function (data) {
 };
 
 Core.event.changeSongInfo = function (data) {
-    Core.setSongInfo(data.artist, data.title, data.duration);
-    MFDuration = data.realDuration;
+    Core.setSongInfo(data.artist, data.title, data.realDuration);
+    MFDuration = data.duration;
 };
 
 Core.event.sendSetFirstActive = function (data) {

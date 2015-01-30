@@ -225,7 +225,7 @@ MFCore.playNext = function (force) {
         if (!ConnectStatus) {
             BG.setNotification({
                 type: 'basic',
-                title: CurrentSong.title.trim() + ' ' + CurrentSong.duration,
+                title: CurrentSong.title.trim() + ' ' + CurrentSong.realDuration,
                 message: CurrentSong.artist,
                 iconUrl: '/app-icon.png'
             });
@@ -277,7 +277,7 @@ MFCore.playPrev = function () {
         if (!ConnectStatus) {
             BG.setNotification({
                 type: 'basic',
-                title: CurrentSong.title + ' ' + CurrentSong.duration,
+                title: CurrentSong.title + ' ' + CurrentSong.realDuration,
                 message: CurrentSong.artist,
                 iconUrl: '/app-icon.png'
             });

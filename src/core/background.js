@@ -47,12 +47,12 @@ chrome.commands.onCommand.addListener(function (command) {
         if (!CONST.PAGE_RELOADED && FirstLoad && MFCore.isFirstSongPlayed()) {
             BG.event.sendPlay();
         } else {
-            if(Songs[CACHE.SONGS_STATE] != undefined) {
+            if (Songs[CACHE.SONGS_STATE] != undefined) {
                 if (MFCore.isFirstSongPlayed()) {
                     if (!ConnectStatus) {
                         BG.setNotification({
                             type: 'basic',
-                            title: CurrentSong.title +' '+ CurrentSong.duration,
+                            title: CurrentSong.title + ' ' + CurrentSong.realDuration,
                             message: CurrentSong.artist,
                             iconUrl: '/app-icon.png'
                         });
@@ -424,7 +424,6 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             CACHE.SONGS_LIST.appendChild(list);
             EmptyList.style.display = 'none';
         } else {
-            console.log('xexe');
             EmptyList.style.display = 'block';
             LAST_EMPTY = true;
 
@@ -575,6 +574,7 @@ BG.event.checkPlayed = function (data) {
  * @param {object} data
  */
 BG.event.sendPlay = function (data) {
+    BG.setSongsStateChange(false);
     BG.event.playByIndex(LastActiveIndex);
 };
 
@@ -622,12 +622,16 @@ BG.event.setToPause = function (data) {
 };
 
 BG.event.setToPlay = function (data) {
-    if(LastActiveIndex != undefined) {
+    if (LastActiveIndex != undefined && !LAST_EMPTY) {
         BG.setToPlay();
-    } else if(LastActiveIndex == undefined && Songs[CACHE.SONGS_STATE] != undefined) {
+    } else if (LastActiveIndex == undefined && Songs[CACHE.SONGS_STATE] != undefined) {
         LastActiveIndex = {
             index: 1
         };
+        FirstLoad = true;
+        BG.setSongsStateChange(false);
+        BG.setToPlay();
+    } else if (LastActiveIndex != undefined && LAST_EMPTY) {
         FirstLoad = true;
         BG.setSongsStateChange(false);
         BG.setToPlay();
@@ -655,7 +659,7 @@ BG.event.playPrev = function (data) {
  * @param {{index: number, aid: number}} data
  */
 BG.event.playByIndex = function (data) {
-    if(Songs[CACHE.SONGS_STATE] != undefined) {
+    if (Songs[CACHE.SONGS_STATE] != undefined || CurrentSong != undefined) {
         MFCore.nullSongCurrentDuration();
         MFPlayer.pause();
         MFProgress.style.width = 0;
@@ -666,11 +670,18 @@ BG.event.playByIndex = function (data) {
             MFCore.events();
         }
 
-        var song = Songs[CACHE.SONGS_STATE][data.index];
+        if (Songs[CACHE.SONGS_STATE] == undefined) {
+            var song = CurrentSong;
+        } else {
+            var song = Songs[CACHE.SONGS_STATE][data.index];
+        }
+
 
         if (data.aid == undefined) {
             data.aid = song.aid;
         }
+
+        console.log(song);
 
         MFDuration = song.duration;
         MFPlayer.src = song.url;
@@ -680,7 +691,7 @@ BG.event.playByIndex = function (data) {
             MFPlay.className += ' pause';
         }
 
-        if(LastActiveIndex != undefined) {
+        if (LastActiveIndex != undefined && Songs[CACHE.SONGS_STATE] != undefined) {
             BG.removeActiveIndex(LastActiveIndex.aid);
 
             BG.event.send({
@@ -692,31 +703,33 @@ BG.event.playByIndex = function (data) {
             });
         }
 
-        BG.setActiveByIndex(data.aid);
-        BG.setLastActive(data.aid);
+        if (data != undefined) {
+            BG.setActiveByIndex(data.aid);
+            BG.setLastActive(data.aid);
 
 
-        LastActiveIndex = {
-            index: data.index,
-            aid: data.aid
-        };
-
-        var minutes = VKit.util.secToMin(MFDuration);
+            LastActiveIndex = {
+                index: data.index,
+                aid: data.aid
+            };
+        }
 
         CurrentSong = {
+            aid: song.aid,
             id: song.aid,
             artist: song.artist,
             title: song.title,
-            duration: minutes,
-            realDuration: song.duration,
+            duration: song.duration,
+            realDuration: VKit.util.secToMin(MFDuration),
             index: data.index,
             owner: song.owner_id,
-            albumID: AlbumID
+            albumID: AlbumID,
+            url: song.url
         };
 
         var songTitle = CurrentSong.artist + ' - ' + CurrentSong.title;
 
-        BG.setSongInfo(CurrentSong.artist, CurrentSong.title, CurrentSong.duration);
+        BG.setSongInfo(CurrentSong.artist, CurrentSong.title, CurrentSong.realDuration);
         BG.browserAction.setIcon.pause();
         BG.browserAction.setTitle(songTitle);
 
@@ -792,7 +805,7 @@ BG.event.changeCurrentTime = function (data) {
     if (MFPlayer.src != '') {
         MFPlayer.pause();
         MFPlayer.currentTime = data;
-        BG.event.setToPlay('true');
+        BG.event.setToPlay();
     }
 };
 
@@ -1107,7 +1120,7 @@ BG.event.isFirstSongPlayed = function () {
     });
 };
 
-BG.setToPlay = function() {
+BG.setToPlay = function () {
     if (FirstLoad) {
         BG.event.playByIndex(LastActiveIndex);
     }
@@ -1134,11 +1147,11 @@ BG.setToPlay = function() {
     });
 };
 
-BG.setSongsStateChange = function(val) {
+BG.setSongsStateChange = function (val) {
     CACHE.SONGS_STATE_CHANGE = val;
 };
 
-BG.getSongsStateChange = function() {
+BG.getSongsStateChange = function () {
     return CACHE.SONGS_STATE_CHANGE;
 };
 
@@ -1186,17 +1199,20 @@ BG.setFirstSong = function () {
     };
 
     CurrentSong = {
+        aid: song.aid,
         id: song.aid,
         artist: song.artist,
         title: song.title,
-        duration: VKit.util.secToMin(MFDuration),
-        realDuration: song.duration,
+        duration: song.duration,
+        realDuration: VKit.util.secToMin(MFDuration),
+        index: index,
         owner: song.owner_id,
-        albumID: AlbumID
+        albumID: AlbumID,
+        url: song.url
     };
 
     MFDuration = CurrentSong.realDuration;
-    BG.setSongInfo(CurrentSong.artist, CurrentSong.title, CurrentSong.duration);
+    BG.setSongInfo(CurrentSong.artist, CurrentSong.title, CurrentSong.realDuration);
 
     FirstSong = {
         url: song.url,
@@ -1247,7 +1263,11 @@ BG.setLastActive = function (index) {
  * @param {number} index
  */
 BG.setActiveByIndex = function (index) {
-    document.querySelector('#songs-list li[data-aid="' + index + '"]').className = 'active';
+    var el = document.querySelector('#songs-list li[data-aid="' + index + '"]');
+
+    if(el) {
+        el.className = 'active';
+    }
 };
 
 /**
