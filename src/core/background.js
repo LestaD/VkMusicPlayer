@@ -850,7 +850,11 @@ BG.event.updateList = function (data, callback, userUpdate) {
     BG.browserAction.disable();
     BG.browserAction.setIcon.update();
     BG.event.clearSearchInput();
-    BG.clearElement(document.getElementById('search-list'));
+    var searchList = document.getElementById('search-list');
+
+    if(searchList) {
+        BG.clearElement(searchList);
+    }
 
     if (AlbumID) {
         BG.getAllAudio(function () {
@@ -1109,8 +1113,17 @@ BG.event.searchAudio = function (data) {
 BG.event.clearSearchInput = function (data) {
     CACHE.SEARCH.value = '';
     CACHE.EMPTY_SEARCH.classList.remove('show');
-    document.getElementById('search-list').classList.add('hide');
-    document.getElementById('audio-list').classList.remove('hide');
+    var searchEl = document.getElementById('search-list'),
+        audioEl = document.getElementById('audio-list');
+
+    if(searchEl) {
+        searchEl.classList.add('hide');
+    }
+
+    if(audioEl) {
+        audioEl.classList.remove('hide');
+    }
+
     BG.setStates('audio');
 };
 

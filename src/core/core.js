@@ -718,7 +718,7 @@ Core.scrollToSong = function (element) {
  *
  * @param {event} e
  */
-Core.openAllUsers = function (e) {
+Core.openAllUsers = function () {
     CurrentUser.getElementsByClassName('user')[0].classList.toggle('active');
 
     if (AllUsers.classList.contains('opened')) {
