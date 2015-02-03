@@ -341,7 +341,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             saveSong.href = audio.url;
             var songName = audio.artist + ' - ' + audio.title + '.mp3';
             saveSong.title = chrome.i18n.getMessage('download') + ' ' + songName;
-            saveSong.setAttribute('download', songName);
+            saveSong.download = songName;
 
             actions.appendChild(addTo);
             actions.appendChild(saveSong);
@@ -852,7 +852,7 @@ BG.event.updateList = function (data, callback, userUpdate) {
     BG.event.clearSearchInput();
     var searchList = document.getElementById('search-list');
 
-    if(searchList) {
+    if (searchList) {
         BG.clearElement(searchList);
     }
 
@@ -966,15 +966,6 @@ BG.event.loadAlbum = function (data) {
             }
         });
     });
-};
-
-BG.event.downloadSong = function (data) {
-    var index = data.index - 1,
-        link = document.getElementById('audio-list').getElementsByTagName('li')[index].getElementsByTagName('a')[0],
-        me = document.createEvent('MouseEvents');
-
-    me.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-    link.dispatchEvent(me);
 };
 
 BG.event.setShuffleSongs = function (data) {
@@ -1116,11 +1107,11 @@ BG.event.clearSearchInput = function (data) {
     var searchEl = document.getElementById('search-list'),
         audioEl = document.getElementById('audio-list');
 
-    if(searchEl) {
+    if (searchEl) {
         searchEl.classList.add('hide');
     }
 
-    if(audioEl) {
+    if (audioEl) {
         audioEl.classList.remove('hide');
     }
 
@@ -1280,7 +1271,7 @@ BG.setLastActive = function (index) {
 BG.setActiveByIndex = function (index) {
     var el = document.querySelector('#songs-list li[data-aid="' + index + '"]');
 
-    if(el) {
+    if (el) {
         el.className = 'active';
     }
 };

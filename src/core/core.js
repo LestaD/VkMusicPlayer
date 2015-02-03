@@ -37,7 +37,7 @@ var Port,
 var Core = {};
 
 Core.audioEvent = function () {
-    var songs = document.getElementById('player-wrapper').getElementsByTagName('li');
+    var songs = document.getElementById('songs-list').getElementsByTagName('li');
 
     for (var i = 0, size = songs.length; i < size; i++) {
         var song = songs[i];
@@ -50,21 +50,6 @@ Core.audioEvent = function () {
 Core.fillSearch = function () {
     CACHE.SEARCH.value = this.textContent;
     Core.audioSearch();
-};
-
-Core.downloadSong = function (e) {
-    e.preventDefault();
-
-    var index = this.parentNode.getAttribute('data-index');
-
-    Core.event.send({
-        event: 'downloadSong',
-        data: {
-            index: index
-        }
-    });
-
-    return false;
 };
 
 Core.play = function (e) {
