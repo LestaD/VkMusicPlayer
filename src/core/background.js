@@ -1213,15 +1213,13 @@ BG.setFirstSong = function () {
         aid: song.aid
     };
 
-    console.log(song);
-
     CurrentSong = {
         aid: song.aid,
         id: song.aid,
         artist: song.artist,
         title: song.title,
         duration: song.duration,
-        realDuration: VKit.util.secToMin(MFDuration),
+        realDuration: VKit.util.secToMin(song.duration),
         index: index,
         owner_id: song.owner_id,
         albumID: AlbumID,

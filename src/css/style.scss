@@ -167,15 +167,26 @@ $cWidth: 420px;
 
       .actions {
         @extend .absolute;
+        color:#5f7fa2;
         right: 0;
         display: none;
+        height: 100%;
+        font-size: 15px;
+
+        span , a {
+          @include animation-two(150ms);
+          display: block;
+          float:none;
+          line-height: 32px;
+          margin-right: 5px;
+        }
       }
 
       &:hover {
         background: #edf1f5;
 
         .actions {
-          display: block;
+          display: flex;
         }
 
         .duration {
@@ -185,10 +196,9 @@ $cWidth: 420px;
 
       &.active {
         background: #5f7fa2;
-        color: #fff;
 
-        .save-song, .add-song {
-          background-position: 0 -15px;
+        span , a {
+          color: #fff;
         }
 
         .duration {
