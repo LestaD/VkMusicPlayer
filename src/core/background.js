@@ -769,7 +769,7 @@ BG.event.getSongDuration = function () {
     BG.event.send({
         event: 'setSongDuration',
         data: {
-            dur: CurrentSong.realDuration,
+            dur: CurrentSong.duration,
             index: CurrentSong.id
         }
     });
@@ -1226,7 +1226,7 @@ BG.setFirstSong = function () {
         url: song.url
     };
 
-    MFDuration = CurrentSong.realDuration;
+    MFDuration = CurrentSong.duration;
     BG.setSongInfo(CurrentSong.artist, CurrentSong.title, CurrentSong.realDuration);
 
     FirstSong = {

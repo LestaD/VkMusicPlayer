@@ -61,6 +61,7 @@ MFCore.setElements = function () {
 MFCore.changeCurrentTime = function (e) {
     progressLine = e.pageX - MFSongProgress.getBoundingClientRect().left;
     progressTime = (progressLine / songProgressWidth) * MFDuration;
+    console.log(progressTime + ' '+ progressLine+ ' ' + e.pageX);
 };
 
 /**
