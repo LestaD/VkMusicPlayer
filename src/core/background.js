@@ -307,7 +307,6 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                 addTo = spanCache.cloneNode(false),
                 saveSong = aCache.cloneNode(false),
                 actions = spanCache.cloneNode(false),
-                userSong = spanCache.cloneNode(false),
                 index = i.toString();
 
             /**
@@ -330,7 +329,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             artist.className = 'artist';
             duration.className = 'duration';
             actions.className = 'actions';
-            userSong.className = 'fa fa-check-circle song-in-list';
+
             addTo.className = 'fa fa-plus add-to';
             saveSong.className = 'fa fa-floppy-o save-song';
 
@@ -348,8 +347,15 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
 
             if (isSearch) {
                 if (audio.owner_id == VKit.getActiveAccount()) {
-                    userSong.title = chrome.i18n.getMessage('alreadyInList');
-                    li.appendChild(userSong);
+                    var userSong = spanCache.cloneNode(false),
+                        userSongWrapper = spanCache.cloneNode(false);
+
+                    userSong.className = 'fa fa-check-circle song-in-list';
+                    userSong.title = songName + ' ' + chrome.i18n.getMessage('alreadyInList');
+                    userSongWrapper.className = 'sil-wrapper';
+
+                    userSongWrapper.appendChild(userSong);
+                    li.appendChild(userSongWrapper);
                 }
             }
 

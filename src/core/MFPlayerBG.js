@@ -202,7 +202,7 @@ MFCore.playNext = function (force) {
                 BG.event.playByIndex(LastActiveIndex.index);
             } else {
                 if (MFCore.isFirstSongPlayed() || BG.getSongsStateChange()) {
-                    if (!MFCore.isFirstSongPlayed() && BG.checkCurrentListState() && CACHE.SONGS_STATE == CACHE.PREV_SONGS_STATE) {
+                    if (MFCore.isFirstSearchSongPlayed() || (!MFCore.isFirstSongPlayed() && BG.checkCurrentListState() && CACHE.SONGS_STATE == CACHE.PREV_SONGS_STATE)) {
                         next = parseInt(LastActiveIndex.index) + 1;
                     } else {
                         next = 1;
@@ -310,6 +310,12 @@ MFCore.getSongCurrentDuration = function () {
 
 MFCore.isFirstSongPlayed = function () {
     return LastActiveIndex && LastActiveIndex.index == 1 && MFPlayer.paused && MFPlayer.currentTime == 0;
+};
+
+MFCore.isFirstSearchSongPlayed = function() {
+    var song = Songs[CACHE.SONGS_STATE][CurrentSong.index];
+
+    return CACHE.SONGS_STATE == 'search' && song && song.aid == CurrentSong.aid && CurrentSong.index != 1;
 };
 
 /**

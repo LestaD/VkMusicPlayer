@@ -135,6 +135,16 @@ $cWidth: 420px;
         float: left;
       }
 
+      .sil-wrapper {
+        @extend .absolute;
+        background: #fff;
+        border-radius: 50px;
+        top: -3px;
+        left: -3px;
+        color: #66C369;
+        font-size: 12px;
+      }
+
       .artist {
         @extend .relative;
         @extend .text-overflow;
@@ -175,12 +185,12 @@ $cWidth: 420px;
         display: none;
         height: 100%;
 
-        span , a {
+        span, a {
           @include animation-two(150ms);
-          color:#5f7fa2;
+          color: #5f7fa2;
           display: block;
-          float:none;
-          font-size: 15px;
+          float: none;
+          font-size: 14px;
           line-height: 32px;
           margin-right: 10px;
           opacity: 0.7;
@@ -206,8 +216,14 @@ $cWidth: 420px;
       &.active {
         background: #5f7fa2;
 
-        span , a {
+        span, a {
           color: #fff;
+        }
+
+        .sil-wrapper {
+          span {
+            color: #66C369;
+          }
         }
 
         .duration {
@@ -557,6 +573,14 @@ $cWidth: 420px;
     padding-top: 8px;
     color: #507292;
 
+
+    #add-new-thing {
+      @extend .absolute;
+      top: 8px;
+      right: 79px;
+      opacity: 0;
+    }
+
     & > div {
       @include animation-one(250ms);
       cursor: pointer;
@@ -856,10 +880,10 @@ $cWidth: 420px;
     }
 
     .title {
-      &:hover {
-        cursor: pointer;
-        text-decoration: underline;
-      }
+//      &:hover {
+//        cursor: pointer;
+//        text-decoration: underline;
+//      }
     }
   }
 }

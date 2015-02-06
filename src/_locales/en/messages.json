@@ -185,7 +185,7 @@
     },
 
     "alreadyInList": {
-        "message": "This song already in your audio list"
+        "message": "already in your audio list"
     },
 
     "songNotFound": {
