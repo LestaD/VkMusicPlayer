@@ -44,7 +44,7 @@ var
 //track hot keys
 chrome.commands.onCommand.addListener(function (command) {
     if (command == 'Play') {
-        if (!CONST.PAGE_RELOADED && FirstLoad && MFCore.isFirstSongPlayed()) {
+        if (!CONST.PAGE_RELOADED && MFCore.isFirstSongPlayed()) {
             BG.event.sendPlay();
         } else {
             if (Songs[CACHE.SONGS_STATE] != undefined) {

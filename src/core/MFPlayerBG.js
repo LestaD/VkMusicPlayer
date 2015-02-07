@@ -312,7 +312,7 @@ MFCore.isFirstSongPlayed = function () {
     return LastActiveIndex && LastActiveIndex.index == 1 && MFPlayer.paused && MFPlayer.currentTime == 0;
 };
 
-MFCore.isFirstSearchSongPlayed = function() {
+MFCore.isFirstSearchSongPlayed = function () {
     var song = Songs[CACHE.SONGS_STATE][CurrentSong.index];
 
     return CACHE.SONGS_STATE == 'search' && song && song.aid == CurrentSong.aid && CurrentSong.index != 1;
