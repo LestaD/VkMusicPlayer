@@ -215,5 +215,9 @@
 
     "recommendations": {
         "message": "Рекомендации"
+    },
+
+    "addToMyAudioList": {
+        "message": "Добавить в Мои Аудиозаписи"
     }
 }

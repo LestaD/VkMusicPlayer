@@ -40,11 +40,49 @@ Core.audioEvent = function () {
     var songs = document.getElementById('songs-list').getElementsByTagName('li');
 
     for (var i = 0, size = songs.length; i < size; i++) {
-        var song = songs[i];
-        song.getElementsByClassName('artist')[0].addEventListener('click', Core.fillSearch);
+        var song = songs[i],
+            artist = song.getElementsByClassName('artist')[0],
+            addTo = song.getElementsByClassName('add-to')[0];
+
+        if (artist) {
+            artist.addEventListener('click', Core.fillSearch);
+        }
+
+        if (addTo) {
+            addTo.addEventListener('mouseenter', Core.addToMouseEnter);
+            addTo.addEventListener('mouseleave', Core.addToMouseLeave);
+        }
 
         song.addEventListener('click', Core.event.playSong);
     }
+};
+
+Core.addToMouseEnter = function () {
+    var element = this.parentNode.parentNode,
+        addToList = element.getElementsByClassName('add-to-list')[0],
+        addToListData = addToList.getBoundingClientRect();
+
+    var songList = CACHE.SEARCH.value.length > 0 ? CACHE.SEARCH_SONGS_LIST : AudioList,
+        songListStyles = window.getComputedStyle(songList),
+        topOffset = document.querySelector('.c-wrapper').clientHeight + CACHE.SEARCH_WRAPPER.clientHeight + parseInt(songListStyles.paddingTop),
+        addListOffset = addToListData.top - topOffset;
+
+    if (addToListData.top > songList.clientHeight) {
+        var h = Math.abs(songList.clientHeight - addToListData.bottom) - 90 + parseInt(songListStyles.paddingBottom);
+        addToList.style.top = '-' + h + 'px';
+    } else if(addListOffset < 0) {
+        var h = topOffset - addToListData.top - parseInt(songListStyles.paddingTop) + 2;
+        addToList.style.top = h + 'px';
+    }
+
+    addToList.classList.add('show');
+};
+
+Core.addToMouseLeave = function () {
+    var addListEl = this.getElementsByClassName('add-to-list')[0];
+
+    addListEl.classList.remove('show');
+    addListEl.removeAttribute('style');
 };
 
 Core.fillSearch = function () {
@@ -801,7 +839,7 @@ Core.allAlbumsEvents = function () {
 
     for (var i = 0, size = allAlbums.length; i < size; i++) {
         allAlbums[i].addEventListener('click', function (e) {
-            if(!e.target.classList.contains('remove-album')) {
+            if (!e.target.classList.contains('remove-album')) {
                 Core.setSizeToMain();
                 Core.showOverlay();
 
@@ -1154,6 +1192,7 @@ Core.setElements = {
         CACHE.SAVE_ALBUM_FORM = document.getElementById('save-album');
         CACHE.NEW_ALBUM = document.getElementById('new-album');
         CACHE.ALBUMS = document.getElementById('albums');
+        CACHE.REGULAR_BUTTONS = document.getElementById('regular-buttons');
         this.search();
     },
     search: function () {

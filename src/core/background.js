@@ -1,6 +1,5 @@
 var APP_VERSION = localStorage['statusAc'];
-//localStorage['authInfo'] = '';
-//localStorage['statusAc'] = '';
+
 
 chrome.browserAction.setBadgeBackgroundColor({color: '#45658b'});
 
@@ -33,6 +32,7 @@ var
     spanCache = document.createElement('span'),
     aCache = document.createElement('a'),
     imgCache = document.createElement('img'),
+    iCache = document.createElement('i'),
     LAST_EMPTY = false,
     CONST = {
         PAGE_RELOADED: false
@@ -328,7 +328,14 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                 saveSong = aCache.cloneNode(false),
                 recSongs = spanCache.cloneNode(false),
                 actions = spanCache.cloneNode(false),
-                index = i.toString();
+                index = i.toString(),
+                addList = listCache.cloneNode(false),
+                addToMyAudio = liCache.cloneNode(false),
+                addToMyAudioIconList = iCache.cloneNode(false),
+                alreadyAddedIcon = iCache.cloneNode(false),
+                addToAlbums = liCache.cloneNode(false),
+                addToAlbumsCaret = iCache.cloneNode(false),
+                albumsList = listCache;
 
             /**
              * Audio object
@@ -355,6 +362,29 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             addTo.className = 'fa fa-plus add-to';
             saveSong.className = 'fa fa-floppy-o save-song';
 
+            if(currUserID != VKit.getActiveAccount()) {
+                //add to
+                addList.className = 'add-to-list';
+                addToAlbumsCaret.className = 'fa fa-caret-left';
+                albumsList.className = 'sub-menu';
+                addToMyAudio.className = 'add-to-my-audio-list';
+                addToMyAudioIconList.className = 'fa fa-music audio-list-icon';
+                alreadyAddedIcon.className = 'fa fa-check already-added';
+
+                addToMyAudio.appendChild(addToMyAudioIconList);
+                addToMyAudio.appendChild(alreadyAddedIcon);
+                addToMyAudio.textContent = chrome.i18n.getMessage('addToMyAudioList');
+                addList.appendChild(addToMyAudio);
+
+                addToAlbums.textContent = chrome.i18n.getMessage('addToAlbum');
+                addToAlbums.appendChild(addToAlbumsCaret);
+                addToAlbums.appendChild(albumsList);
+                addList.appendChild(addToAlbums);
+            }
+
+            addTo.appendChild(addList);
+
+
             if (CurrentSong.id == audio.aid) {
                 li.className = 'active';
             }
@@ -366,10 +396,6 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             var songName = audio.artist + ' - ' + audio.title + '.mp3';
             saveSong.title = chrome.i18n.getMessage('download') + ' ' + songName;
             saveSong.download = songName;
-
-            actions.appendChild(addTo);
-            actions.appendChild(recSongs);
-            actions.appendChild(saveSong);
 
             if (isSearch) {
                 if (audio.owner_id == VKit.getActiveAccount()) {
@@ -384,6 +410,12 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                     li.appendChild(userSongWrapper);
                 }
             }
+
+
+
+            actions.appendChild(addTo);
+            actions.appendChild(recSongs);
+            actions.appendChild(saveSong);
 
             li.appendChild(artist);
             li.appendChild(splitter);

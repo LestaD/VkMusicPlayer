@@ -2,7 +2,6 @@
  * VK SDK for Chrome
  */
 
-
 /**
  * VKit main object
  *
@@ -22,7 +21,7 @@ VKit.appID = 4186367;
  *
  * @type {string}
  */
-VKit.permissions = 'audio,offline,status';
+VKit.permissions = localStorage['permissions'];
 
 /**
  * Api Version
