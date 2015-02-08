@@ -974,7 +974,7 @@ BG.event.openPlayer = function (data) {
     window.open(url, 'new', 'width=420,height=555,toolbar=0');
 };
 
-BG.event.loadAlbum = function (data) {
+BG.event.loadAlbum = function (data, callback) {
     var sendMsg = '';
 
     if (data.id == undefined) {
@@ -994,6 +994,10 @@ BG.event.loadAlbum = function (data) {
                 id: sendMsg
             }
         });
+
+        if(callback && typeof callback == 'function') {
+            callback();
+        }
     });
 };
 
@@ -1179,18 +1183,34 @@ BG.event.createNewAlbum = function (data) {
     });
 };
 
+/**
+ * Remove album by album_id
+ *
+ * @param data
+ */
 BG.event.removeAlbum = function (data) {
     var id = Number(data),
         currUserID = JSON.parse(localStorage['authInfo']).userID;
 
     if (id > 0) {
         VKit.api('audio.deleteAlbum', ['album_id=' + id], function (response) {
-            BG.renderAlbums(currUserID, AlbumID, function () {
-                BG.event.send({
-                    event: 'reloadContent',
-                    data: 'album-list'
+            if(id.toString() == AlbumID) {
+                BG.renderAlbums(currUserID, AlbumID, function () {
+                    BG.event.loadAlbum({title: chrome.i18n.getMessage('allSongs')}, function() {
+                        BG.event.send({
+                            event: 'reloadContent',
+                            data: 'album-list'
+                        });
+                    });
                 });
-            });
+            } else {
+                BG.renderAlbums(currUserID, AlbumID, function () {
+                    BG.event.send({
+                        event: 'reloadContent',
+                        data: 'album-list'
+                    });
+                });
+            }
         });
     }
 };
