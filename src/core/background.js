@@ -217,10 +217,16 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
         });
     }
 
+    BG.renderAlbums(userID, albumID);
+};
+
+BG.renderAlbums = function (userID, albumID, callback) {
     VKit.api('audio.getAlbums', ['owner_id=' + userID, 'count=100'], function (response) {
+
         var AlbumList = document.getElementById('album-list'),
             Albums = JSON.parse(response).response,
-            allSongs = divCache.cloneNode(false);
+            allSongs = divCache.cloneNode(false),
+            currUserID = JSON.parse(localStorage['authInfo']).userID;
 
         BG.clearElement(AlbumList);
 
@@ -232,7 +238,6 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
             allSongs.setAttribute('data-id', 'null');
             AlbumList.appendChild(allSongs);
 
-
             for (var i = 1, size = Albums.length; i < size; i++) {
                 var data = Albums[i],
                     album = divCache.cloneNode(false);
@@ -242,10 +247,24 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
                 }
 
                 album.textContent = data.title;
+                album.title = data.title;
                 album.setAttribute('data-id', data.album_id);
+
+                if (currUserID == userID) {
+                    var removeAlbum = spanCache.cloneNode(false);
+                    removeAlbum.className = 'fa fa-trash-o remove-album';
+                    removeAlbum.title = chrome.i18n.getMessage('delete');
+                    removeAlbum.setAttribute('data-id', data.album_id);
+
+                    album.appendChild(removeAlbum);
+                }
 
                 AlbumList.appendChild(album);
             }
+        }
+
+        if (callback && typeof callback == 'function') {
+            callback();
         }
     });
 };
@@ -462,15 +481,17 @@ BG.getUsersList = function () {
         var user = usersInfo[i],
             name = div.cloneNode(false),
             userWrapper = div.cloneNode(false),
-            photo = img.cloneNode(false);
+            photo = img.cloneNode(false),
+            userFullName = user.firstName + ' ' + user.lastName;
 
         photo.src = user.photo;
-        name.textContent = user.firstName + ' ' + user.lastName;
+        name.textContent = userFullName;
+        name.title = userFullName;
 
         photo.className = 'user-photo';
         name.className = 'user-name';
 
-        userWrapper.className = 'user';
+        userWrapper.className = 'user r-title';
         userWrapper.setAttribute('data-id', user.id);
 
         userWrapper.appendChild(photo);
@@ -629,7 +650,7 @@ BG.event.setToPause = function (data) {
 };
 
 BG.event.setToPlay = function (data) {
-    if (LastActiveIndex != undefined && !LAST_EMPTY) {
+    if (CurrentSong.aid != undefined) {
         BG.setToPlay();
     } else if (LastActiveIndex == undefined && Songs[CACHE.SONGS_STATE] != undefined) {
         LastActiveIndex = {
@@ -677,7 +698,7 @@ BG.event.playByIndex = function (data) {
             MFCore.events();
         }
 
-        if (Songs[CACHE.SONGS_STATE] == undefined) {
+        if (Songs[CACHE.SONGS_STATE] == undefined || (Songs[CACHE.SONGS_STATE].length == 1 && Songs[CACHE.SONGS_STATE][0] == 0)) {
             var song = CurrentSong;
         } else {
             var song = Songs[CACHE.SONGS_STATE][data.index];
@@ -699,13 +720,15 @@ BG.event.playByIndex = function (data) {
         if (LastActiveIndex != undefined && Songs[CACHE.SONGS_STATE] != undefined) {
             BG.removeActiveIndex(LastActiveIndex.aid);
 
-            BG.event.send({
-                event: 'setNewHighLightElement',
-                data: {
-                    oldIndex: LastActiveIndex.aid,
-                    newIndex: data.aid
-                }
-            });
+            if(!LAST_EMPTY) {
+                BG.event.send({
+                    event: 'setNewHighLightElement',
+                    data: {
+                        oldIndex: LastActiveIndex.aid,
+                        newIndex: data.aid
+                    }
+                });
+            }
         }
 
         if (data != undefined) {
@@ -1129,6 +1152,47 @@ BG.event.isFirstSongPlayed = function () {
         event: 'isFirstSongPlayed',
         data: MFCore.isFirstSongPlayed()
     });
+};
+
+BG.event.createNewAlbum = function (data) {
+    var currUserID = JSON.parse(localStorage['authInfo']).userID;
+
+    VKit.api('audio.addAlbum', ['title=' + data], function (response) {
+        if (currUserID == VKit.getActiveAccount()) {
+            BG.renderAlbums(currUserID, AlbumID, function () {
+                BG.event.send({
+                    event: 'reloadContent',
+                    data: 'album-list'
+                });
+
+                BG.event.send({
+                    event: 'closeAlbumsBox',
+                    data: ''
+                });
+            });
+        } else {
+            BG.event.send({
+                event: 'closeAlbumsBox',
+                data: ''
+            });
+        }
+    });
+};
+
+BG.event.removeAlbum = function (data) {
+    var id = Number(data),
+        currUserID = JSON.parse(localStorage['authInfo']).userID;
+
+    if (id > 0) {
+        VKit.api('audio.deleteAlbum', ['album_id=' + id], function (response) {
+            BG.renderAlbums(currUserID, AlbumID, function () {
+                BG.event.send({
+                    event: 'reloadContent',
+                    data: 'album-list'
+                });
+            });
+        });
+    }
 };
 
 BG.setToPlay = function () {

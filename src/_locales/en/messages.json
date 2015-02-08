@@ -190,5 +190,25 @@
 
     "songNotFound": {
         "message": "Song not found"
+    },
+
+    "addAlbum": {
+        "message": "Add album"
+    },
+
+    "newAlbum": {
+        "message": "New album"
+    },
+
+    "albumssName": {
+        "message": "Album's Name"
+    },
+
+    "close": {
+        "message": "Close"
+    },
+
+    "save": {
+        "message": "Save"
     }
 }

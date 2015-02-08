@@ -191,5 +191,25 @@
 
     "songNotFound": {
         "message": "Песня не найдена"
+    },
+
+    "addAlbum": {
+        "message": "Добавить альбом"
+    },
+
+    "newAlbum": {
+        "message": "Новый альбом"
+    },
+
+    "albumssName": {
+        "message": "Название альбома"
+    },
+
+    "close": {
+        "message": "Закрыть"
+    },
+
+    "save": {
+        "message": "Сохранить"
     }
 }

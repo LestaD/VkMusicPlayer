@@ -93,22 +93,39 @@
     <div id="app-nav-block" class="app-nav">
         <div id="regular-buttons" class="regular-buttons">
             <button id="change-user" class="rb-1">
-                <div id="all-users"></div>
+                <div id="all-users" class="r-list"></div>
                 <div id="current-user"></div>
             </button>
             <button id="albums" class="rb-1">
-                <div id="album-list"></div>
-                <div id="album-title" i18n-locale="albums"></div>
+                <div id="album-list" class="r-list"></div>
+                <div id="album-title" class="r-title" i18n-locale="albums"></div>
+            </button>
+            <button id="add-new-thing" class="rb-1">
+                <div class="r-list">
+                    <div id="add-new-album" i18n-locale="addAlbum"></div>
+                </div>
+                <div class="r-title" i18n-locale="add"></div>
             </button>
         </div>
         <div class="icon-buttons">
-            <span id="add-new-thing" class="fa fa-plus-circle" i18n-title="add"></span>
             <div id="update-list" class="fa fa-repeat" i18n-title="update"></div>
             <div id="settings" class="fa fa-cog" i18n-title="settings"></div>
         </div>
     </div>
     <div id="bg-overlay">
         <div id="overlay-txt" class="overlay-txt" i18n-locale="updating"></div>
+        <div id="add-album-wrapper" class="window-box">
+            <div class="box-title" i18n-locale="newAlbum"></div>
+            <div class="box-close" i18n-locale="close"></div>
+            <form id="save-album" action="">
+                <div class="box-content">
+                    <input id="new-album" type="text" name="new-album" i18n-placeholder="albumssName" required>
+                </div>
+                <div class="box-actions">
+                    <button type="submit" class="regular-button" i18n-locale="save"></button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 </body>

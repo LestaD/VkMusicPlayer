@@ -3,10 +3,11 @@ var
     mainKey,
     KeysPressed = [];
 
-if(navigator.userAgent.indexOf('Macintosh') > -1)
+if(navigator.userAgent.indexOf('Macintosh') > -1) {
     mainKey = 91;
-else
+} else {
     mainKey= 17;
+}
 
 var ContentJS = {};
 

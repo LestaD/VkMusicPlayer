@@ -456,7 +456,7 @@ Core.event.setAudioSearchType = function (data) {
     el.classList.add('active');
 
     typesList.classList.remove('show');
-    typesList.insertAdjacentElement('afterBegin', el);
+    typesList.insertAdjacentElement('afterbegin', el);
 };
 
 Core.event.setAudioSearchLyricsCheckbox = function (data) {
@@ -474,6 +474,10 @@ Core.event.searchSongs = function () {
 
 Core.event.hideOverlay = function () {
     Core.hideOverlay();
+};
+
+Core.event.closeAlbumsBox = function () {
+    Core.closeWBox(CACHE.ADD_ALBUM_WRAPPER);
 };
 
 /**
@@ -518,7 +522,7 @@ Core.removeSizeFromMain = function () {
  *
  * @param {boolean} onlyForButtons
  */
-Core.showOverlay = function (onlyForButtons) {
+Core.showOverlay = function (onlyForButtons, notSongsUpdate) {
     if (document.getElementById('empty-list').style.display == 'block') {
         Overlay.setAttribute('style', 'display:block;top:0;height:100%;');
     } else {
@@ -532,10 +536,15 @@ Core.showOverlay = function (onlyForButtons) {
         OverlayTxt.classList.add('hide');
     } else {
         Overlay.style.top = document.querySelector('.c-wrapper').clientHeight + 'px';
-        OverlayTxt.classList.remove('hide');
 
-        var height = Overlay.clientHeight / 2 - OverlayTxt.clientHeight;
-        OverlayTxt.style.marginTop = height + 'px';
+        if (!notSongsUpdate) {
+            OverlayTxt.classList.remove('hide');
+
+            var height = Overlay.clientHeight / 2 - OverlayTxt.clientHeight;
+            OverlayTxt.style.marginTop = height + 'px';
+        } else {
+            OverlayTxt.classList.add('hide');
+        }
     }
 
     setTimeout(function () {
@@ -600,12 +609,16 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
                     var from = elementID.from[i],
                         el = elementID.el[i];
 
-                    document.getElementById(from).removeChild(document.getElementById(el));
-                    node = document.importNode(win.document.getElementById(el), true);
-                    document.getElementById(from).appendChild(node);
-
                     if (from == 'regular-buttons') {
+                        document.getElementById(from).removeChild(document.getElementById(el));
+                        node = document.importNode(win.document.getElementById(el), true);
+                        CACHE.ADD_NEW_THING.insertAdjacentElement('beforebegin', node);
+
                         Core.setAlbumEvents();
+                    } else {
+                        document.getElementById(from).removeChild(document.getElementById(el));
+                        node = document.importNode(win.document.getElementById(el), true);
+                        document.getElementById(from).appendChild(node);
                     }
                 }
             } else {
@@ -625,12 +638,13 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
                 LastActiveIndex = win.LastActiveIndex;
             }
 
-            if (!CONST.PAGE_RELOADED || !CACHE.SEARCH_LOAD) {
+            if (!CONST.PAGE_RELOADED) {
                 MFCore.init();
             }
 
             if (!isElements && !isEvents) {
                 Core.setElements.all();
+
                 Core.setEvents();
 
                 isElements = true;
@@ -701,36 +715,40 @@ Core.scrollToSong = function (element) {
 /**
  * Show all users
  *
- * @param {event} e
+ * @param {Event} e
  */
-Core.openAllUsers = function () {
-    CurrentUser.getElementsByClassName('user')[0].classList.toggle('active');
+Core.openRbList = function (e) {
+    this.classList.toggle('active');
 
-    if (AllUsers.classList.contains('opened')) {
-        AllUsers.removeAttribute('style');
-        AllUsers.className = '';
+    var list = this.getElementsByClassName('r-list')[0];
+
+    if (list.classList.contains('opened')) {
+        list.removeAttribute('style');
+        list.classList.remove('opened');
     } else {
-        var arr = ['-', AllUsers.clientHeight - 1, 'px'];
-        AllUsers.style.top = arr.join('');
-        AllUsers.className = 'opened';
+        var topVal = list.clientHeight - 1;
+        list.style.top = '-' + topVal.toString() + 'px';
+        list.classList.add('opened');
     }
 };
 
 /**
  * Show all user albums
  *
- * @param {event} e
+ * @param {Event} e
  */
 Core.openAlbums = function (e) {
-    AlbumTitle.classList.toggle('active');
+    this.classList.toggle('active');
 
-    if (AlbumList.classList.contains('opened')) {
-        AlbumList.removeAttribute('style');
-        AlbumList.className = '';
+    var list = this.getElementsByClassName('r-list')[0];
+
+    if (list.classList.contains('opened')) {
+        list.removeAttribute('style');
+        list.classList.remove('opened');
     } else {
-        var arr = ['-', AlbumList.clientHeight - 1, 'px'];
-        AlbumList.style.top = arr.join('');
-        AlbumList.className = 'opened';
+        var topVal = list.clientHeight - 1;
+        list.style.top = '-' + topVal.toString() + 'px';
+        list.classList.add('opened');
     }
 };
 
@@ -754,7 +772,7 @@ Core.setActiveUser = function () {
         cloneUsr.classList.add('active');
     }
 
-    CurrentUser.removeChild(CurrentUser.getElementsByClassName('user')[0])
+    CurrentUser.removeChild(CurrentUser.getElementsByClassName('user')[0]);
     CurrentUser.appendChild(cloneUsr);
 
     if (Core.checkForSearchState()) {
@@ -783,27 +801,42 @@ Core.allAlbumsEvents = function () {
 
     for (var i = 0, size = allAlbums.length; i < size; i++) {
         allAlbums[i].addEventListener('click', function (e) {
-            Core.setSizeToMain();
+            if(!e.target.classList.contains('remove-album')) {
+                Core.setSizeToMain();
+                Core.showOverlay();
+
+                AlbumTitle.textContent = this.textContent == chrome.i18n.getMessage('allSongs') ? chrome.i18n.getMessage('albums') : this.textContent;
+                var dID = this.getAttribute('data-id'),
+                    rID;
+
+                if (dID == 'null') {
+                    rID = undefined;
+                } else {
+                    rID = dID;
+                }
+
+                Core.setBlur('songs-list');
+                Core.event.send({
+                    event: 'loadAlbum',
+                    data: {
+                        id: rID,
+                        title: this.textContent
+                    }
+                });
+            }
+        });
+    }
+
+    var removeAlbums = document.getElementsByClassName('remove-album');
+
+    for (var i = 0, size = removeAlbums.length; i < size; i++) {
+        removeAlbums[i].addEventListener('click', function () {
             Core.showOverlay();
 
-            AlbumTitle.textContent = this.textContent == chrome.i18n.getMessage('allSongs') ? chrome.i18n.getMessage('albums') : this.textContent;
-            var dID = this.getAttribute('data-id'),
-                rID;
-
-            if (dID == 'null') {
-                rID = undefined;
-            } else {
-                rID = dID;
-            }
-
-            Core.setBlur('songs-list');
             Core.event.send({
-                event: 'loadAlbum',
-                data: {
-                    id: rID,
-                    title: this.textContent
-                }
-            });
+                event: 'removeAlbum',
+                data: this.getAttribute('data-id')
+            })
         });
     }
 };
@@ -966,10 +999,46 @@ Core.openSearchSettings = function () {
     }
 };
 
+/**
+ * Activate search by key
+ *
+ * @param {Event} e
+ */
 Core.searchInputKeysEvents = function (e) {
     if (e.keyCode == 13) {
         Core.audioSearch();
     }
+};
+
+Core.addNewAlbum = function () {
+    Core.showOverlay(false, true);
+    Core.setBlur('songs-list');
+    CACHE.ADD_ALBUM_WRAPPER.classList.add('show');
+};
+
+Core.closeWindowBox = function () {
+    Core.closeWBox(this.parentNode);
+};
+
+Core.closeWBox = function (windowBox) {
+    var boxInputs = windowBox.getElementsByTagName('input');
+
+    windowBox.classList.remove('show');
+    Core.removeBlur('songs-list');
+    Core.hideOverlay();
+
+    for (var i = 0, size = boxInputs.length; i < size; i++) {
+        boxInputs[i].value = '';
+    }
+};
+
+Core.saveAlbumAction = function (e) {
+    e.preventDefault();
+
+    Core.event.send({
+        event: 'createNewAlbum',
+        data: CACHE.NEW_ALBUM.value
+    });
 };
 
 /**
@@ -982,17 +1051,31 @@ Core.setEvents = function () {
     RepeatSong.addEventListener('click', Core.event.setRepeatSong);
     Core.allUsersEvents();
     Core.allAlbumsEvents();
-    AlbumTitle.addEventListener('click', Core.openAlbums);
     ShuffleSongs.addEventListener('click', Core.shuffleSongs);
     Broadcast.addEventListener('click', Core.broadcastSong);
     Core.setAudioSearchConfigsEvents();
+    CACHE.ADD_NEW_ALBUM.addEventListener('click', Core.addNewAlbum);
     document.addEventListener('click', Core.trackActiveElements);
+
+    var rb1 = document.getElementsByClassName('rb-1');
+
+    for (var i = 0, size = rb1.length; i < size; i++) {
+        rb1[i].addEventListener('click', Core.openRbList);
+    }
+
+    var boxClose = document.getElementsByClassName('box-close');
+
+    for (var i = 0, size = boxClose.length; i < size; i++) {
+        boxClose[i].addEventListener('click', Core.closeWindowBox);
+    }
+
+    CACHE.SAVE_ALBUM_FORM.addEventListener('submit', Core.saveAlbumAction);
 };
 
 Core.setAlbumEvents = function () {
     Core.setElements.all();
     Core.allAlbumsEvents();
-    AlbumTitle.addEventListener('click', Core.openAlbums);
+    CACHE.ALBUMS.addEventListener('click', Core.openAlbums);
 };
 
 Core.setAllUsersEvents = function () {
@@ -1065,6 +1148,12 @@ Core.setElements = {
         Broadcast = document.getElementById('broadcast');
         CACHE.SEARCH_WRAPPER = document.getElementById('search-wrapper');
         CACHE.APP_NAV_BLOCK = document.getElementById('app-nav-block');
+        CACHE.ADD_NEW_THING = document.getElementById('add-new-thing');
+        CACHE.ADD_NEW_ALBUM = document.getElementById('add-new-album');
+        CACHE.ADD_ALBUM_WRAPPER = document.getElementById('add-album-wrapper');
+        CACHE.SAVE_ALBUM_FORM = document.getElementById('save-album');
+        CACHE.NEW_ALBUM = document.getElementById('new-album');
+        CACHE.ALBUMS = document.getElementById('albums');
         this.search();
     },
     search: function () {
