@@ -543,7 +543,7 @@ $cWidth: 420px;
 
 #bg-overlay {
   @extend .fixed;
-  background: rgba(0, 0, 0, 0.16);
+  background: rgba(0, 0, 0, 0.4);
   display: none;
   top: 50px;
   height: calc(100% - 50px);

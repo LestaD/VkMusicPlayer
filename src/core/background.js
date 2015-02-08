@@ -290,7 +290,8 @@ BG.checkForSearchState = function () {
 BG.renderAudioList = function (response, type, noFirst, obj, callback) {
     var isSearch = BG.checkForSearchState(),
         oldList,
-        searchEl = document.getElementById('search-list');
+        searchEl = document.getElementById('search-list'),
+        currUserID = JSON.parse(localStorage['authInfo']).userID;
 
     BG.setStates(isSearch ? 'search' : 'audio');
 
@@ -325,6 +326,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                 duration = spanCache.cloneNode(false),
                 addTo = spanCache.cloneNode(false),
                 saveSong = aCache.cloneNode(false),
+                recSongs = spanCache.cloneNode(false),
                 actions = spanCache.cloneNode(false),
                 index = i.toString();
 
@@ -349,6 +351,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             duration.className = 'duration';
             actions.className = 'actions';
 
+            recSongs.className = 'fa fa-headphones';
             addTo.className = 'fa fa-plus add-to';
             saveSong.className = 'fa fa-floppy-o save-song';
 
@@ -356,12 +359,16 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                 li.className = 'active';
             }
 
+            recSongs.title = chrome.i18n.getMessage('recommendations');
+            recSongs.setAttribute('data-id',audio.owner_id+'_'+audio.aid);
+
             saveSong.href = audio.url;
             var songName = audio.artist + ' - ' + audio.title + '.mp3';
             saveSong.title = chrome.i18n.getMessage('download') + ' ' + songName;
             saveSong.download = songName;
 
             actions.appendChild(addTo);
+            actions.appendChild(recSongs);
             actions.appendChild(saveSong);
 
             if (isSearch) {
@@ -1158,6 +1165,11 @@ BG.event.isFirstSongPlayed = function () {
     });
 };
 
+/**
+ * Creates new album
+ *
+ * @param {String} data
+ */
 BG.event.createNewAlbum = function (data) {
     var currUserID = JSON.parse(localStorage['authInfo']).userID;
 
@@ -1186,7 +1198,7 @@ BG.event.createNewAlbum = function (data) {
 /**
  * Remove album by album_id
  *
- * @param data
+ * @param {String} data
  */
 BG.event.removeAlbum = function (data) {
     var id = Number(data),

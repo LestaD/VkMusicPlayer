@@ -210,5 +210,9 @@
 
     "save": {
         "message": "Save"
+    },
+
+    "recommendations": {
+        "message": "Recommendations"
     }
 }
