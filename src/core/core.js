@@ -42,7 +42,8 @@ Core.audioEvent = function () {
     for (var i = 0, size = songs.length; i < size; i++) {
         var song = songs[i],
             artist = song.getElementsByClassName('artist')[0],
-            addTo = song.getElementsByClassName('add-to')[0];
+            addTo = song.getElementsByClassName('add-to')[0],
+            addToMyAudioList = song.getElementsByClassName('add-to-my-audio-list')[0];
 
         if (artist) {
             artist.addEventListener('click', Core.fillSearch);
@@ -53,7 +54,22 @@ Core.audioEvent = function () {
             addTo.addEventListener('mouseleave', Core.addToMouseLeave);
         }
 
+        if(addToMyAudioList) {
+            addToMyAudioList.addEventListener('click', Core.addSongToMyAudioList);
+        }
+
         song.addEventListener('click', Core.event.playSong);
+    }
+};
+
+Core.addSongToMyAudioList = function() {
+    if(!this.classList.contains('in-process')) {
+
+        this.classList.add('in-process');
+        Core.event.send({
+            event: 'addSongToMyAudioList',
+            data: this.getAttribute('data-arr')
+        });
     }
 };
 
@@ -215,7 +231,7 @@ Core.event.sendPlay = function () {
 };
 
 Core.event.playSong = function (e) {
-    if (e.target.nodeName == 'LI') {
+    if (e.target.nodeName == 'LI' && e.target.classList.contains('main-song-wrapper')) {
         MFTimeCurrent.textContent = '0:00';
         MFBuffer.style.width = 0;
         MFProgress.style.width = 0;
@@ -516,6 +532,16 @@ Core.event.hideOverlay = function () {
 
 Core.event.closeAlbumsBox = function () {
     Core.closeWBox(CACHE.ADD_ALBUM_WRAPPER);
+};
+
+Core.event.songWasAdded = function(data) {
+    var arr = data.split(','),
+        li = document.querySelector('#songs-list li[data-aid="'+arr[0]+'"] .add-to-list .add-to-my-audio-list');
+
+    li.querySelector('.audio-list-icon').classList.add('hide');
+    li.querySelector('.already-added').classList.remove('hide');
+    li.classList.remove('add-to-my-audio-list');
+    li.classList.remove('in-process');
 };
 
 /**

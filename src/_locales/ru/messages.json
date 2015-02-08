@@ -219,5 +219,13 @@
 
     "addToMyAudioList": {
         "message": "Добавить в Мои Аудиозаписи"
+    },
+
+    "shareSong": {
+        "message": "Поделиться песней"
+    },
+
+    "songWasAdded": {
+        "message": "Песня была успешно добавлена"
     }
 }

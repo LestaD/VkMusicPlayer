@@ -218,5 +218,13 @@
 
     "addToMyAudioList": {
         "message": "Add to My Audio List"
+    },
+
+    "shareSong": {
+        "message": "Share song"
+    },
+
+    "songWasAdded": {
+        "message": "Song was successfully added"
     }
 }
