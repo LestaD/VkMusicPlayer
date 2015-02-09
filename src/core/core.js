@@ -17,6 +17,8 @@ var Port,
     AlbumTitle,
     AudioList,
     ShuffleSongs,
+    liCache = document.createElement('li'),
+    listCache = document.createElement('ul'),
     Broadcast,
     isEvents = false,
     isElements = false,
@@ -27,7 +29,8 @@ var Port,
         PRELOADERS: {
             AUDIO_LIST: '<div class="lines"><div class="element"></div><div class="element"></div><div class="element"></div><div class="element"></div><div class="element"></div></div>'
         }
-    };
+    },
+    currUserID = JSON.parse(localStorage['authInfo']).userID;
 
 /**
  * Main object
@@ -43,7 +46,8 @@ Core.audioEvent = function () {
         var song = songs[i],
             artist = song.getElementsByClassName('artist')[0],
             addTo = song.getElementsByClassName('add-to')[0],
-            addToMyAudioList = song.getElementsByClassName('add-to-my-audio-list')[0];
+            addToMyAudioList = song.getElementsByClassName('add-to-my-audio-list')[0],
+            addToAlbum = song.getElementsByClassName('add-to-album-show')[0];
 
         if (artist) {
             artist.addEventListener('click', Core.fillSearch);
@@ -54,23 +58,98 @@ Core.audioEvent = function () {
             addTo.addEventListener('mouseleave', Core.addToMouseLeave);
         }
 
-        if(addToMyAudioList) {
+        if (addToMyAudioList) {
             addToMyAudioList.addEventListener('click', Core.addSongToMyAudioList);
+        }
+
+        if (addToAlbum) {
+            addToAlbum.addEventListener('mouseenter', Core.addToAlbumMouseEnter);
+            addToAlbum.addEventListener('mouseleave', Core.addToAlbumMouseLeave);
         }
 
         song.addEventListener('click', Core.event.playSong);
     }
 };
 
-Core.addSongToMyAudioList = function() {
-    if(!this.classList.contains('in-process')) {
+Core.addSongToMyAudioList = function () {
+    this.classList.remove('add-to-my-audio-list');
 
-        this.classList.add('in-process');
-        Core.event.send({
-            event: 'addSongToMyAudioList',
-            data: this.getAttribute('data-arr')
-        });
-    }
+    Core.event.send({
+        event: 'addSongToMyAudioList',
+        data: this.getAttribute('data-arr')
+    });
+};
+
+Core.addToAlbumMouseEnter = function () {
+    var mainEl = this,
+        subMenu = mainEl.getElementsByClassName('sub-menu')[0];
+
+    VKit.api('audio.getAlbums', ['owner_id=' + currUserID, 'count=100'], function (response) {
+        var albums = JSON.parse(response).response;
+
+        if (albums[0] == 0) {
+            subMenu.classList.remove('show-loader');
+            subMenu.classList.add('empty-list');
+            subMenu.textContent = chrome.i18n.getMessage('albumsListIsEmpty');
+        } else {
+            var list = listCache.cloneNode(false);
+
+            for (var i = 1, size = albums.length; i < size; i++) {
+                var album = albums[i],
+                    li = liCache.cloneNode(false);
+
+                li.textContent = album.title;
+                li.setAttribute('data-id', album.album_id);
+
+                li.addEventListener('click', function () {
+                    var el = this,
+                        data = mainEl.getAttribute('data-arr').split(',');
+
+                    if(data[2] == 'true') {
+                        VKit.api('audio.add', ['audio_id=' + data[0], 'owner_id=' + data[1]], function (response) {
+                            var aid = JSON.parse(response).response;
+
+                            VKit.api('audio.moveToAlbum', ['album_id=' + el.getAttribute('data-id'), 'audio_ids=' + aid], function (response) {
+                                Core.event.send({
+                                    event: 'setNotification',
+                                    data: {
+                                        type: 'basic',
+                                        title: chrome.i18n.getMessage('songAddedToAlbum')+' '+el.textContent,
+                                        message: '',
+                                        iconUrl: '/images/lucky-face.png'
+                                    }
+                                });
+                            });
+                        });
+                    } else {
+                        VKit.api('audio.moveToAlbum', ['album_id=' + el.getAttribute('data-id'), 'audio_ids=' + data[0]], function (response) {
+                            Core.event.send({
+                                event: 'setNotification',
+                                data: {
+                                    type: 'basic',
+                                    title: chrome.i18n.getMessage('songAddedToAlbum')+' '+el.textContent,
+                                    message: '',
+                                    iconUrl: '/images/lucky-face.png'
+                                }
+                            });
+                        });
+                    }
+                });
+
+                list.appendChild(li);
+            }
+
+            subMenu.classList.remove('show-loader');
+            subMenu.appendChild(list);
+        }
+    });
+};
+
+Core.addToAlbumMouseLeave = function () {
+    var subMenu = this.getElementsByClassName('sub-menu')[0];
+    subMenu.classList.remove('empty-list');
+    subMenu.classList.add('show-loader');
+    Core.clearElement(subMenu);
 };
 
 Core.addToMouseEnter = function () {
@@ -86,7 +165,7 @@ Core.addToMouseEnter = function () {
     if (addToListData.top > songList.clientHeight) {
         var h = Math.abs(songList.clientHeight - addToListData.bottom) - 90 + parseInt(songListStyles.paddingBottom);
         addToList.style.top = '-' + h + 'px';
-    } else if(addListOffset < 0) {
+    } else if (addListOffset < 0) {
         var h = topOffset - addToListData.top - parseInt(songListStyles.paddingTop) + 2;
         addToList.style.top = h + 'px';
     }
@@ -112,7 +191,7 @@ Core.play = function (e) {
     }
 
     if (LastActive) {
-        LastActive.className = '';
+        LastActive.classList.remove('active');
     }
 
     var element;
@@ -125,12 +204,12 @@ Core.play = function (e) {
 
     var index = element.getAttribute('data-index');
 
-    element.className = 'active';
+    element.classList.add('active');
     LastActive = element;
 };
 
 Core.removeActiveIndex = function (index) {
-    document.querySelector('#songs-list li[data-aid="' + index + '"]').className = '';
+    document.querySelector('#songs-list li[data-aid="' + index + '"]').classList.remove('active');
 };
 
 /**
@@ -139,7 +218,7 @@ Core.removeActiveIndex = function (index) {
  * @param {number} index
  */
 Core.setActiveByIndex = function (index) {
-    document.querySelector('#songs-list li[data-aid="' + index + '"]').className = 'active';
+    document.querySelector('#songs-list li[data-aid="' + index + '"]').classList.add('active');
 };
 
 /**
@@ -319,7 +398,7 @@ Core.event.timeUpdate = function (data) {
     MFTimeCurrent.textContent = data;
 };
 
-Core.event.changePlayToPause = function (data) {
+Core.event.changePlayToPause = function () {
     if (!MFPlay.classList.contains('pause')) {
         MFPlay.className += ' pause';
     }
@@ -327,10 +406,8 @@ Core.event.changePlayToPause = function (data) {
 
 /**
  * Change icon to pause
- *
- * @param data
  */
-Core.event.changePauseToPlay = function (data) {
+Core.event.changePauseToPlay = function () {
     MFPlay.classList.remove('pause');
 };
 
@@ -362,10 +439,10 @@ Core.event.setNewHighLightElement = function (data) {
         oldEl = Core.getSongElementByAID(data.oldIndex);
 
     if (oldEl) {
-        oldEl.className = '';
+        oldEl.classList.remove('active');
     }
 
-    newEl.className = 'active';
+    newEl.classList.add('active');
 
     Core.scrollToSong(newEl);
 };
@@ -446,11 +523,11 @@ Core.event.setRepeatSong = function () {
 };
 
 Core.event.setActiveRepeat = function () {
-    RepeatSong.className = 'active';
+    RepeatSong.classList.add('active');
 };
 
 Core.event.setNonActiveRepeat = function () {
-    RepeatSong.className = '';
+    RepeatSong.classList.remove('active');
 };
 
 /**
@@ -472,23 +549,23 @@ Core.event.onOpen = function () {
     Core.event.setPageReloadInfo();
 };
 
-Core.event.setShuffleToActive = function (data) {
-    ShuffleSongs.className = 'active';
+Core.event.setShuffleToActive = function () {
+    ShuffleSongs.classList.add('active');
 };
 
-Core.event.setShuffleToDisable = function (data) {
-    ShuffleSongs.className = '';
+Core.event.setShuffleToDisable = function () {
+    ShuffleSongs.classList.remove('active');
 };
 
-Core.event.setBroadcastToActive = function (data) {
-    Broadcast.className = 'active';
+Core.event.setBroadcastToActive = function () {
+    Broadcast.classList.add('active');
 };
 
-Core.event.setBroadcastToDisable = function (data) {
-    Broadcast.className = '';
+Core.event.setBroadcastToDisable = function () {
+    Broadcast.classList.remove('active');
 };
 
-Core.event.loadEmptyPage = function (data) {
+Core.event.loadEmptyPage = function () {
     //document.body.removeChild(document.getElementById('main'));
 
     Core.loadBackgroundContent(false, false, function () {
@@ -534,9 +611,9 @@ Core.event.closeAlbumsBox = function () {
     Core.closeWBox(CACHE.ADD_ALBUM_WRAPPER);
 };
 
-Core.event.songWasAdded = function(data) {
+Core.event.songWasAdded = function (data) {
     var arr = data.split(','),
-        li = document.querySelector('#songs-list li[data-aid="'+arr[0]+'"] .add-to-list .add-to-my-audio-list');
+        li = document.querySelector('#songs-list li[data-aid="' + arr[0] + '"] .add-to-list .add-to-my-audio-list');
 
     li.querySelector('.audio-list-icon').classList.add('hide');
     li.querySelector('.already-added').classList.remove('hide');
@@ -1252,7 +1329,7 @@ Core.rightClick = function () {
 };
 
 Core.clearElement = function (element) {
-    var i = element.childElementCount;
+    var i = element.childNodes.length;
 
     while (--i >= 0)
         element.removeChild(element.firstChild);

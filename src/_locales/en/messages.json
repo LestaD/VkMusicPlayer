@@ -226,5 +226,13 @@
 
     "songWasAdded": {
         "message": "Song was successfully added"
+    },
+
+    "albumsListIsEmpty": {
+        "message": "Albums list is empty"
+    },
+
+    "songAddedToAlbum": {
+        "message": "Song was added to"
     }
 }

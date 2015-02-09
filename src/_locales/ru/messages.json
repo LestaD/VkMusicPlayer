@@ -227,5 +227,13 @@
 
     "songWasAdded": {
         "message": "Песня была успешно добавлена"
+    },
+
+    "albumsListIsEmpty": {
+        "message": "Список альбомов пуст"
+    },
+
+    "songAddedToAlbum": {
+        "message": "Песня была добавлена в"
     }
 }
