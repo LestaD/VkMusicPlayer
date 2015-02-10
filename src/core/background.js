@@ -322,184 +322,231 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
     list.setAttribute('id', listID);
 
     if (Songs[CACHE.SONGS_STATE] && Songs[CACHE.SONGS_STATE][0] != 0 && !type) {
-        for (var i = 1, size = Songs[CACHE.SONGS_STATE].length; i < size; i++) {
-            var li = liCache.cloneNode(false),
-                name = spanCache.cloneNode(false),
-                splitter = spanCache.cloneNode(false),
-                artist = spanCache.cloneNode(false),
-                duration = spanCache.cloneNode(false),
-                addTo = spanCache.cloneNode(false),
-                saveSong = aCache.cloneNode(false),
-                recSongs = spanCache.cloneNode(false),
-                actions = spanCache.cloneNode(false),
-                index = i.toString(),
-                addList = listCache.cloneNode(false),
-                addToMyAudio = liCache.cloneNode(false),
-                addToMyAudioIconList = iCache.cloneNode(false),
-                alreadyAddedIcon = iCache.cloneNode(false),
-                addToAlbums = liCache.cloneNode(false),
-                addToAlbumsCaret = iCache.cloneNode(false),
-                albumsList = divCache.cloneNode(false),
-                postOnWall = liCache.cloneNode(false),
-                postOnWallIcon = iCache.cloneNode(false);
 
-            /**
-             * Audio object
-             *
-             * @type {{aid: number, artist: string, duration: number, genre: number, lyrics_id: number, owner_id: number, title: string, url: string}}
-             */
-            var audio = Songs[CACHE.SONGS_STATE][i];
+        VKit.api('audio.getAlbums', ['owner_id=' + currUserID, 'count=100'], function (albumsResponse) {
+            var albumsArr = JSON.parse(albumsResponse).response,
+                albumsListEl = listCache.cloneNode(false);
 
-            //set content
-            name.textContent = audio.title;
-            name.title = audio.title;
-            artist.textContent = audio.artist;
-            artist.title = audio.artist;
-            duration.textContent = VKit.util.secToMin(audio.duration);
+            for (var i = 1, size = albumsArr.length; i < size; i++) {
+                var album = albumsArr[i],
+                    li = liCache.cloneNode(false),
+                    title = divCache.cloneNode(false),
+                    loading = divCache.cloneNode(false),
+                    success = divCache.cloneNode(false),
+                    successIcon = iCache.cloneNode(false);
 
-            //set class
-            name.className = 'title';
-            splitter.className = 'splitter';
-            artist.className = 'artist';
-            duration.className = 'duration';
-            actions.className = 'actions';
+                title.className = 'albumTitle';
+                loading.className = 'loading';
+                success.className = 'added-to-album';
+                successIcon.className = 'fa fa-check';
 
-            recSongs.className = 'fa fa-headphones';
-            addTo.className = 'fa fa-plus add-to';
-            saveSong.className = 'fa fa-floppy-o save-song';
+                title.title = album.title;
+                title.textContent = album.title;
 
-            //add to
-            addList.className = 'add-to-list';
-            var isCurrUser = audio.owner_id != currUserID;
+                success.textContent = chrome.i18n.getMessage('added');
+                success.appendChild(successIcon);
 
-            if (isCurrUser) {
-                addToMyAudio.className = 'add-to-my-audio-list';
+                li.appendChild(title);
+                li.appendChild(loading);
+                li.appendChild(success);
 
-                addToMyAudio.textContent = chrome.i18n.getMessage('addToMyAudioList');
-                addToMyAudio.setAttribute('data-arr', audio.aid + ',' + audio.owner_id);
-                addToMyAudio.appendChild(addToMyAudioIconList);
-                addToMyAudio.appendChild(alreadyAddedIcon);
-                addList.appendChild(addToMyAudio);
+                li.setAttribute('data-id', album.album_id);
+
+                albumsListEl.appendChild(li);
             }
 
-            addToAlbumsCaret.className = 'fa fa-caret-left';
-            albumsList.className = 'sub-menu show-loader';
 
-            addToMyAudioIconList.className = 'fa fa-plus-square audio-list-icon';
-            alreadyAddedIcon.className = 'fa fa-check already-added hide';
-            addToAlbums.className = 'add-to-album-show has-sub-menu';
+            for (var i = 1, size = Songs[CACHE.SONGS_STATE].length; i < size; i++) {
+                var li = liCache.cloneNode(false),
+                    name = spanCache.cloneNode(false),
+                    splitter = spanCache.cloneNode(false),
+                    artist = spanCache.cloneNode(false),
+                    duration = spanCache.cloneNode(false),
+                    addTo = spanCache.cloneNode(false),
+                    saveSong = aCache.cloneNode(false),
+                    recSongs = spanCache.cloneNode(false),
+                    actions = spanCache.cloneNode(false),
+                    index = i.toString(),
+                    addList = listCache.cloneNode(false),
+                    addToMyAudio = liCache.cloneNode(false),
+                    addToMyAudioIconList = iCache.cloneNode(false),
+                    alreadyAddedIcon = iCache.cloneNode(false),
+                    addToAlbums = liCache.cloneNode(false),
+                    addToAlbumsCaret = iCache.cloneNode(false),
+                    albumsList = divCache.cloneNode(false),
+                    postOnWall = liCache.cloneNode(false),
+                    postOnWallIcon = iCache.cloneNode(false);
 
-            postOnWall.className = 'post-on-wall';
-            postOnWall.title = chrome.i18n.getMessage('shareSong');
-            postOnWallIcon.className = 'fa fa-bullhorn post-on-wall-icon';
-            postOnWall.textContent = postOnWall.title;
-            postOnWall.appendChild(postOnWallIcon);
 
-            addList.appendChild(postOnWall);
+                /**
+                 * Audio object
+                 *
+                 * @type {{aid: number, artist: string, duration: number, genre: number, lyrics_id: number, owner_id: number, title: string, url: string}}
+                 */
+                var audio = Songs[CACHE.SONGS_STATE][i];
 
-            addToAlbums.textContent = chrome.i18n.getMessage('addToAlbum');
-            addToAlbums.setAttribute('data-arr', audio.aid + ',' + audio.owner_id + ',' + isCurrUser.toString());
-            addToAlbums.appendChild(addToAlbumsCaret);
-            addToAlbums.appendChild(albumsList);
+                //set content
+                name.textContent = audio.title;
+                name.title = audio.title;
+                artist.textContent = audio.artist;
+                artist.title = audio.artist;
+                duration.textContent = VKit.util.secToMin(audio.duration);
 
-            addList.appendChild(addToAlbums);
+                //set class
+                name.className = 'title';
+                splitter.className = 'splitter';
+                artist.className = 'artist';
+                duration.className = 'duration';
+                actions.className = 'actions';
 
-            addTo.appendChild(addList);
+                recSongs.className = 'fa fa-headphones';
+                addTo.className = 'fa fa-plus add-to';
+                saveSong.className = 'fa fa-floppy-o save-song';
 
-            if (CurrentSong.id == audio.aid) {
-                li.classList.add('active');
-            }
+                //add to
+                addList.className = 'add-to-list';
+                var isCurrUser = audio.owner_id != currUserID;
 
-            recSongs.title = chrome.i18n.getMessage('recommendations');
-            recSongs.setAttribute('data-id', audio.owner_id + '_' + audio.aid);
+                if (isCurrUser) {
+                    addToMyAudio.className = 'add-to-my-audio-list';
 
-            saveSong.href = audio.url;
-            var songName = audio.artist + ' - ' + audio.title + '.mp3';
-            saveSong.title = chrome.i18n.getMessage('download') + ' ' + songName;
-            saveSong.download = songName;
-
-            if (isSearch) {
-                if (audio.owner_id == currUserID) {
-                    var userSong = spanCache.cloneNode(false),
-                        userSongWrapper = spanCache.cloneNode(false);
-
-                    userSong.className = 'fa fa-check-circle song-in-list';
-                    userSong.title = songName + ' ' + chrome.i18n.getMessage('alreadyInList');
-                    userSongWrapper.className = 'sil-wrapper';
-
-                    userSongWrapper.appendChild(userSong);
-                    li.appendChild(userSongWrapper);
+                    addToMyAudio.textContent = chrome.i18n.getMessage('addToMyAudioList');
+                    addToMyAudio.setAttribute('data-arr', audio.aid + ',' + audio.owner_id);
+                    addToMyAudio.appendChild(addToMyAudioIconList);
+                    addToMyAudio.appendChild(alreadyAddedIcon);
+                    addList.appendChild(addToMyAudio);
                 }
+
+                addToAlbumsCaret.className = 'fa fa-caret-left';
+                albumsList.className = 'sub-menu';
+
+                addToMyAudioIconList.className = 'fa fa-plus-square audio-list-icon';
+                alreadyAddedIcon.className = 'fa fa-check already-added hide';
+                addToAlbums.className = 'add-to-album-show has-sub-menu';
+
+                postOnWall.className = 'post-on-wall';
+                postOnWall.title = chrome.i18n.getMessage('shareSong');
+                postOnWall.setAttribute('data-arr', audio.owner_id + '_' + audio.aid);
+                postOnWallIcon.className = 'fa fa-bullhorn post-on-wall-icon';
+                postOnWall.textContent = postOnWall.title;
+                postOnWall.appendChild(postOnWallIcon);
+
+                addList.appendChild(postOnWall);
+
+                addToAlbums.textContent = chrome.i18n.getMessage('addToAlbum');
+                addToAlbums.setAttribute('data-arr', audio.aid + ',' + audio.owner_id + ',' + isCurrUser.toString());
+                addToAlbums.appendChild(addToAlbumsCaret);
+
+                if (albumsArr[0] && albumsArr[0] == 0) {
+                    albumsList.classList.add('empty-list');
+                    albumsList.textContent = chrome.i18n.getMessage('albumsListIsEmpty');
+                } else {
+                    albumsList.appendChild(albumsListEl.cloneNode(true));
+                }
+
+                addToAlbums.appendChild(albumsList);
+                addList.appendChild(addToAlbums);
+                addTo.appendChild(addList);
+
+                if (CurrentSong.id == audio.aid) {
+                    li.classList.add('active');
+                }
+
+                recSongs.title = chrome.i18n.getMessage('recommendations');
+                recSongs.setAttribute('data-id', audio.owner_id + '_' + audio.aid);
+
+                saveSong.href = audio.url;
+                var songName = audio.artist + ' - ' + audio.title + '.mp3';
+                saveSong.title = chrome.i18n.getMessage('download') + ' ' + songName;
+                saveSong.download = songName;
+
+                if (isSearch) {
+                    if (audio.owner_id == currUserID) {
+                        var userSong = spanCache.cloneNode(false),
+                            userSongWrapper = spanCache.cloneNode(false);
+
+                        userSong.className = 'fa fa-check-circle song-in-list';
+                        userSong.title = songName + ' ' + chrome.i18n.getMessage('alreadyInList');
+                        userSongWrapper.className = 'sil-wrapper';
+
+                        userSongWrapper.appendChild(userSong);
+                        li.appendChild(userSongWrapper);
+                    }
+                }
+
+
+                actions.appendChild(addTo);
+                actions.appendChild(recSongs);
+                actions.appendChild(saveSong);
+
+                li.classList.add('main-song-wrapper');
+
+                li.appendChild(artist);
+                li.appendChild(splitter);
+                li.appendChild(name);
+                li.appendChild(duration);
+                li.appendChild(actions);
+
+                li.setAttribute('data-aid', audio.aid);
+                li.setAttribute('data-index', index);
+                li.setAttribute('data-list', listID);
+
+                if (!isSearch) {
+                    SongsCount = index;
+
+                    BG.browserAction.showBadgeInfo();
+                }
+
+                list.appendChild(li);
             }
 
+            BG.browserAction.showBadgeInfo();
+            if (ShowSongsOnBadge == 'false' && ShowSongDurationOnBadge == 'true') {
+                chrome.browserAction.setBadgeText({text: SongCurrentDuration});
+            }
 
-            actions.appendChild(addTo);
-            actions.appendChild(recSongs);
-            actions.appendChild(saveSong);
-
-            li.classList.add('main-song-wrapper');
-
-            li.appendChild(artist);
-            li.appendChild(splitter);
-            li.appendChild(name);
-            li.appendChild(duration);
-            li.appendChild(actions);
-
-            li.setAttribute('data-aid', audio.aid);
-            li.setAttribute('data-index', index);
-            li.setAttribute('data-list', listID);
+            EmptyList.classList.remove('show');
 
             if (!isSearch) {
-                SongsCount = index;
-
-                BG.browserAction.showBadgeInfo();
+                EmptyList.classList.remove('show');
+                PlayerWrapperBG.style.display = 'block';
             }
 
-            list.appendChild(li);
-        }
+            CACHE.SONGS_LIST.insertAdjacentElement('afterBegin', list);
 
-        BG.browserAction.showBadgeInfo();
-        if (ShowSongsOnBadge == 'false' && ShowSongDurationOnBadge == 'true') {
-            chrome.browserAction.setBadgeText({text: SongCurrentDuration});
-        }
-
-        EmptyList.classList.remove('show');
-
-        if (!isSearch) {
-            EmptyList.classList.remove('show');
-            PlayerWrapperBG.style.display = 'block';
-        }
-
-        CACHE.SONGS_LIST.insertAdjacentElement('afterBegin', list);
-
-        if (noFirst) {
-            BG.setFirstSong();
-        }
-
-        if (!isSearch) {
-            CONST.PAGE_RELOADED = true;
-
-            BG.event.send({
-                event: 'setPageReloadState',
-                data: CONST.PAGE_RELOADED
-            });
-
-            if (!LAST_EMPTY) {
-                BG.getSongsStateChange(false);
+            if (noFirst) {
+                BG.setFirstSong();
             }
 
-            LAST_EMPTY = false;
+            if (!isSearch) {
+                CONST.PAGE_RELOADED = true;
 
-            if (typeof obj == 'object') {
-                if (obj.hasOwnProperty('userChecked') && obj.userChecked == true) {
+                BG.event.send({
+                    event: 'setPageReloadState',
+                    data: CONST.PAGE_RELOADED
+                });
 
-                    BG.event.send({
-                        event: 'reloadContent',
-                        data: 'album-list'
-                    });
+                if (!LAST_EMPTY) {
+                    BG.getSongsStateChange(false);
+                }
+
+                LAST_EMPTY = false;
+
+                if (typeof obj == 'object') {
+                    if (obj.hasOwnProperty('userChecked') && obj.userChecked == true) {
+
+                        BG.event.send({
+                            event: 'reloadContent',
+                            data: 'album-list'
+                        });
+                    }
                 }
             }
-        }
+
+            if (callback && typeof callback == 'function') {
+                callback();
+            }
+        });
     } else {
         if (isSearch) {
             var noResults = divCache.cloneNode(false);
@@ -520,10 +567,10 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                 data: CONST.PAGE_RELOADED
             });
         }
-    }
 
-    if (callback && typeof callback == 'function') {
-        callback();
+        if (callback && typeof callback == 'function') {
+            callback();
+        }
     }
 };
 
@@ -787,7 +834,7 @@ BG.event.playByIndex = function (data) {
             BG.setActiveByIndex(data.aid);
             BG.setLastActive(data.aid);
 
-            if(LastActiveIndex == undefined) {
+            if (LastActiveIndex == undefined) {
                 LastActiveIndex = {
                     index: data.index,
                     aid: data.aid
@@ -1327,6 +1374,13 @@ BG.event.setNotification = function (data) {
     BG.setNotification(data);
 };
 
+BG.event.shareSong = function (data) {
+    var currUserID = JSON.parse(localStorage['authInfo']).userID;
+    VKit.api('wall.post',['owner_id='+currUserID,'attachments=audio'+data], function(response) {
+        console.log(response);
+    });
+};
+
 BG.setToPlay = function () {
     if (FirstLoad) {
         BG.event.playByIndex(LastActiveIndex);
@@ -1394,7 +1448,7 @@ BG.setFirstSong = function () {
     if (LastActive)
         LastActive.className = '';
 
-    var element = document.getElementById('player-wrapper').getElementsByTagName('li')[0],
+    var element = document.querySelector('#songs-list > ul > li'),
         index = element.getAttribute('data-index');
 
     LastActive = element;

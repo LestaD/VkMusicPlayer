@@ -20,7 +20,8 @@ var
     MFPrev,
     MFVolumeWrapper,
     MFVolumeLine,
-    MFVolume;
+    MFVolume,
+    MF_INIT = false;
 
 
 /**
@@ -156,4 +157,5 @@ MFCore.changeVolume = function (e) {
 MFCore.init = function () {
     MFCore.setElements();
     MFCore.events();
+    MF_INIT = true;
 };

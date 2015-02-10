@@ -42,35 +42,39 @@ var Port,
 var Core = {};
 
 Core.audioEvent = function () {
-    var songs = document.getElementById('songs-list').getElementsByTagName('li');
+    var songs = document.querySelectorAll('#songs-list > ul > li');
 
     for (var i = 0, size = songs.length; i < size; i++) {
         var song = songs[i],
             artist = song.getElementsByClassName('artist')[0],
             addTo = song.getElementsByClassName('add-to')[0],
-            addToMyAudioList = song.getElementsByClassName('add-to-my-audio-list')[0],
-            addToAlbum = song.getElementsByClassName('add-to-album-show')[0];
+            addToMyAudioList = addTo.getElementsByClassName('add-to-my-audio-list')[0],
+            addToAlbum = addTo.getElementsByClassName('add-to-album-show')[0],
+            postSong = addTo.getElementsByClassName('post-on-wall')[0];
 
-        if (artist) {
-            artist.addEventListener('click', Core.fillSearch);
-        }
+        artist.addEventListener('click', Core.fillSearch);
 
-        if (addTo) {
-            addTo.addEventListener('mouseenter', Core.addToMouseEnter);
-            addTo.addEventListener('mouseleave', Core.addToMouseLeave);
-        }
+        addTo.addEventListener('mouseenter', Core.addToMouseEnter);
+        addTo.addEventListener('mouseleave', Core.addToMouseLeave);
 
         if (addToMyAudioList) {
             addToMyAudioList.addEventListener('click', Core.addSongToMyAudioList);
         }
 
-        if (addToAlbum) {
-            addToAlbum.addEventListener('mouseenter', Core.addToAlbumMouseEnter);
-            addToAlbum.addEventListener('mouseleave', Core.addToAlbumMouseLeave);
-        }
+        addToAlbum.addEventListener('mouseenter', Core.addToAlbumMouseEnter);
+        addToAlbum.addEventListener('mouseleave', Core.addToAlbumMouseLeave);
+
+        postSong.addEventListener('click', Core.shareSong);
 
         song.addEventListener('click', Core.event.playSong);
     }
+};
+
+Core.shareSong = function () {
+    Core.event.send({
+        event: 'shareSong',
+        data: this.getAttribute('data-arr')
+    });
 };
 
 Core.addSongToMyAudioList = function () {
@@ -85,93 +89,44 @@ Core.addSongToMyAudioList = function () {
 Core.addToAlbumMouseEnter = function () {
     var mainEl = this,
         subMenu = mainEl.getElementsByClassName('sub-menu')[0];
-
-    VKit.api('audio.getAlbums', ['owner_id=' + currUserID, 'count=100'], function (response) {
-        var albums = JSON.parse(response).response;
-
-        if (albums[0] && albums[0] == 0) {
-            subMenu.classList.remove('show-loader');
-            subMenu.classList.add('empty-list');
-            subMenu.textContent = chrome.i18n.getMessage('albumsListIsEmpty');
-        } else {
-            var list = listCache.cloneNode(false);
-
-            for (var i = 1, size = albums.length; i < size; i++) {
-                var album = albums[i],
-                    li = liCache.cloneNode(false),
-                    title = divCache.cloneNode(false),
-                    loading = divCache.cloneNode(false),
-                    success = divCache.cloneNode(false),
-                    successIcon = iCache.cloneNode(false);
-
-                title.className = 'albumTitle';
-                loading.className = 'loading';
-                success.className = 'added-to-album';
-                successIcon.className = 'fa fa-check';
-
-                title.title = album.title;
-                title.textContent = album.title;
-
-                success.textContent = chrome.i18n.getMessage('added');
-                success.appendChild(successIcon);
-
-                li.appendChild(title);
-                li.appendChild(loading);
-                li.appendChild(success);
-
-                li.setAttribute('data-id', album.album_id);
-
-                li.addEventListener('click', function () {
-                    var el = this,
-                        h = el.clientHeight,
-                        albumTitle = el.getElementsByClassName('albumTitle')[0],
-                        data = mainEl.getAttribute('data-arr').split(',');
-
-                    if(CACHE.LAST_ADDED_ALBUM == undefined) {
-                        CACHE.LAST_ADDED_ALBUM = albumTitle;
-                    } else {
-                        CACHE.LAST_ADDED_ALBUM.removeAttribute('style');
-                        CACHE.LAST_ADDED_ALBUM = albumTitle;
-                    }
-
-                    albumTitle.style.marginTop = '-' + h + 'px';
-
-                    //add song to audio list and then add to album
-                    if (data[2] == 'true') {
-                        VKit.api('audio.add', ['audio_id=' + data[0], 'owner_id=' + data[1]], function (response) {
-                            var aid = JSON.parse(response).response;
-
-                            VKit.api('audio.moveToAlbum', ['album_id=' + el.getAttribute('data-id'), 'audio_ids=' + aid], function (response) {
-                                albumTitle.style.marginTop = '-' + h * 2 + 'px';
-                            });
-                        });
-                    } else { // add song to album
-                        VKit.api('audio.moveToAlbum', ['album_id=' + el.getAttribute('data-id'), 'audio_ids=' + data[0]], function (response) {
-                            albumTitle.style.marginTop = '-' + h * 2 + 'px';
-                        });
-                    }
-                });
-
-                list.appendChild(li);
-            }
-
-            subMenu.classList.remove('show-loader');
-            subMenu.appendChild(list);
-        }
-
-        Core.calculateDropDrownMenuPosition(mainEl,'sub-menu');
-    });
+    //var el = this,
+    //    h = el.clientHeight,
+    //    albumTitle = el.getElementsByClassName('albumTitle')[0],
+    //    data = mainEl.getAttribute('data-arr').split(',');
+    //
+    //if (CACHE.LAST_ADDED_ALBUM == undefined) {
+    //    CACHE.LAST_ADDED_ALBUM = albumTitle;
+    //} else {
+    //    CACHE.LAST_ADDED_ALBUM.removeAttribute('style');
+    //    CACHE.LAST_ADDED_ALBUM = albumTitle;
+    //}
+    //
+    //albumTitle.style.marginTop = '-' + h + 'px';
+    //
+    ////add song to audio list and then add to album
+    //if (data[2] == 'true') {
+    //    VKit.api('audio.add', ['audio_id=' + data[0], 'owner_id=' + data[1]], function (response) {
+    //        var aid = JSON.parse(response).response;
+    //
+    //        VKit.api('audio.moveToAlbum', ['album_id=' + el.getAttribute('data-id'), 'audio_ids=' + aid], function (response) {
+    //            albumTitle.style.marginTop = '-' + h * 2 + 'px';
+    //        });
+    //    });
+    //} else { // add song to album
+    //    VKit.api('audio.moveToAlbum', ['album_id=' + el.getAttribute('data-id'), 'audio_ids=' + data[0]], function (response) {
+    //        albumTitle.style.marginTop = '-' + h * 2 + 'px';
+    //    });
+    //}
+    Core.calculateDropDrownMenuPosition(mainEl, 'sub-menu');
 };
 
 Core.addToAlbumMouseLeave = function () {
     var subMenu = this.getElementsByClassName('sub-menu')[0];
     subMenu.removeAttribute('style');
-    Core.clearElement(subMenu);
-    subMenu.classList.remove('empty-list','show');
-    subMenu.classList.add('show-loader');
+    subMenu.classList.remove('show');
 };
 
-Core.calculateDropDrownMenuPosition = function(element,elClass) {
+Core.calculateDropDrownMenuPosition = function (element, elClass) {
     var addToList = element.getElementsByClassName(elClass)[0],
         addToListData = addToList.getBoundingClientRect(),
         h = 0;
@@ -183,7 +138,7 @@ Core.calculateDropDrownMenuPosition = function(element,elClass) {
         addListOffSetHeight = addToListData.top + addToListData.height;
 
     if (addListOffSetHeight > songList.clientHeight) {
-        if(elClass == 'sub-menu') {
+        if (elClass == 'sub-menu') {
             h = Math.abs(songList.clientHeight - addToListData.bottom) - 90 + parseInt(songListStyles.paddingBottom) + 1;
         } else {
             h = Math.abs(songList.clientHeight - addToListData.bottom) - 90 + parseInt(songListStyles.paddingBottom);
@@ -199,7 +154,7 @@ Core.calculateDropDrownMenuPosition = function(element,elClass) {
 };
 
 Core.addToMouseEnter = function () {
-    Core.calculateDropDrownMenuPosition(this.parentNode.parentNode,'add-to-list');
+    Core.calculateDropDrownMenuPosition(this.parentNode.parentNode, 'add-to-list');
 };
 
 Core.addToMouseLeave = function () {
@@ -810,7 +765,7 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
                 LastActiveIndex = win.LastActiveIndex;
             }
 
-            if (!CONST.PAGE_RELOADED && !Core.checkForSearchState()) {
+            if (!CONST.PAGE_RELOADED && !MF_INIT) {
                 MFCore.init();
             }
 
@@ -822,7 +777,6 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
                 isElements = true;
                 isEvents = true;
             }
-
 
 
             if (!port) {
@@ -928,7 +882,7 @@ Core.eraseSearchInput = function () {
     CACHE.SEARCH.value = '';
     CACHE.EMPTY_SEARCH.classList.remove('show');
 
-    if(!AudioList && !CACHE.SEARCH_LIST) {
+    if (!AudioList && !CACHE.SEARCH_LIST) {
         CACHE.EMPTY_LIST.classList.add('show');
     }
 
@@ -1129,7 +1083,7 @@ Core.changeAudioSearchType = function (e) {
 Core.showAudioList = function () {
     CACHE.AJAX_CONTENT_LOADER.classList.remove('show');
 
-    if(AudioList) {
+    if (AudioList) {
         AudioList.classList.remove('hide');
     }
 
@@ -1147,11 +1101,11 @@ Core.showAudioList = function () {
  * Show preloader indicator
  */
 Core.showSearchAjax = function () {
-    if(CACHE.SONGS_LIST) {
+    if (CACHE.SONGS_LIST) {
         CACHE.SONGS_LIST.classList.add('hide');
     }
 
-    if(AudioList) {
+    if (AudioList) {
         AudioList.classList.add('hide');
     }
 
@@ -1274,7 +1228,7 @@ Core.setAudioSearchConfigsEvents = function () {
         this.classList.remove('show');
         Core.showAudioList();
 
-        if(!AudioList) {
+        if (!AudioList) {
             CACHE.EMPTY_LIST.classList.add('show');
         }
 
