@@ -321,9 +321,9 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
 
     list.setAttribute('id', listID);
 
-    if (Songs[CACHE.SONGS_STATE] && Songs[CACHE.SONGS_STATE][0] != 0 && !type) {
 
-        VKit.api('audio.getAlbums', ['owner_id=' + currUserID, 'count=100'], function (albumsResponse) {
+    VKit.api('audio.getAlbums', ['owner_id=' + currUserID, 'count=100'], function (albumsResponse) {
+        if (Songs[CACHE.SONGS_STATE] && Songs[CACHE.SONGS_STATE][0] != 0 && !type) {
             var albumsArr = JSON.parse(albumsResponse).response,
                 albumsListEl = listCache.cloneNode(false);
 
@@ -542,36 +542,32 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                     }
                 }
             }
-
-            if (callback && typeof callback == 'function') {
-                callback();
-            }
-        });
-    } else {
-        if (isSearch) {
-            var noResults = divCache.cloneNode(false);
-            noResults.textContent = chrome.i18n.getMessage('nothingFound');
-            noResults.className = 'nothing-found';
-
-            list.appendChild(noResults);
-            CACHE.SONGS_LIST.appendChild(list);
-            EmptyList.classList.remove('show');
         } else {
-            EmptyList.classList.add('show');
-            LAST_EMPTY = true;
+            if (isSearch) {
+                var noResults = divCache.cloneNode(false);
+                noResults.textContent = chrome.i18n.getMessage('nothingFound');
+                noResults.className = 'nothing-found';
 
-            CONST.PAGE_RELOADED = true;
+                list.appendChild(noResults);
+                CACHE.SONGS_LIST.appendChild(list);
+                EmptyList.classList.remove('show');
+            } else {
+                EmptyList.classList.add('show');
+                LAST_EMPTY = true;
 
-            BG.event.send({
-                event: 'setPageReloadState',
-                data: CONST.PAGE_RELOADED
-            });
+                CONST.PAGE_RELOADED = true;
+
+                BG.event.send({
+                    event: 'setPageReloadState',
+                    data: CONST.PAGE_RELOADED
+                });
+            }
         }
 
         if (callback && typeof callback == 'function') {
             callback();
         }
-    }
+    })
 };
 
 BG.getUsersList = function () {
@@ -1050,6 +1046,8 @@ BG.event.openAuth = function (data) {
 BG.event.setActiveUser = function (data) {
     VKit.setActiveAccount(data);
 
+    AlbumID = undefined;
+
     BG.browserAction.disable();
     BG.browserAction.setIcon.update();
 
@@ -1376,7 +1374,7 @@ BG.event.setNotification = function (data) {
 
 BG.event.shareSong = function (data) {
     var currUserID = JSON.parse(localStorage['authInfo']).userID;
-    VKit.api('wall.post',['owner_id='+currUserID,'attachments=audio'+data], function(response) {
+    VKit.api('wall.post', ['owner_id=' + currUserID, 'attachments=audio' + data], function (response) {
         console.log(response);
     });
 };
