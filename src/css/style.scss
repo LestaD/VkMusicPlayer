@@ -857,11 +857,23 @@ $cWidth: 420px;
 #empty-list {
   display: none;
   text-align: center;
-  margin: 20px 0;
+  color: #D3D3D3;
   font-size: 13px;
-  line-height: 350px;
-  height: 414px;
+  height: 449px;
   width: 420px;
+
+  div {
+    font-size: 13px;
+  }
+
+  .sad-face {
+    font-size: 150px;
+    margin: 95px 0 30px;
+  }
+
+  .text {
+    font-size:17px;
+  }
 
   &.show {
     display: block;
@@ -1199,6 +1211,7 @@ $cWidth: 420px;
   max-height: 414px;
   margin: 0 0 35px;
   text-align: center;
+  height: 414px;
   width: 100%;
 
   &.show {

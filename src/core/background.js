@@ -291,7 +291,8 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
     var isSearch = BG.checkForSearchState(),
         oldList,
         searchEl = document.getElementById('search-list'),
-        currUserID = Number(JSON.parse(localStorage['authInfo']).userID);
+        audioEl = document.getElementById('audio-list') || undefined,
+        currUserID = parseInt(JSON.parse(localStorage['authInfo']).userID);
 
     BG.setStates(isSearch ? 'search' : 'audio');
 
@@ -299,7 +300,10 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
 
     if (isSearch) {
         oldList = document.getElementById('search-list') || undefined;
-        document.getElementById('audio-list').classList.add('hide');
+
+        if (audioEl) {
+            audioEl.classList.add('hide');
+        }
     } else {
         oldList = document.getElementById('audio-list') || undefined;
 
@@ -394,7 +398,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             addList.appendChild(postOnWall);
 
             addToAlbums.textContent = chrome.i18n.getMessage('addToAlbum');
-            addToAlbums.setAttribute('data-arr', audio.aid+','+audio.owner_id+','+isCurrUser.toString());
+            addToAlbums.setAttribute('data-arr', audio.aid + ',' + audio.owner_id + ',' + isCurrUser.toString());
             addToAlbums.appendChild(addToAlbumsCaret);
             addToAlbums.appendChild(albumsList);
 
@@ -459,8 +463,10 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             chrome.browserAction.setBadgeText({text: SongCurrentDuration});
         }
 
+        EmptyList.classList.remove('show');
+
         if (!isSearch) {
-            EmptyList.style.display = 'none';
+            EmptyList.classList.remove('show');
             PlayerWrapperBG.style.display = 'block';
         }
 
@@ -478,10 +484,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                 data: CONST.PAGE_RELOADED
             });
 
-            if (LAST_EMPTY) {
-                EmptyList.classList.add('show');
-            } else {
-                EmptyList.classList.remove('show');
+            if (!LAST_EMPTY) {
                 BG.getSongsStateChange(false);
             }
 
@@ -505,9 +508,9 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
 
             list.appendChild(noResults);
             CACHE.SONGS_LIST.appendChild(list);
-            EmptyList.style.display = 'none';
+            EmptyList.classList.remove('show');
         } else {
-            EmptyList.style.display = 'block';
+            EmptyList.classList.add('show');
             LAST_EMPTY = true;
 
             CONST.PAGE_RELOADED = true;
@@ -777,15 +780,13 @@ BG.event.playByIndex = function (data) {
         if (LastActiveIndex != undefined && Songs[CACHE.SONGS_STATE] != undefined) {
             BG.removeActiveIndex(LastActiveIndex.aid);
 
-            if (!LAST_EMPTY) {
-                BG.event.send({
-                    event: 'setNewHighLightElement',
-                    data: {
-                        oldIndex: LastActiveIndex.aid,
-                        newIndex: data.aid
-                    }
-                });
-            }
+            BG.event.send({
+                event: 'setNewHighLightElement',
+                data: {
+                    oldIndex: LastActiveIndex.aid,
+                    newIndex: data.aid
+                }
+            });
         }
 
         if (data != undefined) {
@@ -1192,7 +1193,7 @@ BG.event.searchAudio = function (data) {
     }
 };
 
-BG.event.clearSearchInput = function (data) {
+BG.event.clearSearchInput = function () {
     CACHE.SEARCH.value = '';
     CACHE.EMPTY_SEARCH.classList.remove('show');
     var searchEl = document.getElementById('search-list'),
@@ -1204,6 +1205,10 @@ BG.event.clearSearchInput = function (data) {
 
     if (audioEl) {
         audioEl.classList.remove('hide');
+    }
+
+    if(!audioEl) {
+        EmptyList.classList.add('show');
     }
 
     BG.setStates('audio');
@@ -1252,7 +1257,7 @@ BG.event.createNewAlbum = function (data) {
  * @param {String} data
  */
 BG.event.removeAlbum = function (data) {
-    var id = Number(data),
+    var id = parseInt(data),
         currUserID = JSON.parse(localStorage['authInfo']).userID;
 
     if (id > 0) {
@@ -1304,7 +1309,7 @@ BG.event.addSongToMyAudioList = function (data) {
     });
 };
 
-BG.event.setNotification = function(data) {
+BG.event.setNotification = function (data) {
     BG.setNotification(data);
 };
 

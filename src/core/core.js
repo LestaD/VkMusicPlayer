@@ -210,7 +210,7 @@ Core.addToMouseLeave = function () {
 };
 
 Core.fillSearch = function () {
-    CACHE.SEARCH.value = this.textContent;
+    CACHE.SEARCH.value = this.textContent.trim();
     Core.audioSearch();
 };
 
@@ -804,11 +804,13 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
         if (localStorage['authInfo'] != undefined) {
             Core.audioEvent();
 
+            Core.setElements.search();
+
             if (win.LastActiveIndex) {
                 LastActiveIndex = win.LastActiveIndex;
             }
 
-            if (!CONST.PAGE_RELOADED) {
+            if (!CONST.PAGE_RELOADED && !Core.checkForSearchState()) {
                 MFCore.init();
             }
 
@@ -821,7 +823,7 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
                 isEvents = true;
             }
 
-            Core.setElements.search();
+
 
             if (!port) {
                 Core.event.listenData();
@@ -925,6 +927,10 @@ Core.openAlbums = function (e) {
 Core.eraseSearchInput = function () {
     CACHE.SEARCH.value = '';
     CACHE.EMPTY_SEARCH.classList.remove('show');
+
+    if(!AudioList && !CACHE.SEARCH_LIST) {
+        CACHE.EMPTY_LIST.classList.add('show');
+    }
 
     Core.event.send({
         event: 'clearSearchInput',
@@ -1122,7 +1128,10 @@ Core.changeAudioSearchType = function (e) {
  */
 Core.showAudioList = function () {
     CACHE.AJAX_CONTENT_LOADER.classList.remove('show');
-    AudioList.classList.remove('hide');
+
+    if(AudioList) {
+        AudioList.classList.remove('hide');
+    }
 
     if (CACHE.SEARCH_SONGS_LIST) {
         CACHE.SEARCH_SONGS_LIST.classList.add('hide');
@@ -1265,6 +1274,10 @@ Core.setAudioSearchConfigsEvents = function () {
         this.classList.remove('show');
         Core.showAudioList();
 
+        if(!AudioList) {
+            CACHE.EMPTY_LIST.classList.add('show');
+        }
+
         Core.event.send({
             event: 'clearSearchInput',
             data: ''
@@ -1335,6 +1348,7 @@ Core.setElements = {
         CACHE.SEARCH_SETTINGS = document.getElementById('search-settings');
         CACHE.SEARCH = document.getElementById('search');
         CACHE.EMPTY_SEARCH = document.getElementById('empty-search');
+        CACHE.EMPTY_LIST = document.getElementById('empty-list');
         CACHE.SEARCH_SELECT_TYPES = document.getElementsByClassName('search-select-type');
         CACHE.LYRICS_CHECKBOX = document.getElementById('lyrics');
         CACHE.LYRICS_CHECKBOX_LABEL = document.querySelector('#lyrics-checkbox-wrapper label');
