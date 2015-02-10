@@ -308,6 +308,10 @@ MFCore.getSongCurrentDuration = function () {
     return SongCurrentDuration;
 };
 
+MFCore.isInPlayStatus = function() {
+    return MFPlayer.src != '' && MFPlayer.currentTime > 0;
+};
+
 MFCore.isFirstSongPlayed = function () {
     return LastActiveIndex && LastActiveIndex.index == 1 && MFPlayer.paused && MFPlayer.currentTime == 0;
 };

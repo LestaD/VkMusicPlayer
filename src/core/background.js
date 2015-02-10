@@ -60,15 +60,15 @@ chrome.commands.onCommand.addListener(function (command) {
                 }
 
                 BG.event.setToPause();
+            } else if (CurrentSong.aid != undefined && MFCore.isInPlayStatus()) {
+                BG.event.setToPause();
             } else {
-                if (!ConnectStatus) {
-                    BG.setNotification({
-                        type: 'basic',
-                        title: chrome.i18n.getMessage('songNotFound'),
-                        message: chrome.i18n.getMessage('noSongs'),
-                        iconUrl: '/images/sad-face.png'
-                    });
-                }
+                BG.setNotification({
+                    type: 'basic',
+                    title: chrome.i18n.getMessage('songNotFound'),
+                    message: chrome.i18n.getMessage('noSongs'),
+                    iconUrl: '/images/sad-face.png'
+                });
             }
         }
     } else if (command == 'Next') {
@@ -711,8 +711,13 @@ BG.event.setToPause = function (data) {
 
 BG.event.setToPlay = function (data) {
     if (CurrentSong.aid != undefined) {
-        BG.setToPlay();
+        if (MFCore.isFirstSongPlayed()) {
+            BG.event.sendPlay();
+        } else {
+            BG.setToPlay();
+        }
     } else if (LastActiveIndex == undefined && Songs[CACHE.SONGS_STATE] != undefined) {
+        console.log('sd');
         LastActiveIndex = {
             index: 1
         };
@@ -720,6 +725,7 @@ BG.event.setToPlay = function (data) {
         BG.setSongsStateChange(false);
         BG.setToPlay();
     } else if (LastActiveIndex != undefined && LAST_EMPTY) {
+        console.log('xiix');
         FirstLoad = true;
         BG.setSongsStateChange(false);
         BG.setToPlay();
@@ -777,6 +783,18 @@ BG.event.playByIndex = function (data) {
             MFPlay.className += ' pause';
         }
 
+        if (data != undefined) {
+            BG.setActiveByIndex(data.aid);
+            BG.setLastActive(data.aid);
+
+            if(LastActiveIndex == undefined) {
+                LastActiveIndex = {
+                    index: data.index,
+                    aid: data.aid
+                };
+            }
+        }
+
         if (LastActiveIndex != undefined && Songs[CACHE.SONGS_STATE] != undefined) {
             BG.removeActiveIndex(LastActiveIndex.aid);
 
@@ -790,10 +808,6 @@ BG.event.playByIndex = function (data) {
         }
 
         if (data != undefined) {
-            BG.setActiveByIndex(data.aid);
-            BG.setLastActive(data.aid);
-
-
             LastActiveIndex = {
                 index: data.index,
                 aid: data.aid
@@ -1207,7 +1221,7 @@ BG.event.clearSearchInput = function () {
         audioEl.classList.remove('hide');
     }
 
-    if(!audioEl) {
+    if (!audioEl) {
         EmptyList.classList.add('show');
     }
 
