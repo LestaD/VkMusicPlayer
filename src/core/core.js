@@ -19,6 +19,8 @@ var Port,
     ShuffleSongs,
     liCache = document.createElement('li'),
     listCache = document.createElement('ul'),
+    divCache = document.createElement('div'),
+    iCache = document.createElement('i'),
     Broadcast,
     isEvents = false,
     isElements = false,
@@ -87,7 +89,7 @@ Core.addToAlbumMouseEnter = function () {
     VKit.api('audio.getAlbums', ['owner_id=' + currUserID, 'count=100'], function (response) {
         var albums = JSON.parse(response).response;
 
-        if (albums[0] == 0) {
+        if (albums[0] && albums[0] == 0) {
             subMenu.classList.remove('show-loader');
             subMenu.classList.add('empty-list');
             subMenu.textContent = chrome.i18n.getMessage('albumsListIsEmpty');
@@ -96,42 +98,56 @@ Core.addToAlbumMouseEnter = function () {
 
             for (var i = 1, size = albums.length; i < size; i++) {
                 var album = albums[i],
-                    li = liCache.cloneNode(false);
+                    li = liCache.cloneNode(false),
+                    title = divCache.cloneNode(false),
+                    loading = divCache.cloneNode(false),
+                    success = divCache.cloneNode(false),
+                    successIcon = iCache.cloneNode(false);
 
-                li.textContent = album.title;
+                title.className = 'albumTitle';
+                loading.className = 'loading';
+                success.className = 'added-to-album';
+                successIcon.className = 'fa fa-check';
+
+                title.title = album.title;
+                title.textContent = album.title;
+
+                success.textContent = chrome.i18n.getMessage('added');
+                success.appendChild(successIcon);
+
+                li.appendChild(title);
+                li.appendChild(loading);
+                li.appendChild(success);
+
                 li.setAttribute('data-id', album.album_id);
 
                 li.addEventListener('click', function () {
                     var el = this,
+                        h = el.clientHeight,
+                        albumTitle = el.getElementsByClassName('albumTitle')[0],
                         data = mainEl.getAttribute('data-arr').split(',');
 
-                    if(data[2] == 'true') {
+                    if(CACHE.LAST_ADDED_ALBUM == undefined) {
+                        CACHE.LAST_ADDED_ALBUM = albumTitle;
+                    } else {
+                        CACHE.LAST_ADDED_ALBUM.removeAttribute('style');
+                        CACHE.LAST_ADDED_ALBUM = albumTitle;
+                    }
+
+                    albumTitle.style.marginTop = '-' + h + 'px';
+
+                    //add song to audio list and then add to album
+                    if (data[2] == 'true') {
                         VKit.api('audio.add', ['audio_id=' + data[0], 'owner_id=' + data[1]], function (response) {
                             var aid = JSON.parse(response).response;
 
                             VKit.api('audio.moveToAlbum', ['album_id=' + el.getAttribute('data-id'), 'audio_ids=' + aid], function (response) {
-                                Core.event.send({
-                                    event: 'setNotification',
-                                    data: {
-                                        type: 'basic',
-                                        title: chrome.i18n.getMessage('songAddedToAlbum')+' '+el.textContent,
-                                        message: '',
-                                        iconUrl: '/images/lucky-face.png'
-                                    }
-                                });
+                                albumTitle.style.marginTop = '-' + h * 2 + 'px';
                             });
                         });
-                    } else {
+                    } else { // add song to album
                         VKit.api('audio.moveToAlbum', ['album_id=' + el.getAttribute('data-id'), 'audio_ids=' + data[0]], function (response) {
-                            Core.event.send({
-                                event: 'setNotification',
-                                data: {
-                                    type: 'basic',
-                                    title: chrome.i18n.getMessage('songAddedToAlbum')+' '+el.textContent,
-                                    message: '',
-                                    iconUrl: '/images/lucky-face.png'
-                                }
-                            });
+                            albumTitle.style.marginTop = '-' + h * 2 + 'px';
                         });
                     }
                 });
@@ -142,35 +158,48 @@ Core.addToAlbumMouseEnter = function () {
             subMenu.classList.remove('show-loader');
             subMenu.appendChild(list);
         }
+
+        Core.calculateDropDrownMenuPosition(mainEl,'sub-menu');
     });
 };
 
 Core.addToAlbumMouseLeave = function () {
     var subMenu = this.getElementsByClassName('sub-menu')[0];
-    subMenu.classList.remove('empty-list');
-    subMenu.classList.add('show-loader');
+    subMenu.removeAttribute('style');
     Core.clearElement(subMenu);
+    subMenu.classList.remove('empty-list','show');
+    subMenu.classList.add('show-loader');
 };
 
-Core.addToMouseEnter = function () {
-    var element = this.parentNode.parentNode,
-        addToList = element.getElementsByClassName('add-to-list')[0],
-        addToListData = addToList.getBoundingClientRect();
+Core.calculateDropDrownMenuPosition = function(element,elClass) {
+    var addToList = element.getElementsByClassName(elClass)[0],
+        addToListData = addToList.getBoundingClientRect(),
+        h = 0;
 
     var songList = CACHE.SEARCH.value.length > 0 ? CACHE.SEARCH_SONGS_LIST : AudioList,
         songListStyles = window.getComputedStyle(songList),
         topOffset = document.querySelector('.c-wrapper').clientHeight + CACHE.SEARCH_WRAPPER.clientHeight + parseInt(songListStyles.paddingTop),
-        addListOffset = addToListData.top - topOffset;
+        addListOffset = addToListData.top - topOffset,
+        addListOffSetHeight = addToListData.top + addToListData.height;
 
-    if (addToListData.top > songList.clientHeight) {
-        var h = Math.abs(songList.clientHeight - addToListData.bottom) - 90 + parseInt(songListStyles.paddingBottom);
+    if (addListOffSetHeight > songList.clientHeight) {
+        if(elClass == 'sub-menu') {
+            h = Math.abs(songList.clientHeight - addToListData.bottom) - 90 + parseInt(songListStyles.paddingBottom) + 1;
+        } else {
+            h = Math.abs(songList.clientHeight - addToListData.bottom) - 90 + parseInt(songListStyles.paddingBottom);
+        }
+
         addToList.style.top = '-' + h + 'px';
     } else if (addListOffset < 0) {
-        var h = topOffset - addToListData.top - parseInt(songListStyles.paddingTop) + 2;
+        h = topOffset - addToListData.top - parseInt(songListStyles.paddingTop) + 2;
         addToList.style.top = h + 'px';
     }
 
     addToList.classList.add('show');
+};
+
+Core.addToMouseEnter = function () {
+    Core.calculateDropDrownMenuPosition(this.parentNode.parentNode,'add-to-list');
 };
 
 Core.addToMouseLeave = function () {
@@ -1109,16 +1138,14 @@ Core.showAudioList = function () {
  * Show preloader indicator
  */
 Core.showSearchAjax = function () {
-    if (!CACHE.AJAX_CONTENT_LOADER_HEIGHT) {
-        var alStyles = window.getComputedStyle(AudioList),
-            height = CACHE.SONGS_LIST.clientHeight + parseInt(alStyles['margin-bottom']) + parseInt(alStyles['padding-top']) + parseInt(alStyles['padding-bottom']);
-
-        CACHE.AJAX_CONTENT_LOADER.style.height = height + 'px';
-        CACHE.AJAX_CONTENT_LOADER_HEIGHT = true;
+    if(CACHE.SONGS_LIST) {
+        CACHE.SONGS_LIST.classList.add('hide');
     }
 
-    CACHE.SONGS_LIST.classList.add('hide');
-    AudioList.classList.add('hide');
+    if(AudioList) {
+        AudioList.classList.add('hide');
+    }
+
     CACHE.AJAX_CONTENT_LOADER.classList.add('show');
 };
 

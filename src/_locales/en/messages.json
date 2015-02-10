@@ -234,5 +234,9 @@
 
     "songAddedToAlbum": {
         "message": "Song was added to"
+    },
+
+    "added": {
+        "message": "Added"
     }
 }

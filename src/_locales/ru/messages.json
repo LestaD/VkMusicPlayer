@@ -235,5 +235,9 @@
 
     "songAddedToAlbum": {
         "message": "Песня была добавлена в"
+    },
+
+    "added": {
+        "message": "Добавлено"
     }
 }

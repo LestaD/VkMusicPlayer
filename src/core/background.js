@@ -385,15 +385,6 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             alreadyAddedIcon.className = 'fa fa-check already-added hide';
             addToAlbums.className = 'add-to-album-show has-sub-menu';
 
-
-            addToAlbums.textContent = chrome.i18n.getMessage('addToAlbum');
-            addToAlbums.setAttribute('data-arr', audio.aid+','+audio.owner_id+','+isCurrUser.toString());
-            addToAlbums.appendChild(addToAlbumsCaret);
-            addToAlbums.appendChild(albumsList);
-
-            addList.appendChild(addToAlbums);
-
-
             postOnWall.className = 'post-on-wall';
             postOnWall.title = chrome.i18n.getMessage('shareSong');
             postOnWallIcon.className = 'fa fa-bullhorn post-on-wall-icon';
@@ -401,6 +392,13 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             postOnWall.appendChild(postOnWallIcon);
 
             addList.appendChild(postOnWall);
+
+            addToAlbums.textContent = chrome.i18n.getMessage('addToAlbum');
+            addToAlbums.setAttribute('data-arr', audio.aid+','+audio.owner_id+','+isCurrUser.toString());
+            addToAlbums.appendChild(addToAlbumsCaret);
+            addToAlbums.appendChild(albumsList);
+
+            addList.appendChild(addToAlbums);
 
             addTo.appendChild(addList);
 
