@@ -50,6 +50,7 @@ Core.audioEvent = function () {
             addTo = song.getElementsByClassName('add-to')[0],
             addToMyAudioList = addTo.getElementsByClassName('add-to-my-audio-list')[0],
             addToAlbum = addTo.getElementsByClassName('add-to-album-show')[0],
+            addToAlbumSubItems = addToAlbum.querySelectorAll('.sub-menu > ul > li'),
             postSong = addTo.getElementsByClassName('post-on-wall')[0];
 
         artist.addEventListener('click', Core.fillSearch);
@@ -63,6 +64,10 @@ Core.audioEvent = function () {
 
         addToAlbum.addEventListener('mouseenter', Core.addToAlbumMouseEnter);
         addToAlbum.addEventListener('mouseleave', Core.addToAlbumMouseLeave);
+
+        for(var j = 0, jSize = addToAlbumSubItems.length; j < jSize; j++) {
+            addToAlbumSubItems[j].addEventListener('click', Core.addSongToAlbum);
+        }
 
         postSong.addEventListener('click', Core.shareSong);
 
@@ -86,38 +91,41 @@ Core.addSongToMyAudioList = function () {
     });
 };
 
+Core.addSongToAlbum = function() {
+    var mainEl = this.parentNode.parentNode.parentNode,
+        el = this,
+        h = el.clientHeight,
+        albumTitle = el.getElementsByClassName('albumTitle')[0],
+        data = mainEl.getAttribute('data-arr').split(',');
+
+
+    if (CACHE.LAST_ADDED_ALBUM == undefined) {
+        CACHE.LAST_ADDED_ALBUM = albumTitle;
+    } else {
+        CACHE.LAST_ADDED_ALBUM.removeAttribute('style');
+        CACHE.LAST_ADDED_ALBUM = albumTitle;
+    }
+
+    albumTitle.style.marginTop = '-' + h + 'px';
+
+    //add song to audio list and then add to album
+    if (data[2] == 'true') {
+        VKit.api('audio.add', ['audio_id=' + data[0], 'owner_id=' + data[1]], function (response) {
+            var aid = JSON.parse(response).response;
+
+            VKit.api('audio.moveToAlbum', ['album_id=' + el.getAttribute('data-id'), 'audio_ids=' + aid], function (response) {
+                albumTitle.style.marginTop = '-' + h * 2 + 'px';
+            });
+        });
+    } else { // add song to album
+        VKit.api('audio.moveToAlbum', ['album_id=' + el.getAttribute('data-id'), 'audio_ids=' + data[0]], function (response) {
+            albumTitle.style.marginTop = '-' + h * 2 + 'px';
+        });
+    }
+};
+
 Core.addToAlbumMouseEnter = function () {
-    var mainEl = this,
-        subMenu = mainEl.getElementsByClassName('sub-menu')[0];
-    //var el = this,
-    //    h = el.clientHeight,
-    //    albumTitle = el.getElementsByClassName('albumTitle')[0],
-    //    data = mainEl.getAttribute('data-arr').split(',');
-    //
-    //if (CACHE.LAST_ADDED_ALBUM == undefined) {
-    //    CACHE.LAST_ADDED_ALBUM = albumTitle;
-    //} else {
-    //    CACHE.LAST_ADDED_ALBUM.removeAttribute('style');
-    //    CACHE.LAST_ADDED_ALBUM = albumTitle;
-    //}
-    //
-    //albumTitle.style.marginTop = '-' + h + 'px';
-    //
-    ////add song to audio list and then add to album
-    //if (data[2] == 'true') {
-    //    VKit.api('audio.add', ['audio_id=' + data[0], 'owner_id=' + data[1]], function (response) {
-    //        var aid = JSON.parse(response).response;
-    //
-    //        VKit.api('audio.moveToAlbum', ['album_id=' + el.getAttribute('data-id'), 'audio_ids=' + aid], function (response) {
-    //            albumTitle.style.marginTop = '-' + h * 2 + 'px';
-    //        });
-    //    });
-    //} else { // add song to album
-    //    VKit.api('audio.moveToAlbum', ['album_id=' + el.getAttribute('data-id'), 'audio_ids=' + data[0]], function (response) {
-    //        albumTitle.style.marginTop = '-' + h * 2 + 'px';
-    //    });
-    //}
-    Core.calculateDropDrownMenuPosition(mainEl, 'sub-menu');
+    Core.calculateDropDrownMenuPosition(this, 'sub-menu');
 };
 
 Core.addToAlbumMouseLeave = function () {

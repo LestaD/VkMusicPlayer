@@ -474,7 +474,6 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                     }
                 }
 
-
                 actions.appendChild(addTo);
                 actions.appendChild(recSongs);
                 actions.appendChild(saveSong);
@@ -532,15 +531,10 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
 
                 LAST_EMPTY = false;
 
-                if (typeof obj == 'object') {
-                    if (obj.hasOwnProperty('userChecked') && obj.userChecked == true) {
-
-                        BG.event.send({
-                            event: 'reloadContent',
-                            data: 'album-list'
-                        });
-                    }
-                }
+                BG.event.send({
+                    event: 'reloadContent',
+                    data: 'album-list'
+                });
             }
         } else {
             if (isSearch) {
@@ -560,6 +554,11 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                 BG.event.send({
                     event: 'setPageReloadState',
                     data: CONST.PAGE_RELOADED
+                });
+
+                BG.event.send({
+                    event: 'reloadContent',
+                    data: 'album-list'
                 });
             }
         }
@@ -760,15 +759,13 @@ BG.event.setToPlay = function (data) {
             BG.setToPlay();
         }
     } else if (LastActiveIndex == undefined && Songs[CACHE.SONGS_STATE] != undefined) {
-        console.log('sd');
         LastActiveIndex = {
             index: 1
         };
         FirstLoad = true;
         BG.setSongsStateChange(false);
-        BG.setToPlay();
+        BG.event.sendPlay();
     } else if (LastActiveIndex != undefined && LAST_EMPTY) {
-        console.log('xiix');
         FirstLoad = true;
         BG.setSongsStateChange(false);
         BG.setToPlay();
@@ -828,6 +825,11 @@ BG.event.playByIndex = function (data) {
 
         if (data != undefined) {
             BG.setActiveByIndex(data.aid);
+
+            if(LastActive && LastActive != document.querySelector('#songs-list li[data-aid="' + data.aid + '"]')) {
+                BG.removeActiveIndex(LastActiveIndex.aid);
+            }
+
             BG.setLastActive(data.aid);
 
             if (LastActiveIndex == undefined) {
@@ -839,8 +841,6 @@ BG.event.playByIndex = function (data) {
         }
 
         if (LastActiveIndex != undefined && Songs[CACHE.SONGS_STATE] != undefined) {
-            BG.removeActiveIndex(LastActiveIndex.aid);
-
             BG.event.send({
                 event: 'setNewHighLightElement',
                 data: {
