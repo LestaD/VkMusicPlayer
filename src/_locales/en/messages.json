@@ -238,5 +238,9 @@
 
     "added": {
         "message": "Added"
+    },
+
+    "remove": {
+        "message": "Remove"
     }
 }

@@ -146,7 +146,7 @@ BG.checkForAuth = function () {
             BG.browserAction.enable();
             BG.browserAction.setIcon.autoIcon();
 
-        }, false, false, false, true, {});
+        }, false, 1, false, true, {});
         BG.setSearchType();
     } else {
         PlayerWrapperBG.style.display = 'none';
@@ -204,27 +204,22 @@ BG.getAllAudio = function (callback, type, api, albumID, noFirst, obj) {
     if (!BG.isPlay()) {
         BG.browserAction.showBadgeInfo();
     }
-
     var userID = VKit.getActiveAccount();
 
-    if (!api) {
-        VKit.api('audio.get', ['owner_id=' + userID, 'need_user=0'], function (response) {
-            BG.renderAudioList(response, type, noFirst, obj, callback);
-        });
-    } else if (api == 'albums') {
-        VKit.api('audio.get', ['owner_id=' + userID, 'album_id=' + albumID, 'need_user=0'], function (response) {
-            BG.renderAudioList(response, type, noFirst, obj, callback);
-        });
-    }
+    BG.getData(api, {userID: userID, albumID: albumID}, function (response) {
+        var jsonData = JSON.parse(response).response;
+        BG.renderAudioList(jsonData, type, noFirst, obj, callback);
+        //VKit.api('audio.get', ['owner_id=' + userID, 'need_user=0'], function (response) {
+        //
+        //});
 
-    BG.renderAlbums(userID, albumID);
+        BG.renderAlbums(userID, albumID,jsonData.albumsList);
+    });
 };
 
-BG.renderAlbums = function (userID, albumID, callback) {
-    VKit.api('audio.getAlbums', ['owner_id=' + userID, 'count=100'], function (response) {
-
+BG.renderAlbums = function (userID, albumID, Albums, callback) {
+    console.log("ololo");
         var AlbumList = document.getElementById('album-list'),
-            Albums = JSON.parse(response).response,
             allSongs = divCache.cloneNode(false),
             currUserID = JSON.parse(localStorage['authInfo']).userID;
 
@@ -266,7 +261,7 @@ BG.renderAlbums = function (userID, albumID, callback) {
         if (callback && typeof callback == 'function') {
             callback();
         }
-    });
+
 };
 
 /**
@@ -292,11 +287,11 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
         oldList,
         searchEl = document.getElementById('search-list'),
         audioEl = document.getElementById('audio-list') || undefined,
-        currUserID = parseInt(JSON.parse(localStorage['authInfo']).userID);
+        currUserID = JSON.parse(localStorage['authInfo']).userID;
 
     BG.setStates(isSearch ? 'search' : 'audio');
 
-    Songs[CACHE.SONGS_STATE] = JSON.parse(response).response || undefined;
+    Songs[CACHE.SONGS_STATE] = response.audioList || undefined;
 
     if (isSearch) {
         oldList = document.getElementById('search-list') || undefined;
@@ -322,9 +317,9 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
     list.setAttribute('id', listID);
 
 
-    VKit.api('audio.getAlbums', ['owner_id=' + currUserID, 'count=100'], function (albumsResponse) {
+
         if (Songs[CACHE.SONGS_STATE] && Songs[CACHE.SONGS_STATE][0] != 0 && !type) {
-            var albumsArr = JSON.parse(albumsResponse).response,
+            var albumsArr = response.userAlbumsList,
                 albumsListEl = listCache.cloneNode(false);
 
             for (var i = 1, size = albumsArr.length; i < size; i++) {
@@ -365,6 +360,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                     addTo = spanCache.cloneNode(false),
                     saveSong = aCache.cloneNode(false),
                     recSongs = spanCache.cloneNode(false),
+                    removeSong = spanCache.cloneNode(false),
                     actions = spanCache.cloneNode(false),
                     index = i.toString(),
                     addList = listCache.cloneNode(false),
@@ -402,6 +398,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                 recSongs.className = 'fa fa-headphones';
                 addTo.className = 'fa fa-plus add-to';
                 saveSong.className = 'fa fa-floppy-o save-song';
+                removeSong.className = 'fa fa-times';
 
                 //add to
                 addList.className = 'add-to-list';
@@ -474,9 +471,12 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                     }
                 }
 
+                removeSong.title = chrome.i18n.getMessage('remove');
+
                 actions.appendChild(addTo);
                 actions.appendChild(recSongs);
                 actions.appendChild(saveSong);
+                actions.appendChild(removeSong);
 
                 li.classList.add('main-song-wrapper');
 
@@ -566,7 +566,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
         if (callback && typeof callback == 'function') {
             callback();
         }
-    })
+
 };
 
 BG.getUsersList = function () {
@@ -826,7 +826,7 @@ BG.event.playByIndex = function (data) {
         if (data != undefined) {
             BG.setActiveByIndex(data.aid);
 
-            if(LastActive && LastActive != document.querySelector('#songs-list li[data-aid="' + data.aid + '"]')) {
+            if (LastActive && LastActive != document.querySelector('#songs-list li[data-aid="' + data.aid + '"]')) {
                 BG.removeActiveIndex(LastActiveIndex.aid);
             }
 
@@ -1013,7 +1013,7 @@ BG.event.updateList = function (data, callback, userUpdate) {
             if (callback && typeof callback == 'function') {
                 callback();
             }
-        }, false, 'albums', AlbumID, false);
+        }, false, 2, AlbumID, false);
     } else {
         BG.getAllAudio(function () {
             BG.event.send({
@@ -1034,7 +1034,7 @@ BG.event.updateList = function (data, callback, userUpdate) {
             if (callback && typeof callback == 'function') {
                 callback();
             }
-        }, false, false, false, false);
+        }, false, 1, false, false);
     }
 };
 
@@ -1072,7 +1072,7 @@ BG.event.setActiveUser = function (data) {
                 removeSearchAjax: true
             }
         });
-    }, false, false, false, false, {userChecked: true});
+    }, false, 1, false, false, {userChecked: true});
 
     document.getElementById('album-title').textContent = chrome.i18n.getMessage('albums');
 
@@ -1345,7 +1345,7 @@ BG.event.removeAlbum = function (data) {
 BG.event.addSongToMyAudioList = function (data) {
     var arr = data.split(',');
 
-    VKit.api('audio.add', ['audio_id=' + arr[0], 'owner_id=' + arr[1]], function (response) {
+    VKit.api('execute', ['code=return API.audio.add({audio_id:' + arr[0] + ',owner_id:' + arr[1] + '});'], function (response) {
         var li = document.querySelector('#songs-list li[data-aid="' + arr[0] + '"] .add-to-list .add-to-my-audio-list');
 
         if (li) {
@@ -1376,6 +1376,30 @@ BG.event.shareSong = function (data) {
     var currUserID = JSON.parse(localStorage['authInfo']).userID;
     VKit.api('wall.post', ['owner_id=' + currUserID, 'attachments=audio' + data], function (response) {
         console.log(response);
+    });
+};
+
+/**
+ * Gets audio data
+ *
+ * @param {number} type
+ * @param {object} obj
+ * @param {function} callback
+ */
+BG.getData = function (type, obj, callback) {
+    var code = '',
+        currUserID = JSON.parse(localStorage['authInfo']).userID;
+
+    if (type == 1) {
+        code = 'var data = {"audioList":API.audio.get({owner_id:' + obj.userID + ',need_user:0}),"albumsList":API.audio.getAlbums({owner_id:' + obj.userID + ',count:100}),"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
+    } else if (type == 2) {
+        code = 'var data = {"audioList":API.audio.get({owner_id:' + obj.userID + ',album_id:' + obj.albumID + ',need_user:0}),"albumsList":API.audio.getAlbums({owner_id:' + obj.userID + ',count:100}),"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
+    }
+
+    VKit.api('execute', ['code=' + code], function (response) {
+        if (callback && typeof callback == 'function') {
+            callback(response);
+        }
     });
 };
 
