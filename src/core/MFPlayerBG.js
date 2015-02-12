@@ -313,7 +313,7 @@ MFCore.isInPlayStatus = function() {
 };
 
 MFCore.isFirstSongPlayed = function () {
-    return LastActiveIndex && LastActiveIndex.index == 1 && MFPlayer.paused && MFPlayer.currentTime == 0;
+    return LastActiveIndex && LastActiveIndex.index == 1 && MFPlayer.paused && MFPlayer.buffered.length == 0;
 };
 
 MFCore.isFirstSearchSongPlayed = function () {

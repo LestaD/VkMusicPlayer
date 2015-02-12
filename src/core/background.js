@@ -440,7 +440,9 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             addTo.appendChild(addList);
 
             if (CurrentSong.id == audio.aid) {
-                li.classList.add('active');
+                if(MFPlayer.buffered.length != 0) {
+                    li.classList.add('active');
+                }
             }
 
             recSongs.title = chrome.i18n.getMessage('recommendations');
@@ -819,8 +821,9 @@ BG.event.playByIndex = function (data) {
 
         if (data != undefined) {
             BG.setActiveByIndex(data.aid);
+            console.log(LastActive);
+            if (LastActive && LastActive.getAttribute('data-aid') != document.querySelector('#songs-list li[data-aid="' + data.aid + '"]').getAttribute('data-aid')) {
 
-            if (LastActive && LastActive != document.querySelector('#songs-list li[data-aid="' + data.aid + '"]')) {
                 BG.removeActiveIndex(LastActiveIndex.aid);
             }
 
@@ -1564,11 +1567,12 @@ BG.setActiveByIndex = function (index) {
  * @param {number} index
  */
 BG.removeActiveIndex = function (index) {
-    var element = document.querySelector('#songs-list li[data-aid="' + index + '"]');
+    var elementsArr = document.querySelectorAll('#songs-list li[data-aid="' + index + '"]');
 
-    if (element) {
-        element.classList.remove('active');
+    for(var i = 0, size = elementsArr.length; i < size; i++) {
+        elementsArr[i].classList.remove('active');
     }
+
 };
 
 /**
