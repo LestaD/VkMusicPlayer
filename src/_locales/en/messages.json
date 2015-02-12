@@ -242,5 +242,9 @@
 
     "remove": {
         "message": "Remove"
+    },
+
+    "songAddedToYourWall": {
+        "message": "Song was posted on your wall"
     }
 }

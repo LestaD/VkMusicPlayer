@@ -17,10 +17,6 @@ var Port,
     AlbumTitle,
     AudioList,
     ShuffleSongs,
-    liCache = document.createElement('li'),
-    listCache = document.createElement('ul'),
-    divCache = document.createElement('div'),
-    iCache = document.createElement('i'),
     Broadcast,
     isEvents = false,
     isElements = false,
@@ -65,7 +61,7 @@ Core.audioEvent = function () {
         addToAlbum.addEventListener('mouseenter', Core.addToAlbumMouseEnter);
         addToAlbum.addEventListener('mouseleave', Core.addToAlbumMouseLeave);
 
-        for(var j = 0, jSize = addToAlbumSubItems.length; j < jSize; j++) {
+        for (var j = 0, jSize = addToAlbumSubItems.length; j < jSize; j++) {
             addToAlbumSubItems[j].addEventListener('click', Core.addSongToAlbum);
         }
 
@@ -76,22 +72,28 @@ Core.audioEvent = function () {
 };
 
 Core.shareSong = function () {
-    Core.event.send({
-        event: 'shareSong',
-        data: this.getAttribute('data-arr')
-    });
+    if (!this.classList.contains('added') && !this.classList.contains('in-process')) {
+        this.classList.add('in-process');
+
+        Core.event.send({
+            event: 'shareSong',
+            data: this.getAttribute('data-arr')
+        });
+    }
 };
 
 Core.addSongToMyAudioList = function () {
-    this.classList.remove('add-to-my-audio-list');
+    if (!this.classList.contains('added') && !this.classList.contains('in-process')) {
+        this.classList.add('in-process');
 
-    Core.event.send({
-        event: 'addSongToMyAudioList',
-        data: this.getAttribute('data-arr')
-    });
+        Core.event.send({
+            event: 'addSongToMyAudioList',
+            data: this.getAttribute('data-arr')
+        });
+    }
 };
 
-Core.addSongToAlbum = function() {
+Core.addSongToAlbum = function () {
     var mainEl = this.parentNode.parentNode.parentNode,
         el = this,
         h = el.clientHeight,
@@ -607,10 +609,21 @@ Core.event.songWasAdded = function (data) {
     var arr = data.split(','),
         li = document.querySelector('#songs-list li[data-aid="' + arr[0] + '"] .add-to-list .add-to-my-audio-list');
 
-    li.querySelector('.audio-list-icon').classList.add('hide');
-    li.querySelector('.already-added').classList.remove('hide');
-    li.classList.remove('add-to-my-audio-list');
-    li.classList.remove('in-process');
+    if (li) {
+        li.classList.remove('in-process');
+        li.classList.add('added');
+    }
+
+};
+
+Core.event.songWasShared = function (data) {
+    var arr = data.split('_'),
+        li = document.querySelector('#songs-list li[data-aid="' + arr[1] + '"] .add-to-list .post-on-wall');
+
+    if (li) {
+        li.classList.remove('in-process');
+        li.classList.add('added');
+    }
 };
 
 /**

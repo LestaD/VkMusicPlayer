@@ -344,7 +344,6 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             albumsListEl.appendChild(li);
         }
 
-
         for (var i = 1, size = Songs[CACHE.SONGS_STATE].length; i < size; i++) {
             var li = liCache.cloneNode(false),
                 name = spanCache.cloneNode(false),
@@ -361,6 +360,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                 addToMyAudio = liCache.cloneNode(false),
                 addToMyAudioIconList = iCache.cloneNode(false),
                 alreadyAddedIcon = iCache.cloneNode(false),
+                loadIcon = iCache.cloneNode(false),
                 addToAlbums = liCache.cloneNode(false),
                 addToAlbumsCaret = iCache.cloneNode(false),
                 albumsList = divCache.cloneNode(false),
@@ -393,6 +393,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             addTo.className = 'fa fa-plus add-to';
             saveSong.className = 'fa fa-floppy-o save-song';
             removeSong.className = 'fa fa-times';
+            loadIcon.className = 'load-icon';
 
             //add to
             addList.className = 'add-to-list';
@@ -405,6 +406,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                 addToMyAudio.setAttribute('data-arr', audio.aid + ',' + audio.owner_id);
                 addToMyAudio.appendChild(addToMyAudioIconList);
                 addToMyAudio.appendChild(alreadyAddedIcon);
+                addToMyAudio.appendChild(loadIcon);
                 addList.appendChild(addToMyAudio);
             }
 
@@ -412,7 +414,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             albumsList.className = 'sub-menu';
 
             addToMyAudioIconList.className = 'fa fa-plus-square audio-list-icon';
-            alreadyAddedIcon.className = 'fa fa-check already-added hide';
+            alreadyAddedIcon.className = 'fa fa-check already-added';
             addToAlbums.className = 'add-to-album-show has-sub-menu';
 
             postOnWall.className = 'post-on-wall';
@@ -421,6 +423,8 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             postOnWallIcon.className = 'fa fa-bullhorn post-on-wall-icon';
             postOnWall.textContent = postOnWall.title;
             postOnWall.appendChild(postOnWallIcon);
+            postOnWall.appendChild(alreadyAddedIcon.cloneNode(true));
+            postOnWall.appendChild(loadIcon.cloneNode(true));
 
             addList.appendChild(postOnWall);
 
@@ -440,7 +444,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             addTo.appendChild(addList);
 
             if (CurrentSong.id == audio.aid) {
-                if(MFPlayer.buffered.length != 0) {
+                if (MFPlayer.buffered.length != 0) {
                     li.classList.add('active');
                 }
             }
@@ -821,8 +825,10 @@ BG.event.playByIndex = function (data) {
 
         if (data != undefined) {
             BG.setActiveByIndex(data.aid);
-            console.log(LastActive);
-            if (LastActive && LastActive.getAttribute('data-aid') != document.querySelector('#songs-list li[data-aid="' + data.aid + '"]').getAttribute('data-aid')) {
+
+            var tempEl = document.querySelector('#songs-list li[data-aid="' + data.aid + '"]');
+
+            if (LastActive && tempEl && LastActive.getAttribute('data-aid') != tempEl.getAttribute('data-aid')) {
 
                 BG.removeActiveIndex(LastActiveIndex.aid);
             }
@@ -1242,7 +1248,6 @@ BG.event.searchAudio = function (data) {
         });
 
 
-
         //VKit.api('audio.search', ['q=' + data.q, 'auto_complete=1', 'lyrics=' + lyrics, 'performer_only=' + performer_only, 'sort=' + sort, 'search_own=1', 'offset=0', 'count=300'], function (response) {
         //
         //});
@@ -1348,29 +1353,29 @@ BG.event.removeAlbum = function (data) {
 };
 
 BG.event.addSongToMyAudioList = function (data) {
-    var arr = data.split(',');
+    var arr = data.split(','),
+        li = document.querySelector('#songs-list li[data-aid="' + arr[0] + '"] .add-to-list .add-to-my-audio-list');
 
-    VKit.api('execute', ['code=return API.audio.add({audio_id:' + arr[0] + ',owner_id:' + arr[1] + '});'], function (response) {
-        var li = document.querySelector('#songs-list li[data-aid="' + arr[0] + '"] .add-to-list .add-to-my-audio-list');
+    if (li && (!li.classList.contains('added') && !li.classList.contains('in-process'))) {
+        li.classList.add('in-process');
 
-        if (li) {
-            li.querySelector('.audio-list-icon').classList.add('hide');
-            li.querySelector('.already-added').classList.remove('hide');
-            li.classList.remove('add-to-my-audio-list');
+        VKit.api('execute', ['code=return API.audio.add({audio_id:' + arr[0] + ',owner_id:' + arr[1] + '});'], function (response) {
+            li.classList.remove('in-process');
+            li.classList.add('added');
 
             BG.setNotification({
                 type: 'basic',
                 title: chrome.i18n.getMessage('songWasAdded'),
                 message: '',
-                iconUrl: '/images/lucky-face.png'
+                iconUrl: '/images/song-added.png'
             });
 
             BG.event.send({
                 event: 'songWasAdded',
                 data: data
             });
-        }
-    });
+        });
+    }
 };
 
 BG.event.setNotification = function (data) {
@@ -1378,10 +1383,32 @@ BG.event.setNotification = function (data) {
 };
 
 BG.event.shareSong = function (data) {
-    var currUserID = JSON.parse(localStorage['authInfo']).userID;
-    VKit.api('wall.post', ['owner_id=' + currUserID, 'attachments=audio' + data], function (response) {
-        console.log(response);
-    });
+    var currUserID = JSON.parse(localStorage['authInfo']).userID,
+        aid = data.split('_')[1],
+        li = document.querySelector('#songs-list li[data-aid="' + aid + '"] .add-to-list .post-on-wall');
+
+    if (li && (!li.classList.contains('added') && !li.classList.contains('in-process'))) {
+        li.classList.add('in-process');
+
+        VKit.api('wall.post', ['owner_id=' + currUserID, 'attachments=audio' + data], function (response) {
+            li.classList.remove('in-process');
+            li.classList.add('added');
+
+            BG.setNotification({
+                type: 'basic',
+                title: chrome.i18n.getMessage('songAddedToYourWall'),
+                message: '',
+                iconUrl: '/images/shared-item.png'
+            });
+
+            BG.event.send({
+                event: 'songWasShared',
+                data: data
+            });
+
+            console.log(response);
+        });
+    }
 };
 
 /**
@@ -1569,7 +1596,7 @@ BG.setActiveByIndex = function (index) {
 BG.removeActiveIndex = function (index) {
     var elementsArr = document.querySelectorAll('#songs-list li[data-aid="' + index + '"]');
 
-    for(var i = 0, size = elementsArr.length; i < size; i++) {
+    for (var i = 0, size = elementsArr.length; i < size; i++) {
         elementsArr[i].classList.remove('active');
     }
 

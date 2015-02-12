@@ -248,6 +248,54 @@ $cWidth: 420px;
               opacity: 1;
             }
 
+            .load-icon {
+              background: url(../images/loader-transparent.GIF) center center no-repeat;
+              background-size: 15px;
+              width: 15px;
+              height: 15px;
+              transform: scale(0);
+            }
+
+            .add-to-my-audio-list, .post-on-wall {
+              padding: 0 0 0 29px;
+
+              @extend .relative;
+
+              & > i {
+                @include animation-one(100ms);
+                @extend .absolute;
+                left:9px;
+              }
+
+              .already-added {
+                transform: scale(0);
+              }
+
+              &.in-process {
+                .audio-list-icon, .post-on-wall-icon {
+                  transform: scale(0);
+                }
+
+                .load-icon {
+                  transform: scale(1);
+                }
+              }
+
+              &.added {
+                .audio-list-icon, .post-on-wall-icon {
+                  transform: scale(0);
+                }
+
+                .load-icon {
+                  transform: scale(0);
+                }
+
+                .already-added {
+                  transform: scale(1);
+                }
+              }
+            }
+
             li {
               height: 35px;
               line-height: 35px;
@@ -873,7 +921,7 @@ $cWidth: 420px;
   }
 
   .text {
-    font-size:17px;
+    font-size: 17px;
   }
 
   &.show {
