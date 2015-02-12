@@ -1298,9 +1298,11 @@ BG.event.isFirstSongPlayed = function () {
 BG.event.createNewAlbum = function (data) {
     var currUserID = JSON.parse(localStorage['authInfo']).userID;
 
-    VKit.api('audio.addAlbum', ['title=' + data], function (response) {
+    BG.getData(5, {title: data}, function (response) {
+        var userAlbums = JSON.parse(response).response;
+
         if (currUserID == VKit.getActiveAccount()) {
-            BG.renderAlbums(currUserID, AlbumID, function () {
+            BG.renderAlbums(currUserID, AlbumID, userAlbums.userAlbumsList, function () {
                 BG.event.send({
                     event: 'reloadContent',
                     data: 'album-list'
@@ -1432,6 +1434,8 @@ BG.getData = function (type, obj, callback) {
         code = 'var data = {"audioList":API.audio.search({q:"' + obj.q + '",auto_complete:1,lyrics:' + obj.lyrics + ',perfomer_only:' + obj.performer_only + ',sort:' + obj.sort + ',search_own:1,offset:0,count:300}),"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
     } else if (type == 4) {
         code = 'var removeAlbum = API.audio.deleteAlbum({album_id:' + obj.album_id + '}); var data = {"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
+    } else if (type == 5) {
+        code = 'var addAlbum = API.audio.addAlbum({title:"' + obj.title + '"}); var data = {"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
     }
 
     VKit.api('execute', ['code=' + code], function (response) {
