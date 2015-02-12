@@ -983,6 +983,7 @@ Core.allAlbumsEvents = function () {
     for (var i = 0, size = removeAlbums.length; i < size; i++) {
         removeAlbums[i].addEventListener('click', function () {
             Core.showOverlay();
+            Core.setBlur('songs-list');
 
             Core.event.send({
                 event: 'removeAlbum',

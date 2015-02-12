@@ -1330,9 +1330,11 @@ BG.event.removeAlbum = function (data) {
         currUserID = JSON.parse(localStorage['authInfo']).userID;
 
     if (id > 0) {
-        VKit.api('audio.deleteAlbum', ['album_id=' + id], function (response) {
+        BG.getData(4, {album_id: id}, function (response) {
+            var userAlbums = JSON.parse(response).response;
+
             if (id.toString() == AlbumID) {
-                BG.renderAlbums(currUserID, AlbumID, function () {
+                BG.renderAlbums(currUserID, AlbumID, userAlbums.userAlbumsList, function () {
                     BG.event.loadAlbum({title: chrome.i18n.getMessage('allSongs')}, function () {
                         BG.event.send({
                             event: 'reloadContent',
@@ -1341,7 +1343,7 @@ BG.event.removeAlbum = function (data) {
                     });
                 });
             } else {
-                BG.renderAlbums(currUserID, AlbumID, function () {
+                BG.renderAlbums(currUserID, AlbumID, userAlbums.userAlbumsList, function () {
                     BG.event.send({
                         event: 'reloadContent',
                         data: 'album-list'
@@ -1428,6 +1430,8 @@ BG.getData = function (type, obj, callback) {
         code = 'var data = {"audioList":API.audio.get({owner_id:' + obj.userID + ',album_id:' + obj.albumID + ',need_user:0}),"albumsList":API.audio.getAlbums({owner_id:' + obj.userID + ',count:100}),"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
     } else if (type == 3) {
         code = 'var data = {"audioList":API.audio.search({q:"' + obj.q + '",auto_complete:1,lyrics:' + obj.lyrics + ',perfomer_only:' + obj.performer_only + ',sort:' + obj.sort + ',search_own:1,offset:0,count:300}),"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
+    } else if (type == 4) {
+        code = 'var removeAlbum = API.audio.deleteAlbum({album_id:' + obj.album_id + '}); var data = {"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
     }
 
     VKit.api('execute', ['code=' + code], function (response) {
