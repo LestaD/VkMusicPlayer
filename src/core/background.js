@@ -1409,8 +1409,6 @@ BG.event.shareSong = function (data) {
                 event: 'songWasShared',
                 data: data
             });
-
-            console.log(response);
         });
     }
 };
