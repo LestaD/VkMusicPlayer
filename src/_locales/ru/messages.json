@@ -247,5 +247,9 @@
 
     "songAddedToYourWall": {
         "message": "Песня добавлена на вашу стену"
+    },
+
+    "closeRecommendations": {
+        "message": "Закрыть рекоммендации"
     }
 }

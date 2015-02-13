@@ -264,7 +264,7 @@ $cWidth: 420px;
               & > i {
                 @include animation-one(100ms);
                 @extend .absolute;
-                left:9px;
+                left: 9px;
               }
 
               .already-added {
@@ -992,6 +992,19 @@ $cWidth: 420px;
   height: 30px;
   width: 100%;
   z-index: 199;
+}
+
+#rec-overlay {
+  @extend .absolute;
+  background: #6383a8;
+  color: #FFFFFF;
+  font-size: 12px;
+  top: 0;
+  left: 0;
+  text-align: center;
+  line-height: 30px;
+  height: 30px;
+  width: 100%;
 }
 
 #search {

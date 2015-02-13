@@ -246,5 +246,9 @@
 
     "songAddedToYourWall": {
         "message": "Song was posted on your wall"
+    },
+
+    "closeRecommendations": {
+        "message": "Close recommendations"
     }
 }
