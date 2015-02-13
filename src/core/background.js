@@ -172,6 +172,7 @@ BG.elements = function () {
     CACHE.SEARCH = document.getElementById('search');
     CACHE.SEARCH_TYPES_LIST = document.getElementById('types-list');
     CACHE.SEARCH_SELECT_TYPES = document.getElementsByClassName('search-select-type');
+    CACHE.REC_OVERLAY = document.getElementById('rec-overlay');
     CACHE.SONG_SEARCH_TYPE = document.getElementById('song-search-type');
     CACHE.AUDIO_SEARCH_TYPE = document.getElementById('audio-search-type');
     CACHE.LYRICS_CHECKBOX = document.getElementById('lyrics');
@@ -278,7 +279,7 @@ BG.checkForSearchState = function () {
  * @param {Function} callback
  */
 BG.renderAudioList = function (response, type, noFirst, obj, callback) {
-    var isSearch = BG.checkForSearchState(),
+    var isSearch = typeof obj == 'object' && obj.recState ? obj.recState : BG.checkForSearchState(),
         oldList,
         searchEl = document.getElementById('search-list'),
         audioEl = document.getElementById('audio-list') || undefined,
@@ -389,7 +390,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             duration.className = 'duration';
             actions.className = 'actions';
 
-            recSongs.className = 'fa fa-headphones';
+            recSongs.className = 'fa fa-headphones show-rec-songs';
             addTo.className = 'fa fa-plus add-to';
             saveSong.className = 'fa fa-floppy-o save-song';
             removeSong.className = 'fa fa-times';
@@ -1219,6 +1220,33 @@ BG.event.setAudioSearchLyricsCheckbox = function (data) {
     });
 };
 
+BG.event.hideRecOverlay = function () {
+    CACHE.REC_OVERLAY.classList.remove('show');
+};
+
+BG.event.showRecSongs = function (data) {
+    CACHE.REC_OVERLAY.classList.add('show');
+
+    BG.browserAction.disable();
+    BG.browserAction.setIcon.update();
+
+    BG.getData(6, {target_audio: data}, function (response) {
+        var jsonData = JSON.parse(response).response;
+
+        BG.renderAudioList(jsonData, false, false, {searchRender: true, recState: true}, function () {
+            BG.browserAction.enable();
+            BG.browserAction.setIcon.autoIcon();
+
+            BG.event.send({
+                event: 'reloadContent',
+                data: {
+                    removeSearchAjax: true
+                }
+            });
+        });
+    });
+};
+
 BG.event.searchAudio = function (data) {
     if (data.q.length > 0) {
         var lyrics = CACHE.LYRICS_CHECKBOX.checked ? 1 : 0,
@@ -1246,11 +1274,6 @@ BG.event.searchAudio = function (data) {
                 });
             });
         });
-
-
-        //VKit.api('audio.search', ['q=' + data.q, 'auto_complete=1', 'lyrics=' + lyrics, 'performer_only=' + performer_only, 'sort=' + sort, 'search_own=1', 'offset=0', 'count=300'], function (response) {
-        //
-        //});
     } else {
         BG.event.clearSearchInput();
         BG.clearElement(document.getElementById('search-list'));
@@ -1262,9 +1285,14 @@ BG.event.searchAudio = function (data) {
     }
 };
 
-BG.event.clearSearchInput = function () {
+BG.event.clearSearchInput = function (data) {
     CACHE.SEARCH.value = '';
     CACHE.EMPTY_SEARCH.classList.remove('show');
+
+    if(data && data.hideRec) {
+        CACHE.REC_OVERLAY.classList.remove('show');
+    }
+
     var searchEl = document.getElementById('search-list'),
         audioEl = document.getElementById('audio-list');
 
@@ -1434,6 +1462,8 @@ BG.getData = function (type, obj, callback) {
         code = 'var removeAlbum = API.audio.deleteAlbum({album_id:' + obj.album_id + '}); var data = {"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
     } else if (type == 5) {
         code = 'var addAlbum = API.audio.addAlbum({title:"' + obj.title + '"}); var data = {"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
+    } else if (type == 6) {
+        code = 'var data = {"audioList": API.audio.getRecommendations({target_audio:"' + obj.target_audio + '",count:600}),"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
     }
 
     VKit.api('execute', ['code=' + code], function (response) {

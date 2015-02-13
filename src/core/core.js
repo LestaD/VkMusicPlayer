@@ -47,7 +47,8 @@ Core.audioEvent = function () {
             addToMyAudioList = addTo.getElementsByClassName('add-to-my-audio-list')[0],
             addToAlbum = addTo.getElementsByClassName('add-to-album-show')[0],
             addToAlbumSubItems = addToAlbum.querySelectorAll('.sub-menu > ul > li'),
-            postSong = addTo.getElementsByClassName('post-on-wall')[0];
+            postSong = addTo.getElementsByClassName('post-on-wall')[0],
+            recSongs = song.getElementsByClassName('show-rec-songs')[0];
 
         artist.addEventListener('click', Core.fillSearch);
 
@@ -67,8 +68,41 @@ Core.audioEvent = function () {
 
         postSong.addEventListener('click', Core.shareSong);
 
+        recSongs.addEventListener('click', Core.showRecSongs);
+
         song.addEventListener('click', Core.event.playSong);
     }
+};
+
+Core.removeRecState = function () {
+    CONST.REC_ACTIVE = false;
+    CACHE.REC_OVERLAY.classList.remove('show');
+
+    if (!AudioList && !CACHE.SEARCH_LIST) {
+        CACHE.EMPTY_LIST.classList.add('show');
+    }
+
+    Core.showAudioList();
+    CACHE.SEARCH_AJAX = false;
+
+    Core.event.send({
+        event: 'clearSearchInput',
+        data: {
+            hideRec: true
+        }
+    });
+};
+
+Core.showRecSongs = function () {
+    CONST.REC_ACTIVE = true;
+    CACHE.REC_OVERLAY.classList.add('show');
+    Core.showOverlay(true);
+    Core.showSearchAjax();
+
+    Core.event.send({
+        event: 'showRecSongs',
+        data: this.getAttribute('data-id')
+    });
 };
 
 Core.shareSong = function () {
@@ -124,6 +158,11 @@ Core.addSongToAlbum = function () {
             albumTitle.style.marginTop = '-' + h * 2 + 'px';
         });
     }
+
+    //var code = 'var addSong = API.audio.add({audio_id:'+data[0]+',owner_id:'+data[1]+'}); var addSongToAlbum = API.audio.moveToAlbum({album_id='+el.getAttribute('data-id')+',audio_ids: addSong.aid}); return [addSong,addSongToAlbum];';
+    //VKit.api('execute', ['code=' + code], function (response) {
+    //
+    //});
 };
 
 Core.addToAlbumMouseEnter = function () {
@@ -141,7 +180,7 @@ Core.calculateDropDrownMenuPosition = function (element, elClass) {
         addToListData = addToList.getBoundingClientRect(),
         h = 0;
 
-    var songList = CACHE.SEARCH.value.length > 0 ? CACHE.SEARCH_SONGS_LIST : AudioList,
+    var songList = CACHE.SEARCH.value.length > 0 || CONST.REC_ACTIVE == true ? CACHE.SEARCH_SONGS_LIST : AudioList,
         songListStyles = window.getComputedStyle(songList),
         topOffset = document.querySelector('.c-wrapper').clientHeight + CACHE.SEARCH_WRAPPER.clientHeight + parseInt(songListStyles.paddingTop),
         addListOffset = addToListData.top - topOffset,
@@ -449,6 +488,9 @@ Core.event.updateList = function () {
     Core.showOverlay();
     Core.setBlur('songs-list');
     Core.eraseSearchInput();
+
+    CONST.REC_ACTIVE = false;
+    CACHE.REC_OVERLAY.classList.remove('show');
 
     Core.event.send({
         event: 'updateList',
@@ -1285,6 +1327,8 @@ Core.setAudioSearchConfigsEvents = function () {
             data: !CACHE.LYRICS_CHECKBOX.checked
         });
     });
+
+    CACHE.REC_OVERLAY.addEventListener('click', Core.removeRecState);
 };
 
 /**
@@ -1323,6 +1367,7 @@ Core.setElements = {
         CACHE.SEARCH_SETTINGS_BUTTON = document.getElementById('open-search-settings');
         CACHE.SEARCH_SETTINGS = document.getElementById('search-settings');
         CACHE.SEARCH = document.getElementById('search');
+        CACHE.REC_OVERLAY = document.getElementById('rec-overlay');
         CACHE.EMPTY_SEARCH = document.getElementById('empty-search');
         CACHE.EMPTY_LIST = document.getElementById('empty-list');
         CACHE.SEARCH_SELECT_TYPES = document.getElementsByClassName('search-select-type');

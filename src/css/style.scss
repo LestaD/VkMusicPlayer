@@ -996,15 +996,29 @@ $cWidth: 420px;
 
 #rec-overlay {
   @extend .absolute;
-  background: #6383a8;
+  @include animation-one(250ms);
+  background: rgba(99, 131, 168, 0.93);
   color: #FFFFFF;
+  cursor: pointer;
   font-size: 12px;
-  top: 0;
+  margin-top: -31px;
   left: 0;
   text-align: center;
   line-height: 30px;
   height: 30px;
   width: 100%;
+
+  &:hover {
+    background: rgba(109, 140, 176, 0.93);
+  }
+
+  &.show {
+    margin-top: 0;
+  }
+
+  i {
+    margin-right: 5px;
+  }
 }
 
 #search {
