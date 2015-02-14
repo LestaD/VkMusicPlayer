@@ -1489,6 +1489,11 @@ BG.event.hideRemoveOverlay = function (data) {
     }
 };
 
+/**
+ * Delete song
+ *
+ * @param {string} data
+ */
 BG.event.removeSong = function (data) {
     var currUserID = JSON.parse(localStorage['authInfo']).userID,
         code = 'return API.audio.delete({audio_id:' + data + ',owner_id:' + currUserID + '});',
@@ -1513,6 +1518,17 @@ BG.event.removeSong = function (data) {
             }
         });
     }
+};
+
+/**
+ * Remove song from album
+ *
+ * @param {string} data
+ */
+BG.event.removeFromAlbum = function(data) {
+    var code = 'return API.audio.moveToAlbum({album_id:"",audio_ids:['+data+']});';
+
+    VKit.api('execute',['code='+code], function(response) {});
 };
 
 /**

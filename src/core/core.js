@@ -51,7 +51,8 @@ Core.audioEvent = function () {
             recSongs = song.getElementsByClassName('show-rec-songs')[0],
             removeSong = song.getElementsByClassName('remove-song')[0],
             yesRemove = song.getElementsByClassName('yes-remove')[0],
-            noRemove = song.getElementsByClassName('no-remove')[0];
+            noRemove = song.getElementsByClassName('no-remove')[0],
+            removeFromAlbum = song.getElementsByClassName('remove-from-album')[0];
 
         artist.addEventListener('click', Core.fillSearch);
 
@@ -80,8 +81,23 @@ Core.audioEvent = function () {
             noRemove.addEventListener('click', Core.hideSureOverlay);
         }
 
+        if(removeFromAlbum) {
+            removeFromAlbum.addEventListener('click', Core.removeFromAlbum);
+        }
+
         song.addEventListener('click', Core.event.playSong);
     }
+};
+
+Core.removeFromAlbum = function() {
+    var li = this.parentNode.parentNode;
+
+    Core.event.send({
+        event: 'removeFromAlbum',
+        data: li.getAttribute('data-aid')
+    });
+
+    li.remove();
 };
 
 Core.removeSong = function () {
