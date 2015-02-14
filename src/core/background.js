@@ -101,13 +101,13 @@ BG.browserAction = {
     },
     setIcon: {
         pause: function () {
-            chrome.browserAction.setIcon({path: "/images/pause-icon.png"});
+            chrome.browserAction.setIcon({path: {'19': '/images/pause-icon.png', '38': '/images/pause-icon.png',}});
         },
         play: function () {
-            chrome.browserAction.setIcon({path: {'19':'/images/play-icon.png','38':'/images/play-icon.png'}});
+            chrome.browserAction.setIcon({path: {'19': '/images/play-icon.png', '38': '/images/play-icon.png'}});
         },
         update: function () {
-            chrome.browserAction.setIcon({path: "/images/update_icon.png"});
+            chrome.browserAction.setIcon({path: {'19': '/images/update_icon.png', '38': '/images/update_icon.png'}});
         },
         autoIcon: function () {
             if (BG.isPlay()) {
@@ -1524,10 +1524,11 @@ BG.event.removeSong = function (data) {
  *
  * @param {string} data
  */
-BG.event.removeFromAlbum = function(data) {
-    var code = 'return API.audio.moveToAlbum({album_id:"",audio_ids:['+data+']});';
+BG.event.removeFromAlbum = function (data) {
+    var code = 'return API.audio.moveToAlbum({album_id:"",audio_ids:[' + data + ']});';
 
-    VKit.api('execute',['code='+code], function(response) {});
+    VKit.api('execute', ['code=' + code], function (response) {
+    });
 };
 
 /**
