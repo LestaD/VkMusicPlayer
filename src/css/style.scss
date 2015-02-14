@@ -163,6 +163,10 @@ $cWidth: 420px;
         width: 100%;
         z-index: 810;
 
+        .sure-text {
+          color: #2B587A;
+        }
+
         &.show {
           display: block;
         }
