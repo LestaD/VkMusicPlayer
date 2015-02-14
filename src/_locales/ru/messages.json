@@ -1,255 +1,206 @@
 {
-    "appName": {
-        "message": "VK Music Player",
-        "description": "Имя разширения"
-    },
-
-    "appDesc": {
-        "message": "Твоя музыка с тобой всегда и везде",
-        "description": "App description"
-    },
-
-    "auth": {
-        "message": "Войти",
-        "description": "Авторизация Вконтакте"
-    },
-
-    "update": {
-        "message": "Обновить",
-        "description": "Обновить список аудиозаписей"
-    },
-
-    "updating": {
-        "message": "Обновление списка аудиозаписей",
-        "description": "Обновление списка аудиозаписей"
-    },
-
-    "settings": {
-        "message": "Настройки",
-        "description": "Настройки приложения"
-    },
-
-    "accounts": {
-        "message": "Аккаунты"
-    },
-
-    "active": {
-        "message": "Активный"
-    },
-
-    "notActive": {
-        "message": "Не активен"
-    },
-
-    "add": {
-        "message": "Добавить"
-    },
-
-    "addUser": {
-        "message": "Добавить пользователя"
-    },
-
-    "searchUserExample": {
-        "message": "Введите ID пользователя например: 12376771 или его адресс например: smokeelow"
-    },
-
-    "searchGroupExample": {
-        "message": "Введите ID группы например: zapolk"
-    },
-
-    "userNotFound": {
-        "message": "Пользователь не найден"
-    },
-
-    "alreadyInYourList": {
-        "message": "Этот пользователь уже добавлен в ваш список"
-    },
-
-    "delete": {
-        "message": "Удалить"
-    },
-
-    "itsYou": {
-        "message": "Это вы"
-    },
-
-    "developedBy": {
-        "message": "Разработал"
-    },
-
-    "author": {
-        "message": "Сергей Бевзюк"
-    },
-
-    "activate": {
-        "message": "Активировать"
-    },
-
-    "noSongs": {
-        "message": "Список аудиозаписей пуст"
-    },
-
-    "repeatSong": {
-        "message": "Повторят эту композицию"
-    },
-
-    "hotKeys": {
-        "message": "Горячие клавиши"
-    },
-
-    "nextSong": {
-        "message": "Следующая песня"
-    },
-
-    "prevSong": {
-        "message": "Предыдущая песня"
-    },
-
-    "pauseOrPlaySong": {
-        "message": "Пауза / Играть песню"
-    },
-
-    "updateSongs": {
-        "message": "Обновить(перезагрузить) список аудиозаписей"
-    },
-
-    "keysWorkTxt": {
-        "message": "Горячие клавиши работают на всех страницах кроме страниц данного приложения(страница настроек и всплывающее окно), а также всех служебных страниц Google Chrome."
-    },
-
-    "albums": {
-        "message": "Альбомы"
-    },
-
-    "allSongs": {
-        "message": "Все песни"
-    },
-
-    "download": {
-        "message": "Скачать"
-    },
-
-    "addToAlbum": {
-        "message": "Добавить в альбом"
-    },
-
-    "shuffle": {
-        "message": "Перемешать"
-    },
-
-    "commonSettings": {
-        "message": "Общее"
-    },
-
-    "showNumberOfSongs": {
-        "message": "Показывать количество песен на значке"
-    },
-
-    "showSongDurationOnBadge": {
-        "message": "Показывать продолжительность песни на значке"
-    },
-
-    "addGroup": {
-        "message": "Добавить группу"
-    },
-
-    "groupNotFound": {
-        "message": "Группа не найдена"
-    },
-
-    "search": {
-        "message": "Поиск"
-    },
-
-    "byPopular": {
-        "message": "По популярности"
-    },
-
-    "byDuration": {
-        "message": "По длительности"
-    },
-
-    "onlyText": {
-        "message": "Только с текстом"
-    },
-
-    "byCompositor": {
-        "message": "По исполнителям"
-    },
-
-    "bySongName": {
-        "message": "По композициям"
-    },
-
-    "nothingFound": {
-        "message": "Ничего не найдено"
-    },
-
-    "alreadyInList": {
-        "message": "уже в ваших аудиозаписях"
-    },
-
-    "songNotFound": {
-        "message": "Песня не найдена"
-    },
-
-    "addAlbum": {
-        "message": "Добавить альбом"
-    },
-
-    "newAlbum": {
-        "message": "Новый альбом"
-    },
-
-    "albumssName": {
-        "message": "Название альбома"
-    },
-
-    "close": {
-        "message": "Закрыть"
-    },
-
-    "save": {
-        "message": "Сохранить"
-    },
-
-    "recommendations": {
-        "message": "Рекомендации"
-    },
-
-    "addToMyAudioList": {
-        "message": "Добавить песню"
-    },
-
-    "shareSong": {
-        "message": "Поделиться песней"
-    },
-
-    "songWasAdded": {
-        "message": "Песня была успешно добавлена"
-    },
-
-    "albumsListIsEmpty": {
-        "message": "Список альбомов пуст"
-    },
-
-    "songAddedToAlbum": {
-        "message": "Песня была добавлена в"
-    },
-
-    "added": {
-        "message": "Добавлено"
-    },
-
-    "remove": {
-        "message": "Удалить"
-    },
-
-    "songAddedToYourWall": {
-        "message": "Песня добавлена на вашу стену"
-    },
-
-    "closeRecommendations": {
-        "message": "Закрыть рекоммендации"
-    }
+  "appName": {
+    "message": "VK Music Player",
+    "description": "Имя разширения"
+  },
+  "appDesc": {
+    "message": "Твоя музыка с тобой всегда и везде",
+    "description": "App description"
+  },
+  "auth": {
+    "message": "Войти",
+    "description": "Авторизация Вконтакте"
+  },
+  "update": {
+    "message": "Обновить",
+    "description": "Обновить список аудиозаписей"
+  },
+  "updating": {
+    "message": "Обновление списка аудиозаписей",
+    "description": "Обновление списка аудиозаписей"
+  },
+  "settings": {
+    "message": "Настройки",
+    "description": "Настройки приложения"
+  },
+  "accounts": {
+    "message": "Аккаунты"
+  },
+  "active": {
+    "message": "Активный"
+  },
+  "notActive": {
+    "message": "Не активен"
+  },
+  "add": {
+    "message": "Добавить"
+  },
+  "addUser": {
+    "message": "Добавить пользователя"
+  },
+  "searchUserExample": {
+    "message": "Введите ID пользователя например: 12376771 или его адресс например: smokeelow"
+  },
+  "searchGroupExample": {
+    "message": "Введите ID группы например: zapolk"
+  },
+  "userNotFound": {
+    "message": "Пользователь не найден"
+  },
+  "alreadyInYourList": {
+    "message": "Этот пользователь уже добавлен в ваш список"
+  },
+  "delete": {
+    "message": "Удалить"
+  },
+  "itsYou": {
+    "message": "Это вы"
+  },
+  "developedBy": {
+    "message": "Разработал"
+  },
+  "author": {
+    "message": "Сергей Бевзюк"
+  },
+  "activate": {
+    "message": "Активировать"
+  },
+  "noSongs": {
+    "message": "Список аудиозаписей пуст"
+  },
+  "repeatSong": {
+    "message": "Повторят эту композицию"
+  },
+  "hotKeys": {
+    "message": "Горячие клавиши"
+  },
+  "nextSong": {
+    "message": "Следующая песня"
+  },
+  "prevSong": {
+    "message": "Предыдущая песня"
+  },
+  "pauseOrPlaySong": {
+    "message": "Пауза / Играть песню"
+  },
+  "updateSongs": {
+    "message": "Обновить(перезагрузить) список аудиозаписей"
+  },
+  "keysWorkTxt": {
+    "message": "Горячие клавиши работают на всех страницах кроме страниц данного приложения(страница настроек и всплывающее окно), а также всех служебных страниц Google Chrome."
+  },
+  "albums": {
+    "message": "Альбомы"
+  },
+  "allSongs": {
+    "message": "Все песни"
+  },
+  "download": {
+    "message": "Скачать"
+  },
+  "addToAlbum": {
+    "message": "Добавить в альбом"
+  },
+  "shuffle": {
+    "message": "Перемешать"
+  },
+  "commonSettings": {
+    "message": "Общее"
+  },
+  "showNumberOfSongs": {
+    "message": "Показывать количество песен на значке"
+  },
+  "showSongDurationOnBadge": {
+    "message": "Показывать продолжительность песни на значке"
+  },
+  "addGroup": {
+    "message": "Добавить группу"
+  },
+  "groupNotFound": {
+    "message": "Группа не найдена"
+  },
+  "search": {
+    "message": "Поиск"
+  },
+  "byPopular": {
+    "message": "По популярности"
+  },
+  "byDuration": {
+    "message": "По длительности"
+  },
+  "onlyText": {
+    "message": "Только с текстом"
+  },
+  "byCompositor": {
+    "message": "По исполнителям"
+  },
+  "bySongName": {
+    "message": "По композициям"
+  },
+  "nothingFound": {
+    "message": "Ничего не найдено"
+  },
+  "alreadyInList": {
+    "message": "уже в ваших аудиозаписях"
+  },
+  "songNotFound": {
+    "message": "Песня не найдена"
+  },
+  "addAlbum": {
+    "message": "Добавить альбом"
+  },
+  "newAlbum": {
+    "message": "Новый альбом"
+  },
+  "albumssName": {
+    "message": "Название альбома"
+  },
+  "close": {
+    "message": "Закрыть"
+  },
+  "save": {
+    "message": "Сохранить"
+  },
+  "recommendations": {
+    "message": "Рекомендации"
+  },
+  "addToMyAudioList": {
+    "message": "Добавить песню"
+  },
+  "shareSong": {
+    "message": "Поделиться песней"
+  },
+  "songWasAdded": {
+    "message": "Песня была успешно добавлена"
+  },
+  "albumsListIsEmpty": {
+    "message": "Список альбомов пуст"
+  },
+  "songAddedToAlbum": {
+    "message": "Песня была добавлена в"
+  },
+  "added": {
+    "message": "Добавлено"
+  },
+  "remove": {
+    "message": "Удалить"
+  },
+  "songAddedToYourWall": {
+    "message": "Песня добавлена на вашу стену"
+  },
+  "closeRecommendations": {
+    "message": "Закрыть рекоммендации"
+  },
+  "removeFromAlbum": {
+    "message": "Удалить из альбома"
+  },
+  "areYouSure": {
+    "message": "Вы уверены?"
+  },
+  "yes": {
+    "message": "Да"
+  },
+  "no": {
+    "message": "Нет"
+  }
 }

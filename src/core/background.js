@@ -312,8 +312,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
 
     list.setAttribute('id', listID);
 
-
-    if (Songs[CACHE.SONGS_STATE] && Songs[CACHE.SONGS_STATE][0] != 0 && !type) {
+    if (Songs[CACHE.SONGS_STATE] && Songs[CACHE.SONGS_STATE].length > 0 && Songs[CACHE.SONGS_STATE][0] != 0 && !type) {
         var albumsArr = response.userAlbumsList,
             albumsListEl = listCache.cloneNode(false);
 
@@ -355,6 +354,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                 saveSong = aCache.cloneNode(false),
                 recSongs = spanCache.cloneNode(false),
                 removeSong = spanCache.cloneNode(false),
+                removeFromAlbum = spanCache.cloneNode(false),
                 actions = spanCache.cloneNode(false),
                 index = i.toString(),
                 addList = listCache.cloneNode(false),
@@ -366,8 +366,11 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
                 addToAlbumsCaret = iCache.cloneNode(false),
                 albumsList = divCache.cloneNode(false),
                 postOnWall = liCache.cloneNode(false),
-                postOnWallIcon = iCache.cloneNode(false);
-
+                postOnWallIcon = iCache.cloneNode(false),
+                sureOverlay = divCache.cloneNode(false),
+                sureText = spanCache.cloneNode(false),
+                sureYes = spanCache.cloneNode(false),
+                sureNo = spanCache.cloneNode(false);
 
             /**
              * Audio object
@@ -393,8 +396,13 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             recSongs.className = 'fa fa-headphones show-rec-songs';
             addTo.className = 'fa fa-plus add-to';
             saveSong.className = 'fa fa-floppy-o save-song';
-            removeSong.className = 'fa fa-times';
+            removeSong.className = 'fa fa-times remove-song';
+            removeFromAlbum.className = 'fa fa-chain-broken remove-from-album';
             loadIcon.className = 'load-icon';
+            sureOverlay.className = 'sure-overlay';
+            sureText.className = 'sure-text';
+            sureYes.className = 'regular-button yes-remove';
+            sureNo.className = 'regular-button no-remove';
 
             //add to
             addList.className = 'add-to-list';
@@ -473,11 +481,27 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             }
 
             removeSong.title = chrome.i18n.getMessage('remove');
+            removeFromAlbum.title = chrome.i18n.getMessage('removeFromAlbum');
 
             actions.appendChild(addTo);
             actions.appendChild(recSongs);
             actions.appendChild(saveSong);
-            actions.appendChild(removeSong);
+
+            if (VKit.getActiveAccount() == currUserID && !isSearch) {
+                actions.appendChild(removeSong);
+
+                if (AlbumID != undefined && AlbumID != '') {
+                    actions.appendChild(removeFromAlbum);
+                }
+            }
+
+            sureText.textContent = chrome.i18n.getMessage('areYouSure');
+            sureYes.textContent = chrome.i18n.getMessage('yes');
+            sureNo.textContent = chrome.i18n.getMessage('no');
+
+            sureOverlay.appendChild(sureText);
+            sureOverlay.appendChild(sureYes);
+            sureOverlay.appendChild(sureNo);
 
             li.classList.add('main-song-wrapper');
 
@@ -486,6 +510,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             li.appendChild(name);
             li.appendChild(duration);
             li.appendChild(actions);
+            li.appendChild(sureOverlay);
 
             li.setAttribute('data-aid', audio.aid);
             li.setAttribute('data-index', index);
@@ -539,6 +564,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
         }
     } else {
         if (isSearch) {
+
             var noResults = divCache.cloneNode(false);
             noResults.textContent = chrome.i18n.getMessage('nothingFound');
             noResults.className = 'nothing-found';
@@ -546,7 +572,9 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             list.appendChild(noResults);
             CACHE.SONGS_LIST.appendChild(list);
             EmptyList.classList.remove('show');
+
         } else {
+            console.log('QWEQW');
             EmptyList.classList.add('show');
             LAST_EMPTY = true;
 
@@ -985,12 +1013,13 @@ BG.event.firstLoad = function () {
 };
 
 
-BG.event.sendFirstLoad = function (data) {
+BG.event.sendFirstLoad = function () {
     BG.event.firstLoad();
 };
 
 /**
  * Update audio list
+ *
  * @param {object} data
  * @param {Function} callback
  */
@@ -998,6 +1027,9 @@ BG.event.updateList = function (data, callback, userUpdate) {
     BG.browserAction.disable();
     BG.browserAction.setIcon.update();
     BG.event.clearSearchInput();
+
+    CACHE.REC_OVERLAY.classList.remove('show');
+
     var searchList = document.getElementById('search-list');
 
     if (searchList) {
@@ -1289,7 +1321,7 @@ BG.event.clearSearchInput = function (data) {
     CACHE.SEARCH.value = '';
     CACHE.EMPTY_SEARCH.classList.remove('show');
 
-    if(data && data.hideRec) {
+    if (data && data.hideRec) {
         CACHE.REC_OVERLAY.classList.remove('show');
     }
 
@@ -1437,6 +1469,48 @@ BG.event.shareSong = function (data) {
                 event: 'songWasShared',
                 data: data
             });
+        });
+    }
+};
+
+BG.event.showRemoveOverlay = function (data) {
+    var el = document.querySelector('#songs-list li[data-aid="' + data + '"]');
+
+    if (el) {
+        el.getElementsByClassName('sure-overlay')[0].classList.add('show');
+    }
+};
+
+BG.event.hideRemoveOverlay = function (data) {
+    var el = document.querySelector('#songs-list li[data-aid="' + data + '"]');
+
+    if (el) {
+        el.getElementsByClassName('sure-overlay')[0].classList.remove('show');
+    }
+};
+
+BG.event.removeSong = function (data) {
+    var currUserID = JSON.parse(localStorage['authInfo']).userID,
+        code = 'return API.audio.delete({audio_id:' + data + ',owner_id:' + currUserID + '});',
+        el = document.querySelector('#songs-list li[data-aid="' + data + '"]');
+
+    if (el) {
+        el.getElementsByClassName('yes-remove')[0].classList.add('active');
+        el.getElementsByClassName('no-remove')[0].classList.add('hide');
+
+        VKit.api('execute', ['code=' + code], function (response) {
+            var jsonData = JSON.parse(response).response;
+
+            if (jsonData == 1) {
+                if (el) {
+                    el.remove();
+                }
+
+                BG.event.send({
+                    event: 'removeSongNode',
+                    data: data
+                });
+            }
         });
     }
 };

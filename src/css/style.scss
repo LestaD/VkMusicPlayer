@@ -152,6 +152,50 @@ $cWidth: 420px;
         float: left;
       }
 
+      .sure-overlay {
+        @extend .absolute;
+        display: none;
+        top: 0;
+        left: 0;
+        background: #fff;
+        line-height: 32px;
+        height: 32px;
+        width: 100%;
+        z-index: 810;
+
+        &.show {
+          display: block;
+        }
+
+        span {
+          display: inline-block;
+
+          &:first-child {
+            margin-left: 15px;
+          }
+        }
+
+        .regular-button {
+          margin-top: 4px;
+          overflow: hidden;
+
+          &.hide {
+            display: none;
+          }
+        }
+
+        .yes-remove {
+          margin-right: 10px;
+          margin-left: 200px;
+
+          &.active {
+            background: #6383a8 url(../images/loader-transparent.GIF) center center no-repeat;
+            background-size: 15px;
+            text-indent: -100px;
+          }
+        }
+      }
+
       .sil-wrapper {
         @extend .absolute;
         background: #fff;
@@ -934,7 +978,7 @@ $cWidth: 420px;
   @extend .absolute;
   top: 13px;
   right: 53px;
-  background: url(/images/audio_icons_2x.png) -32px -49px no-repeat;
+  background: url(../images/audio_icons_2x.png) -32px -49px no-repeat;
   background-size: 257px 63px;
   cursor: pointer;
   text-indent: -9999px;
@@ -952,7 +996,7 @@ $cWidth: 420px;
   @extend .absolute;
   top: 12px;
   right: 32px;
-  background: url(/images/audio_icons_2x.png) -49px -49px no-repeat;
+  background: url(../images/audio_icons_2x.png) -49px -49px no-repeat;
   background-size: 257px 63px;
   cursor: pointer;
   text-indent: -9999px;
@@ -970,7 +1014,7 @@ $cWidth: 420px;
   @extend .absolute;
   top: 12px;
   right: 11px;
-  background: url(/images/audio_icons_2x.png) -65px -49px no-repeat;
+  background: url(../images/audio_icons_2x.png) -65px -49px no-repeat;
   background-size: 257px 63px;
   cursor: pointer;
   text-indent: -9999px;

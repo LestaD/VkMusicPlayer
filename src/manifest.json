@@ -8,7 +8,6 @@
     "background": {
         "persistent": true,
         "page": "/templates/background.html"
-
     },
     "browser_action": {
         "name": "__MSG_appName__",

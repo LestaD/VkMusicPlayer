@@ -48,7 +48,10 @@ Core.audioEvent = function () {
             addToAlbum = addTo.getElementsByClassName('add-to-album-show')[0],
             addToAlbumSubItems = addToAlbum.querySelectorAll('.sub-menu > ul > li'),
             postSong = addTo.getElementsByClassName('post-on-wall')[0],
-            recSongs = song.getElementsByClassName('show-rec-songs')[0];
+            recSongs = song.getElementsByClassName('show-rec-songs')[0],
+            removeSong = song.getElementsByClassName('remove-song')[0],
+            yesRemove = song.getElementsByClassName('yes-remove')[0],
+            noRemove = song.getElementsByClassName('no-remove')[0];
 
         artist.addEventListener('click', Core.fillSearch);
 
@@ -70,8 +73,53 @@ Core.audioEvent = function () {
 
         recSongs.addEventListener('click', Core.showRecSongs);
 
+        if (removeSong) {
+            removeSong.addEventListener('click', Core.showRemoveOverlay);
+
+            yesRemove.addEventListener('click', Core.removeSong);
+            noRemove.addEventListener('click', Core.hideSureOverlay);
+        }
+
         song.addEventListener('click', Core.event.playSong);
     }
+};
+
+Core.removeSong = function () {
+    this.classList.add('active');
+
+    var sOverlay = this.parentNode,
+        li = sOverlay.parentNode;
+
+    this.nextSibling.classList.add('hide');
+    sOverlay.classList.add('active');
+
+    Core.event.send({
+        event: 'removeSong',
+        data: li.getAttribute('data-aid')
+    });
+};
+
+Core.hideSureOverlay = function () {
+    var li = this.parentNode.parentNode;
+
+    this.parentNode.classList.remove('show');
+
+    Core.event.send({
+        event: 'hideRemoveOverlay',
+        data: li.getAttribute('data-aid')
+    });
+
+};
+
+Core.showRemoveOverlay = function () {
+    var li = this.parentNode.parentNode;
+
+    li.getElementsByClassName('sure-overlay')[0].classList.add('show');
+
+    Core.event.send({
+        event: 'showRemoveOverlay',
+        data: li.getAttribute('data-aid')
+    })
 };
 
 Core.removeRecState = function () {
@@ -665,6 +713,14 @@ Core.event.songWasShared = function (data) {
     if (li) {
         li.classList.remove('in-process');
         li.classList.add('added');
+    }
+};
+
+Core.event.removeSongNode = function(data) {
+    var el = document.querySelector('#songs-list li[data-aid="' + data + '"]');
+
+    if(el) {
+        el.remove();
     }
 };
 
