@@ -104,7 +104,7 @@ BG.browserAction = {
             chrome.browserAction.setIcon({path: "/images/pause-icon.png"});
         },
         play: function () {
-            chrome.browserAction.setIcon({path: "/images/play-icon.png"});
+            chrome.browserAction.setIcon({path: {'19':'/images/play-icon.png','38':'/images/play-icon.png'}});
         },
         update: function () {
             chrome.browserAction.setIcon({path: "/images/update_icon.png"});
