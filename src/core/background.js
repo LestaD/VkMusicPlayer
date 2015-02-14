@@ -435,8 +435,6 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             postOnWall.appendChild(alreadyAddedIcon.cloneNode(true));
             postOnWall.appendChild(loadIcon.cloneNode(true));
 
-            addList.appendChild(postOnWall);
-
             addToAlbums.textContent = chrome.i18n.getMessage('addToAlbum');
             addToAlbums.setAttribute('data-arr', audio.aid + ',' + audio.owner_id + ',' + isCurrUser.toString());
             addToAlbums.appendChild(addToAlbumsCaret);
@@ -450,6 +448,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
 
             addToAlbums.appendChild(albumsList);
             addList.appendChild(addToAlbums);
+            addList.appendChild(postOnWall);
             addTo.appendChild(addList);
 
             if (CurrentSong.id == audio.aid) {
