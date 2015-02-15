@@ -134,11 +134,11 @@ BG.browserAction = {
 };
 
 BG.checkForAuth = function () {
-    if (localStorage['authInfo'] != undefined && (localStorage['statusAc'] != undefined && localStorage['statusAc'] != '' && localStorage['statusAc'] != 'false')) {
+    if (localStorage['authInfo'] != undefined && localStorage['authInfo'] != '' && (localStorage['statusAc'] != undefined && localStorage['statusAc'] != '' && localStorage['statusAc'] != 'false')) {
         AuthBlock.style.display = 'none';
         PlayerWrapperBG.style.display = 'block';
         MFCore.init();
-        BG.event.listenData();
+
         BG.browserAction.disable();
         BG.browserAction.setIcon.update();
 
@@ -150,7 +150,7 @@ BG.checkForAuth = function () {
         BG.setSearchType();
     } else {
         PlayerWrapperBG.style.display = 'none';
-        BG.event.listenData();
+        //BG.event.listenData();
         BG.event.openAuth();
     }
 };
@@ -1734,6 +1734,7 @@ BG.removeActiveIndex = function (index) {
 BG.init = function () {
     setTranslation();
     BG.elements();
+    BG.event.listenData();
     BG.checkForAuth();
 };
 

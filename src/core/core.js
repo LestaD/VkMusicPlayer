@@ -891,7 +891,7 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
             document.body.appendChild(node);
         }
 
-        if (localStorage['authInfo'] != undefined) {
+        if (localStorage['authInfo'] != undefined && localStorage['authInfo'] != '') {
             Core.audioEvent();
 
             Core.setElements.search();
@@ -912,7 +912,6 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
                 isElements = true;
                 isEvents = true;
             }
-
 
             if (!port) {
                 Core.event.listenData();

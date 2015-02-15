@@ -84,8 +84,6 @@ VKit.util = {
      */
     getUrlParam: function(url, param) {
         var regexp = new RegExp(param + '=([\\w-]{0,})');
-        console.log(url);
-        console.log(param);
         return url.match(regexp)[1];
     },
 
