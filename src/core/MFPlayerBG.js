@@ -199,7 +199,7 @@ MFCore.playNext = function (force) {
             BG.event.playByIndex({index: random});
         } else {
             if (RepeatSong && !fp) {
-                BG.event.playByIndex(LastActiveIndex.index);
+                BG.event.playByIndex({index:LastActiveIndex.index});
             } else {
                 if (MFCore.isFirstSongPlayed() || BG.getSongsStateChange()) {
                     if (MFCore.isFirstSearchSongPlayed() || (!MFCore.isFirstSongPlayed() && BG.checkCurrentListState() && CACHE.SONGS_STATE == CACHE.PREV_SONGS_STATE)) {

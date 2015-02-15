@@ -572,7 +572,6 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             EmptyList.classList.remove('show');
 
         } else {
-            console.log('QWEQW');
             EmptyList.classList.add('show');
             LAST_EMPTY = true;
 
