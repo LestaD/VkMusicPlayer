@@ -150,7 +150,6 @@ BG.checkForAuth = function () {
         BG.setSearchType();
     } else {
         PlayerWrapperBG.style.display = 'none';
-        //BG.event.listenData();
         BG.event.openAuth();
     }
 };
