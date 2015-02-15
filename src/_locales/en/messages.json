@@ -201,5 +201,8 @@
   },
   "no": {
     "message": "No"
+  },
+  "overview": {
+    "message": "Overview"
   }
 }

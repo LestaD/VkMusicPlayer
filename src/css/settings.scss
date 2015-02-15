@@ -308,6 +308,8 @@ a {
     padding:15px;
 
     input[type="checkbox"] {
+      @extend .relative;
+      top:3px;
       margin: 0 10px 0 0;
     }
   }

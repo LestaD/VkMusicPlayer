@@ -963,7 +963,7 @@ Core.openSettings = function () {
 };
 
 Core.scrollToSong = function (element) {
-    var songList = CACHE.SEARCH.value.length > 0 ? CACHE.SEARCH_SONGS_LIST : AudioList,
+    var songList = CACHE.SEARCH.value.length > 0 || CONST.REC_ACTIVE ? CACHE.SEARCH_SONGS_LIST : AudioList,
         offset = element.offsetTop - element.clientHeight - songList.scrollTop - CACHE.SEARCH_WRAPPER.clientHeight;
 
     if (offset > songList.clientHeight) {

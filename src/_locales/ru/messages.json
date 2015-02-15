@@ -202,5 +202,8 @@
   },
   "no": {
     "message": "Нет"
+  },
+  "overview": {
+    "message": "Обзор"
   }
 }
