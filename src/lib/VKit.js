@@ -273,7 +273,7 @@ VKit.openAuthWindow = function(callback) {
                                 var userInfo = JSON.parse(response).response[0];
 
                                 VKit.saveUserInfo({
-                                    id: userInfo.uid,
+                                    id: userInfo.id,
                                     firstName: userInfo.first_name,
                                     lastName: userInfo.last_name,
                                     photo: userInfo.photo_100,
