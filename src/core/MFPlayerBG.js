@@ -194,7 +194,7 @@ MFCore.playNext = function (force) {
             fp = true;
 
         if (ShuffleSongs) {
-            var random = Math.floor((Math.random() * Songs[CACHE.SONGS_STATE].length));
+            var random = Math.floor((Math.random() * Songs[CACHE.SONGS_STATE].items.length));
 
             BG.event.playByIndex({index: random});
         } else {
@@ -220,7 +220,7 @@ MFCore.playNext = function (force) {
                 }
 
 
-                if ((next + 1) > Songs[CACHE.SONGS_STATE].length)
+                if ((next + 1) > Songs[CACHE.SONGS_STATE].items.length)
                     next = 1;
 
                 BG.event.playByIndex({index: next});
@@ -262,7 +262,7 @@ MFCore.playPrev = function () {
         var prev = parseInt(LastActiveIndex.index) - 1;
 
         if (ShuffleSongs) {
-            var random = Math.floor((Math.random() * Songs[CACHE.SONGS_STATE].length));
+            var random = Math.floor((Math.random() * Songs[CACHE.SONGS_STATE].items.length));
 
             BG.event.playByIndex({index: random});
         } else {
@@ -274,7 +274,7 @@ MFCore.playPrev = function () {
             }
 
             if (prev <= 0) {
-                prev = Songs[CACHE.SONGS_STATE].length - 1;
+                prev = Songs[CACHE.SONGS_STATE].items.length - 1;
             }
 
             BG.event.playByIndex({index: prev});
@@ -317,9 +317,9 @@ MFCore.isFirstSongPlayed = function () {
 };
 
 MFCore.isFirstSearchSongPlayed = function () {
-    var song = Songs[CACHE.SONGS_STATE][CurrentSong.index];
+    var song = Songs[CACHE.SONGS_STATE].items[CurrentSong.index];
 
-    return CACHE.SONGS_STATE == 'search' && song && song.aid == CurrentSong.aid && CurrentSong.index != 1;
+    return CACHE.SONGS_STATE == 'search' && song && song.id == CurrentSong.id && CurrentSong.index != 1;
 };
 
 /**
