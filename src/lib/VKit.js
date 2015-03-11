@@ -269,7 +269,7 @@ VKit.openAuthWindow = function(callback) {
                             });
                             VKit.setActiveAccount(id);
 
-                            VKit.api('users.get', ['userd_ids=' + VKit.authInfo('userID'), 'fields=photo_100'], function(response) {
+                            VKit.api('users.get', ['user_ids=' + VKit.authInfo('userID'), 'fields=photo_100'], function(response) {
                                 var userInfo = JSON.parse(response).response[0];
 
                                 VKit.saveUserInfo({
