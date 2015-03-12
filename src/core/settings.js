@@ -230,7 +230,7 @@ Settings.addUser = function (e) {
                             button = document.createElement('button'),
                             exist = div.cloneNode(false);
 
-                        avatar.src = info.photo_medium;
+                        avatar.src = info.photo_100;
                         name.textContent = info.name;
                         button.textContent = chrome.i18n.getMessage('add');
                         exist.textContent = chrome.i18n.getMessage('alreadyInYourList');
@@ -247,7 +247,7 @@ Settings.addUser = function (e) {
 
                         menuWrapper.appendChild(button);
 
-                        var groupId = '-' + info.gid;
+                        var groupId = '-' + info.id;
 
                         if (VKit.getUserInfo(groupId) != undefined) {
                             userWrapper.appendChild(exist);
@@ -257,7 +257,7 @@ Settings.addUser = function (e) {
                                     id: groupId,
                                     firstName: info.name,
                                     lastName: '',
-                                    photo: info.photo_medium,
+                                    photo: info.photo_100,
                                     token: VKit.authInfo('token')
                                 });
                                 Settings.clearElement(AccountsBlock);
@@ -316,12 +316,12 @@ Settings.addUser = function (e) {
 
                         menuWrapper.appendChild(button);
 
-                        if (VKit.getUserInfo(info.uid) != undefined)
+                        if (VKit.getUserInfo(info.id) != undefined)
                             userWrapper.appendChild(exist);
                         else {
                             button.addEventListener('click', function () {
                                 VKit.saveUserInfo({
-                                    id: info.uid,
+                                    id: info.id,
                                     firstName: info.first_name,
                                     lastName: info.last_name,
                                     photo: info.photo_100,

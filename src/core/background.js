@@ -228,9 +228,7 @@ BG.renderAlbums = function (userID, albumID, Albums, callback) {
         allSongs.setAttribute('data-id', 'null');
         AlbumList.appendChild(allSongs);
 
-        console.log(Albums);
-
-        for (var i = 1, size = Albums.length; i < size; i++) {
+        for (var i = 0, size = Albums.length; i < size; i++) {
             var data = Albums[i],
                 album = divCache.cloneNode(false);
 
@@ -313,15 +311,13 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
 
     list.setAttribute('id', listID);
 
-    if (Songs[CACHE.SONGS_STATE] && Songs[CACHE.SONGS_STATE].count > 0 && Songs[CACHE.SONGS_STATE][0] != 0 && !type) {
+    if (Songs[CACHE.SONGS_STATE] && Songs[CACHE.SONGS_STATE].items.length > 0 && !type) {
         var albumsListEl = listCache.cloneNode(false);
 
-        console.log(response.userAlbumsList);
         if (response.userAlbumsList.items.length > 0) {
             var albumsArr = response.userAlbumsList.items;
 
-            console.log(albumsArr,'ooook');
-            for (var i = 1, size = albumsArr.length; i < size; i++) {
+            for (var i = 0, size = albumsArr.length; i < size; i++) {
                 var album = albumsArr[i],
                     li = liCache.cloneNode(false),
                     title = divCache.cloneNode(false),
@@ -350,7 +346,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             }
         }
 
-        for (var i = 1, size = Songs[CACHE.SONGS_STATE].items.length; i < size; i++) {
+        for (var i = 0, size = Songs[CACHE.SONGS_STATE].items.length; i < size; i++) {
             var li = liCache.cloneNode(false),
                 name = spanCache.cloneNode(false),
                 splitter = spanCache.cloneNode(false),
@@ -445,7 +441,7 @@ BG.renderAudioList = function (response, type, noFirst, obj, callback) {
             addToAlbums.setAttribute('data-arr', audio.id + ',' + audio.owner_id + ',' + isCurrUser.toString());
             addToAlbums.appendChild(addToAlbumsCaret);
 
-            if (albumsArr && albumsArr[0] && albumsArr[0] == 0) {
+            if (!albumsArr) {
                 albumsList.classList.add('empty-list');
                 albumsList.textContent = chrome.i18n.getMessage('albumsListIsEmpty');
             } else {
@@ -1363,7 +1359,6 @@ BG.event.createNewAlbum = function (data) {
     var currUserID = JSON.parse(localStorage['authInfo']).userID;
 
     BG.getData(5, {title: data}, function (response) {
-        console.log(resp)
         var userAlbums = JSON.parse(response).response;
 
         if (currUserID == VKit.getActiveAccount()) {
@@ -1398,7 +1393,6 @@ BG.event.removeAlbum = function (data) {
 
     if (id > 0) {
         BG.getData(4, {album_id: id}, function (response) {
-            console.log(response, 'albums response');
             var userAlbums = JSON.parse(response).response;
 
             if (id.toString() == AlbumID) {
@@ -1411,7 +1405,6 @@ BG.event.removeAlbum = function (data) {
                     });
                 });
             } else {
-                console.log(userAlbums, 'ooooh yeah');
                 BG.renderAlbums(currUserID, AlbumID, userAlbums.userAlbumsList.items, function () {
                     BG.event.send({
                         event: 'reloadContent',
@@ -1557,7 +1550,7 @@ BG.getData = function (type, obj, callback) {
     } else if (type == 3) {
         code = 'var data = {"audioList":API.audio.search({q:"' + obj.q + '",auto_complete:1,lyrics:' + obj.lyrics + ',perfomer_only:' + obj.performer_only + ',sort:' + obj.sort + ',search_own:1,offset:0,count:300}),"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
     } else if (type == 4) {
-        code = 'var removeAlbum = API.audio.deleteAlbum({album_id:' + obj.id + '}); var data = {"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
+        code = 'var removeAlbum = API.audio.deleteAlbum({album_id:' + obj.album_id + '}); var data = {"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
     } else if (type == 5) {
         code = 'var addAlbum = API.audio.addAlbum({title:"' + obj.title + '"}); var data = {"userAlbumsList":API.audio.getAlbums({owner_id:' + currUserID + ',count:100})}; return data;';
     } else if (type == 6) {
