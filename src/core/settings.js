@@ -10,8 +10,13 @@ var
     AccountsBlock,
     ShowSongsNumber,
     ShowSongDuration,
-    ShowSN = localStorage['showSongsOnBadge'],
-    ShowSD = localStorage['showSongDuration'],
+    COMMON_SETTINGS = {
+        showSongsNumber: localStorage['showSongsOnBadge'],
+        showSongDuration: localStorage['showSongDuration'],
+        showNotifications: localStorage['showNotifications'],
+        useHttps: localStorage['useHttps']
+    },
+    CACHE = {},
     Port;
 
 var Settings = {};
@@ -72,6 +77,13 @@ Settings.event.showSongsOnBadge = function () {
     });
 };
 
+Settings.event.showSongDuration = function() {
+    Settings.event.send({
+        event: 'showSongDuration',
+        data: ShowSongDuration.checked
+    });
+};
+
 Settings.loadAccounts = function () {
     var usersInfo = VKit.getUserInfo(),
         div = document.createElement('div'),
@@ -97,8 +109,8 @@ Settings.loadAccounts = function () {
         del.className = 'delete-user regular-button';
         active.className = 'activate regular-button';
 
-        del.setAttribute('data-id', i);
-        active.setAttribute('data-id', i);
+        del.setAttribute('data-id', i.toString());
+        active.setAttribute('data-id', i.toString());
 
         userWrapper.appendChild(avatar);
         userWrapper.appendChild(name);
@@ -358,12 +370,12 @@ Settings.removeButtonsFromModal = function () {
     var buttons = ModalContent.getElementsByClassName('bottom-buttons') || undefined;
 
     if (buttons) {
-        for (var i = 0 , size = buttons.length; i < size; i++) {
+        for (var i = 0, size = buttons.length; i < size; i++) {
             if (buttons[i])
                 ModalContent.removeChild(buttons[i]);
         }
     }
-}
+};
 
 Settings.showOverlay = function () {
     Overlay.style.display = 'block';
@@ -386,6 +398,8 @@ Settings.setElements = function () {
     AccountsBlock = document.getElementById('accounts-block');
     ShowSongsNumber = document.getElementById('show-songs-number');
     ShowSongDuration = document.getElementById('show-song-duration');
+    CACHE.SHOW_NOTIFICATIONS = document.getElementById('show-notifications');
+    CACHE.USE_HTTPS = document.getElementById('use-https');
 };
 
 Settings.setEvents = function () {
@@ -394,10 +408,23 @@ Settings.setEvents = function () {
     Overlay.addEventListener('click', Settings.hideOverlay);
     ShowSongsNumber.addEventListener('change', Settings.songsNumberAction);
     ShowSongDuration.addEventListener('change', Settings.songsDurationAction);
+    CACHE.SHOW_NOTIFICATIONS.addEventListener('change', Settings.commonSettingsInputHandler);
+    CACHE.USE_HTTPS.addEventListener('change', Settings.commonSettingsInputHandler);
+};
+
+Settings.commonSettingsInputHandler = function() {
+    var el = this,
+        val = el.checked.toString();
+
+    if(el.name == 'useHttps') {
+        val = el.checked ? '1' : '0';
+    }
+
+    Settings.setLocalStorage(el.name, val);
 };
 
 Settings.songsNumberAction = function (e) {
-    var el = e.target;
+    var el = this;
 
     if (el.checked == true) {
         ShowSongDuration.checked = false;
@@ -409,7 +436,7 @@ Settings.songsNumberAction = function (e) {
 };
 
 Settings.songsDurationAction = function (e) {
-    var el = e.target;
+    var el = this;
 
     if (el.checked == true) {
         ShowSongsNumber.checked = false;
@@ -417,10 +444,7 @@ Settings.songsDurationAction = function (e) {
     }
 
     Settings.setLocalStorage('showSongDuration', el.checked);
-    Settings.event.send({
-        event: 'showSongDuration',
-        data: el.checked
-    });
+    Settings.event.showSongDuration();
 };
 
 Settings.setLocalStorage = function (key, val) {
@@ -428,17 +452,10 @@ Settings.setLocalStorage = function (key, val) {
 };
 
 Settings.common = function () {
-    if (ShowSN == 'true') {
-        ShowSongsNumber.checked = true;
-    } else {
-        ShowSongsNumber.checked = false;
-    }
-
-    if (ShowSD == 'true') {
-        ShowSongDuration.checked = true;
-    } else {
-        ShowSongDuration.checked = false;
-    }
+    ShowSongsNumber.checked = COMMON_SETTINGS.showSongsNumber == 'true';
+    ShowSongDuration.checked = COMMON_SETTINGS.showSongDuration == 'true';
+    CACHE.SHOW_NOTIFICATIONS.checked = COMMON_SETTINGS.showNotifications == 'true';
+    CACHE.USE_HTTPS.checked = COMMON_SETTINGS.useHttps == '1';
 };
 
 Settings.init = function () {
@@ -449,7 +466,6 @@ Settings.init = function () {
     Settings.common();
     Settings.setEvents();
     Settings.loadAccounts();
-
 };
 
 window.addEventListener('DOMContentLoaded', Settings.init);

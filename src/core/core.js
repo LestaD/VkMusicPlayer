@@ -925,6 +925,10 @@ Core.loadBackgroundContent = function (port, elementID, callback) {
             if (!CONST.PAGE_RELOADED && !CACHE.SEARCH_LOAD) {
                 Core.event.play();
             }
+
+            if(CACHE.REC_OVERLAY.classList.contains('show')) {
+                CONST.REC_ACTIVE = true;
+            }
         } else {
             var authButton = document.getElementById('vk-auth');
             document.getElementById('app-nav-block').style.display = 'none';

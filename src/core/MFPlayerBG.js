@@ -199,7 +199,7 @@ MFCore.playNext = function (force) {
             BG.event.playByIndex({index: random});
         } else {
             if (RepeatSong && !fp) {
-                BG.event.playByIndex({index:LastActiveIndex.index});
+                BG.event.playByIndex({index: LastActiveIndex.index});
             } else {
                 if (MFCore.isFirstSongPlayed() || BG.getSongsStateChange()) {
                     if (MFCore.isFirstSearchSongPlayed() || (!MFCore.isFirstSongPlayed() && BG.checkCurrentListState() && CACHE.SONGS_STATE == CACHE.PREV_SONGS_STATE)) {
@@ -227,23 +227,22 @@ MFCore.playNext = function (force) {
             }
         }
 
-        if (!ConnectStatus) {
-            BG.setNotification({
-                type: 'basic',
-                title: CurrentSong.title.trim() + ' ' + CurrentSong.realDuration,
-                message: CurrentSong.artist,
-                iconUrl: '/app-icon.png'
-            });
-        }
+        BG.setNotification({
+            type: 'basic',
+            title: CurrentSong.title.trim() + ' ' + CurrentSong.realDuration,
+            message: CurrentSong.artist,
+            iconUrl: '/app-icon.png'
+        });
+
     } else {
-        if (!ConnectStatus) {
-            BG.setNotification({
-                type: 'basic',
-                title: chrome.i18n.getMessage('songNotFound'),
-                message: chrome.i18n.getMessage('noSongs'),
-                iconUrl: '/images/sad-face.png'
-            });
-        }
+
+        BG.setNotification({
+            type: 'basic',
+            title: chrome.i18n.getMessage('songNotFound'),
+            message: chrome.i18n.getMessage('noSongs'),
+            iconUrl: '/images/sad-face.png'
+        });
+
     }
 };
 
@@ -308,7 +307,7 @@ MFCore.getSongCurrentDuration = function () {
     return SongCurrentDuration;
 };
 
-MFCore.isInPlayStatus = function() {
+MFCore.isInPlayStatus = function () {
     return MFPlayer.src != '' && MFPlayer.currentTime > 0;
 };
 

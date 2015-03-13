@@ -205,5 +205,11 @@
   },
   "overview": {
     "message": "Обзор"
+  },
+  "showNotifications": {
+    "message": "Показывать уведомления"
+  },
+  "useHttps": {
+    "message": "Использовать https"
   }
 }

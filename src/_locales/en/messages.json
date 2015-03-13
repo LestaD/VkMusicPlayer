@@ -204,5 +204,11 @@
   },
   "overview": {
     "message": "Overview"
+  },
+  "showNotifications": {
+    "message": "Show notifications"
+  },
+  "useHttps": {
+    "message": "Use https"
   }
 }

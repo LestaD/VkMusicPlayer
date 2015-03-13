@@ -26,12 +26,20 @@
         <div class="sub-title" i18n-locale="commonSettings"></div>
         <div id="common-settings">
             <div class="set-line">
-                <input id="show-songs-number" type="checkbox"/>
+                <input id="show-songs-number" type="checkbox" name="showSongsOnBadge"/>
                 <label i18n-locale="showNumberOfSongs" for="show-songs-number"></label>
             </div>
             <div class="set-line">
-                <input id="show-song-duration" type="checkbox" i18n-value="showSongDurationOnBadge"/>
+                <input id="show-song-duration" type="checkbox" i18n-value="showSongDurationOnBadge" name="showSongDuration"/>
                 <label i18n-locale="showSongDurationOnBadge" for="show-song-duration"></label>
+            </div>
+            <div class="set-line">
+                <input id="show-notifications" type="checkbox" name="showNotifications"/>
+                <label i18n-locale="showNotifications" for="show-notifications"></label>
+            </div>
+            <div class="set-line">
+                <input id="use-https" type="checkbox" name="useHttps"/>
+                <label i18n-locale="useHttps" for="use-https"></label>
             </div>
         </div>
         <div class="sub-title" i18n-locale="overview"></div>

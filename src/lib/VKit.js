@@ -301,7 +301,7 @@ VKit.openAuthWindow = function(callback) {
  */
 VKit.api = function(method, params, callback) {
     var parameters = params.join('&'),
-        arr = ['https://api.vk.com/method/', method, '?', parameters, '&v=', VKit.apiVer, '&access_token=', VKit.authInfo('token')],
+        arr = ['https://api.vk.com/method/', method, '?', parameters, '&v=', VKit.apiVer, '&https=', localStorage['useHttps'], '&access_token=', VKit.authInfo('token')],
         url = arr.join('');
 
     VKit.util.ajax(url, callback);

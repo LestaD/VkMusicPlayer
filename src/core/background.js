@@ -1684,13 +1684,15 @@ BG.setSongInfo = function (artist, title, totalTime) {
  * @param {{type: string, title: string, message: string, iconUrl: string}} options
  */
 BG.setNotification = function (options) {
-    chrome.notifications.create('', options, function (id) {
-        setTimeout(function () {
-            chrome.notifications.clear(id, function (cleared) {
+    if(localStorage['showNotifications'] == 'true') {
+        chrome.notifications.create('', options, function (id) {
+            setTimeout(function () {
+                chrome.notifications.clear(id, function (cleared) {
 
-            });
-        }, 1500);
-    });
+                });
+            }, 1500);
+        });
+    }
 };
 
 /**
