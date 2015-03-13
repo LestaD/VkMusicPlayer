@@ -23,6 +23,7 @@
         "activeTab",
         "downloads",
         "notifications",
+        "http://*.vk.com/*",
         "https://*.vk.com/*",
         "http://*.vk.me/*",
         "https://*.vk.me/*",
