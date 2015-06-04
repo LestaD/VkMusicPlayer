@@ -1,3 +1,5 @@
 .idea/*
 release/*
 node_modules/*
+vkmp.sublime-*
+build/*
